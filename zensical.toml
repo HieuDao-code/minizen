@@ -1,9 +1,9 @@
 [project]
-site_name = "minizen-template"
-site_url = "https://hieudao-code.github.io/minizen-template"
+site_name = "minizen"
+site_url = "https://hieudao-code.github.io/minizen"
 site_description = "A quieter way to stay informed"
 site_author = "Hieu Dao"
-repo_url = "https://github.com/HieuDao-Code/minizen-template"
+repo_url = "https://github.com/HieuDao-Code/minizen"
 
 [project.theme]
 features = ["content.code.copy", "content.tooltips"]
