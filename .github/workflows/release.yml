@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  bump-version:
+    name: "Bump version and create changelog with commitizen"
+    runs-on: ubuntu-latest
+
+    if: "!startsWith(github.event.head_commit.message, 'bump:')"
+
+    permissions:
+      contents: write # needed to push version bump commit and create release
+
+    environment: bump-version
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          token: "${{ secrets.PERSONAL_ACCESS_TOKEN }}"
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Create bump and changelog
+        uses: commitizen-tools/commitizen-action@338bbd841b75aaee6bf5340e1fa12f6ab58ff9ff # 0.27.1
+        with:
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          changelog_increment_filename: body.md
+
+      - name: Release
+        run: |
+          gh release create "${REVISION}" \
+            --notes-file body.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REVISION: ${{ env.REVISION }}

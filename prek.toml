@@ -1,0 +1,29 @@
+# ruff
+[[repos]]
+repo = "https://github.com/astral-sh/ruff-pre-commit"
+rev = "b831c3dc5d27d9da294ae4e915773b99aa24a7c5" # frozen: v0.15.10
+hooks = [
+  { id = "ruff-format" },
+  { id = "ruff-check", args = [
+    "--fix",
+    "--exit-non-zero-on-fix",
+  ] },
+]
+
+# uv
+[[repos]]
+repo = "https://github.com/astral-sh/uv-pre-commit"
+rev = "6a280ba12b7901e47757c868c8c13c6a624c9ecb"    # frozen: 0.11.7
+hooks = [{ id = "uv-audit" }]
+
+# zizmor
+[[repos]]
+repo = "https://github.com/zizmorcore/zizmor-pre-commit"
+rev = "a4727cbbcd26d7098e96b9cb738169b59711ae51"             # frozen: v1.24.1
+hooks = [{ id = "zizmor", args = ["--persona", "auditor"] }]
+
+# commitizen
+[[repos]]
+repo = "https://github.com/commitizen-tools/commitizen"
+rev = "b5d5040f7980a5d2bce320d2a1ea1e04ac54b00c"        # frozen: v4.13.10
+hooks = [{ id = "commitizen", stages = ["pre-push"] }]
