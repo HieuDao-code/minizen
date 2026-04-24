@@ -31,8 +31,6 @@ def test_load_settings_reads_toml_and_env(
     monkeypatch.setenv("MINIFLUX_API_KEY", "mf-key")
     monkeypatch.setenv("EMAIL_USERNAME", "email-user")
     monkeypatch.setenv("EMAIL_PASSWORD", "email-pass")
-    monkeypatch.setenv("ANTHROPIC_API_KEY", "ant-key")
-
     # act
     settings = load_settings(config_path=config_file)
 

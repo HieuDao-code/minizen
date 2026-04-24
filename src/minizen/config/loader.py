@@ -28,8 +28,5 @@ def load_settings(*, config_path: Path) -> Settings:
             username=os.environ["EMAIL_USERNAME"],
             password=os.environ["EMAIL_PASSWORD"],
         ),
-        ai=AIConfig(
-            model=ai_raw.get("model", "anthropic:claude-sonnet-4-6"),
-            top_n=ai_raw.get("top_n", 5),
-        ),
+        ai=AIConfig(**ai_raw),
     )
