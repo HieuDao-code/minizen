@@ -27,7 +27,8 @@ def test_send_connects_and_sends_message(mocker: MockerFixture) -> None:
     mock_smtp_cls.assert_called_once_with(host="smtp.example.com", port=587)
     mock_smtp.starttls.assert_called_once_with()
     mock_smtp.login.assert_called_once_with(user="user", password="pass")
-    mock_smtp.send_message.assert_called_once()
+    sent_msg: MIMEMultipart = mock_smtp.send_message.call_args[0][0]
+    mock_smtp.send_message.assert_called_once_with(sent_msg)
 
 
 def test_send_message_has_correct_headers(mocker: MockerFixture) -> None:
