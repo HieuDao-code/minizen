@@ -3,7 +3,7 @@ revision = 3
 requires-python = ">=3.14"
 
 [options]
-exclude-newer = "2026-04-17T18:56:39.276271928Z"
+exclude-newer = "2026-04-17T19:34:45.621987733Z"
 exclude-newer-span = "P1W"
 
 [[package]]
@@ -505,7 +505,7 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "miniflux", specifier = ">=1.1.6,<2.0.0" },
-    { name = "mistune", specifier = ">=3.1.3,<4.0.0" },
+    { name = "mistune", specifier = ">=3.2.0,<4.0.0" },
     { name = "pydantic", specifier = ">=2.13.1,<3.0.0" },
     { name = "pydantic-ai-slim", extras = ["anthropic", "openai"], specifier = ">=1.84.0,<2.0.0" },
     { name = "python-dotenv", specifier = ">=1.1.0,<2.0.0" },
