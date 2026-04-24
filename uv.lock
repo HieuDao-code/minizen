@@ -3,7 +3,7 @@ revision = 3
 requires-python = ">=3.14"
 
 [options]
-exclude-newer = "2026-04-17T18:53:03.329693619Z"
+exclude-newer = "2026-04-17T18:56:39.276271928Z"
 exclude-newer-span = "P1W"
 
 [[package]]
@@ -464,7 +464,7 @@ wheels = [
 
 [[package]]
 name = "minizen"
-version = "0.1.0"
+version = "0.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "miniflux" },
