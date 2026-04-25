@@ -1,4 +1,6 @@
+import json
 from datetime import UTC, datetime
+from pathlib import Path
 
 from pytest_mock import MockerFixture
 
@@ -80,3 +82,24 @@ def test_miniflux_client_initialized_with_config(mocker: MockerFixture) -> None:
     mock_client_cls.assert_called_once_with(
         base_url="https://rss.example.com", api_key="secret-key"
     )
+
+
+def test_fetch_unread_with_fixture_data(mocker: MockerFixture) -> None:
+    # arrange
+    fixture_path = Path(__file__).parents[2] / "fixtures" / "miniflux_response.json"
+    fixture = json.loads(fixture_path.read_text())
+    mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
+    mock_client_cls.return_value.get_entries.return_value = fixture
+    config = MinifluxConfig(url="https://rss.example.com", api_key="key")
+    provider = MinifluxProvider(config=config)
+
+    # act
+    articles = provider.fetch_unread()
+
+    # assert
+    assert len(articles) == 5
+    feed_names = {a.feed_name for a in articles}
+    assert feed_names == {"Hacker News", "The Verge", "Ars Technica"}
+    assert all(a.title for a in articles)
+    assert all(a.url for a in articles)
+    assert all(a.published_at.tzinfo is UTC for a in articles)
