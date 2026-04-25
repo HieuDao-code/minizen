@@ -171,6 +171,66 @@ def test_digest_send_test_exits_early_when_no_articles(
     mock_email.send.assert_not_called()
 
 
+def test_digest_fetch_verbose_calls_configure_logging(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mock_configure = mocker.patch("minizen.cli.commands.digest.configure_logging")
+    mocker.patch(
+        "minizen.cli.commands.digest.load_settings", return_value=_make_settings_mock()
+    )
+    mock_rss = MagicMock()
+    mock_rss.fetch_unread.return_value = []
+    mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
+    runner = CliRunner()
+
+    # act
+    runner.invoke(app, ["digest", "fetch", "-v"])
+
+    # assert
+    mock_configure.assert_called_once_with(verbose=True)
+
+
+def test_digest_preview_verbose_calls_configure_logging(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mock_configure = mocker.patch("minizen.cli.commands.digest.configure_logging")
+    mocker.patch(
+        "minizen.cli.commands.digest.load_settings", return_value=_make_settings_mock()
+    )
+    mock_rss = MagicMock()
+    mock_rss.fetch_unread.return_value = []
+    mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
+    runner = CliRunner()
+
+    # act
+    runner.invoke(app, ["digest", "preview", "-v"])
+
+    # assert
+    mock_configure.assert_called_once_with(verbose=True)
+
+
+def test_digest_send_test_verbose_calls_configure_logging(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mock_configure = mocker.patch("minizen.cli.commands.digest.configure_logging")
+    mocker.patch(
+        "minizen.cli.commands.digest.load_settings", return_value=_make_settings_mock()
+    )
+    mock_rss = MagicMock()
+    mock_rss.fetch_unread.return_value = []
+    mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
+    runner = CliRunner()
+
+    # act
+    runner.invoke(app, ["digest", "send-test", "-v"])
+
+    # assert
+    mock_configure.assert_called_once_with(verbose=True)
+
+
 @pytest.mark.parametrize("subcommand", ["preview", "send-test"])
 def test_digest_exits_on_missing_config(mocker: MockerFixture, subcommand: str) -> None:
     # arrange

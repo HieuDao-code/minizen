@@ -5,6 +5,7 @@ from typing import Annotated
 import typer
 
 from minizen.ai.agent import DigestAgent
+from minizen.cli.state import configure_logging
 from minizen.config.loader import load_settings
 from minizen.config.models import Settings
 from minizen.providers.email.smtp import EmailProvider
@@ -18,10 +19,23 @@ _CONFIG_OPTION = Annotated[
     typer.Option(help="Path to the TOML configuration file.", show_default=True),
 ]
 
+_VERBOSE_OPTION = Annotated[
+    bool,
+    typer.Option("--verbose", "-v", help="Enable debug logging."),
+]
+
 app = typer.Typer(help="Preview or test the digest without marking articles as read.")
 
 
 def _load(config: Path) -> Settings:
+    """Load settings from a TOML file, exiting with an error message on failure.
+
+    Args:
+        config: Path to the TOML configuration file.
+
+    Returns:
+        Fully loaded application settings.
+    """
     try:
         return load_settings(config_path=config)
     except FileNotFoundError:
@@ -34,8 +48,12 @@ def _load(config: Path) -> Settings:
 
 
 @app.command("fetch")
-def fetch(config: _CONFIG_OPTION = _DEFAULT_CONFIG) -> None:
+def fetch(
+    config: _CONFIG_OPTION = _DEFAULT_CONFIG,
+    verbose: _VERBOSE_OPTION = False,
+) -> None:
     """Fetch unread articles and print their titles and URLs."""
+    configure_logging(verbose=verbose)
     settings = _load(config)
     rss = MinifluxProvider(config=settings.miniflux)
     articles = rss.fetch_unread()
@@ -49,8 +67,12 @@ def fetch(config: _CONFIG_OPTION = _DEFAULT_CONFIG) -> None:
 
 
 @app.command("preview")
-def preview(config: _CONFIG_OPTION = _DEFAULT_CONFIG) -> None:
+def preview(
+    config: _CONFIG_OPTION = _DEFAULT_CONFIG,
+    verbose: _VERBOSE_OPTION = False,
+) -> None:
     """Fetch and summarise articles, then print the Markdown digest."""
+    configure_logging(verbose=verbose)
     settings = _load(config)
     rss = MinifluxProvider(config=settings.miniflux)
     articles = rss.fetch_unread()
@@ -63,8 +85,12 @@ def preview(config: _CONFIG_OPTION = _DEFAULT_CONFIG) -> None:
 
 
 @app.command("send-test")
-def send_test(config: _CONFIG_OPTION = _DEFAULT_CONFIG) -> None:
+def send_test(
+    config: _CONFIG_OPTION = _DEFAULT_CONFIG,
+    verbose: _VERBOSE_OPTION = False,
+) -> None:
     """Send a test digest email without marking articles as read."""
+    configure_logging(verbose=verbose)
     settings = _load(config)
     rss = MinifluxProvider(config=settings.miniflux)
     articles = rss.fetch_unread()
