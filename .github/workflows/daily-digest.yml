@@ -3,7 +3,7 @@ name: Daily Digest
 on:
   schedule:
     - cron: "0 8 * * *"
-      timezone: "Europe/Paris"  # CET/CEST — handles DST automatically
+      timezone: "CET"
   workflow_dispatch:
 
 concurrency:
