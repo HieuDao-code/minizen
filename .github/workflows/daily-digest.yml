@@ -2,8 +2,9 @@ name: Daily Digest
 
 on:
   schedule:
-    - cron: "0 7 * * *"  # 07:00 UTC every day
-  workflow_dispatch:      # allow manual trigger
+    - cron: "0 8 * * *"
+      timezone: "CET" # CET/CEST — handles DST automatically
+  workflow_dispatch: # allow manual trigger
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

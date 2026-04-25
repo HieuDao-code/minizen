@@ -1,3 +1,5 @@
+from typing import cast
+
 import mistune
 
 from minizen.ai.agent import DigestAgent
@@ -16,6 +18,6 @@ def run_pipeline(*, settings: Settings) -> None:
         return
 
     result = agent.run(articles=articles)
-    html = mistune.html(result.markdown)
+    html = cast(str, mistune.html(result.markdown))
     email.send(subject="Your Daily Digest", html=html)
     rss.mark_as_read(article_ids=result.articles_used)

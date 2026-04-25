@@ -1,11 +1,12 @@
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, cast
 
 import mistune
 import typer
 
 from minizen.ai.agent import DigestAgent
 from minizen.config.loader import load_settings
+from minizen.config.models import Settings
 from minizen.providers.email.smtp import EmailProvider
 from minizen.providers.rss.miniflux import MinifluxProvider
 
@@ -19,7 +20,7 @@ _CONFIG_OPTION = Annotated[
 app = typer.Typer(help="Preview or test the digest without marking articles as read.")
 
 
-def _load(config: Path):  # type: ignore[no-untyped-def]
+def _load(config: Path) -> Settings:
     try:
         return load_settings(config_path=config)
     except FileNotFoundError as e:
@@ -55,7 +56,7 @@ def send_test(config: _CONFIG_OPTION = _DEFAULT_CONFIG) -> None:
         return
     agent = DigestAgent(model=settings.ai.model, top_n=settings.ai.top_n)
     result = agent.run(articles=articles)
-    html = mistune.html(result.markdown)
+    html = cast(str, mistune.html(result.markdown))
     email = EmailProvider(config=settings.email)
     email.send(subject="[TEST] Your Daily Digest", html=html)
     typer.echo("Test digest sent.")
