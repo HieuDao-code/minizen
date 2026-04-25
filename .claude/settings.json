@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "ask": [
+      "Bash(uv run minizen digest preview*)",
+      "Bash(uv run minizen digest send-test*)",
+      "Bash(uv run minizen run*)",
+      "Bash(minizen digest preview*)",
+      "Bash(minizen digest send-test*)",
+      "Bash(minizen run*)"
+    ]
+  }
+}

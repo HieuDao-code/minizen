@@ -1,3 +1,4 @@
+from datetime import date
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -13,6 +14,50 @@ def _make_settings_mock() -> MagicMock:
     mock.ai.model = "anthropic:claude-sonnet-4-6"
     mock.ai.top_n = 5
     return mock
+
+
+def test_digest_fetch_prints_articles(mocker: MockerFixture) -> None:
+    # arrange
+    mock_settings = _make_settings_mock()
+    mocker.patch(
+        "minizen.cli.commands.digest.load_settings", return_value=mock_settings
+    )
+    mock_article = MagicMock()
+    mock_article.feed_name = "Tech Feed"
+    mock_article.title = "Article Title"
+    mock_article.url = "https://example.com/article"
+    mock_rss = MagicMock()
+    mock_rss.fetch_unread.return_value = [mock_article]
+    mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(app, ["digest", "fetch"])
+
+    # assert
+    assert result.exit_code == 0
+    assert "Tech Feed" in result.output
+    assert "Article Title" in result.output
+    assert "https://example.com/article" in result.output
+
+
+def test_digest_fetch_exits_early_when_no_articles(mocker: MockerFixture) -> None:
+    # arrange
+    mock_settings = _make_settings_mock()
+    mocker.patch(
+        "minizen.cli.commands.digest.load_settings", return_value=mock_settings
+    )
+    mock_rss = MagicMock()
+    mock_rss.fetch_unread.return_value = []
+    mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(app, ["digest", "fetch"])
+
+    # assert
+    assert result.exit_code == 0
+    assert "No unread articles" in result.output
 
 
 def test_digest_preview_prints_markdown(mocker: MockerFixture) -> None:
@@ -83,7 +128,8 @@ def test_digest_send_test_sends_email(mocker: MockerFixture) -> None:
     mock_email = MagicMock()
     mocker.patch("minizen.cli.commands.digest.EmailProvider", return_value=mock_email)
     mocker.patch(
-        "minizen.cli.commands.digest.mistune.html", return_value="<h2>Digest</h2>"
+        "minizen.cli.commands.digest.render_email",
+        return_value=("<h2>Digest</h2>", "## Digest"),
     )
     runner = CliRunner()
 
@@ -91,9 +137,12 @@ def test_digest_send_test_sends_email(mocker: MockerFixture) -> None:
     result = runner.invoke(app, ["digest", "send-test"])
 
     # assert
+    today = date.today().strftime("%B %-d, %Y")
     assert result.exit_code == 0
     mock_email.send.assert_called_once_with(
-        subject="[TEST] Your Daily Digest", html="<h2>Digest</h2>"
+        subject=f"[TEST] Your Daily Zen — {today}",
+        html="<h2>Digest</h2>",
+        plain_text="## Digest",
     )
     mock_rss.mark_as_read.assert_not_called()
 

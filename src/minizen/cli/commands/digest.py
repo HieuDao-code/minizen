@@ -1,13 +1,14 @@
+from datetime import date
 from pathlib import Path
-from typing import Annotated, cast
+from typing import Annotated
 
-import mistune
 import typer
 
 from minizen.ai.agent import DigestAgent
 from minizen.config.loader import load_settings
 from minizen.config.models import Settings
 from minizen.providers.email.smtp import EmailProvider
+from minizen.providers.email.template import render_email
 from minizen.providers.rss.miniflux import MinifluxProvider
 
 _DEFAULT_CONFIG = Path.home() / ".config" / "minizen" / "config.toml"
@@ -72,7 +73,12 @@ def send_test(config: _CONFIG_OPTION = _DEFAULT_CONFIG) -> None:
         return
     agent = DigestAgent(model=settings.ai.model, top_n=settings.ai.top_n)
     result = agent.run(articles=articles)
-    html = cast(str, mistune.html(result.markdown))
+    html, plain_text = render_email(result.markdown)
+    today = date.today().strftime("%B %-d, %Y")
     email = EmailProvider(config=settings.email)
-    email.send(subject="[TEST] Your Daily Digest", html=html)
+    email.send(
+        subject=f"[TEST] Your Daily Zen — {today}",
+        html=html,
+        plain_text=plain_text,
+    )
     typer.echo("Test digest sent.")

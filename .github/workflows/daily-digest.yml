@@ -2,7 +2,7 @@ name: Daily Digest
 
 on:
   schedule:
-    - cron: "0 8 * * *"
+    - cron: "0 6 * * *"
       timezone: "CET"
   workflow_dispatch:
 
@@ -21,7 +21,13 @@ jobs:
       contents: read
 
     environment:
-      name: digest
+      name: minizen
+
+    env:
+      MINIFLUX_API_KEY: ${{ secrets.MINIFLUX_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      MINIZEN_EMAIL_USERNAME: ${{ secrets.MINIZEN_EMAIL_USERNAME }}
+      MINIZEN_EMAIL_PASSWORD: ${{ secrets.MINIZEN_EMAIL_PASSWORD }}
 
     steps:
       - name: Checkout repository
@@ -38,40 +44,22 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Write config file
+      - name: Setup config
         env:
-          MINIFLUX_URL: ${{ secrets.MINIFLUX_URL }}
-          SMTP_HOST: ${{ secrets.SMTP_HOST }}
-          SMTP_PORT: ${{ secrets.SMTP_PORT }}
-          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
-          EMAIL_TO: ${{ secrets.EMAIL_TO }}
-          AI_MODEL: ${{ vars.AI_MODEL }}
-          AI_TOP_N: ${{ vars.AI_TOP_N }}
+          EMAIL_FROM: ${{ vars.EMAIL_FROM }}
+          EMAIL_TO: ${{ vars.EMAIL_TO }}
+          SMTP_HOST: ${{ vars.SMTP_HOST || 'smtp.gmail.com' }}
+          SMTP_PORT: ${{ vars.SMTP_PORT || '587' }}
+          AI_MODEL: ${{ vars.AI_MODEL || 'anthropic:claude-haiku-4-5' }}
+          AI_TOP_N: ${{ vars.AI_TOP_N || '5' }}
         run: |
-          uv run python -c "
-          import os, tomli_w
-          from pathlib import Path
-          cfg = {
-              'miniflux': {'url': os.environ['MINIFLUX_URL']},
-              'email': {
-                  'smtp_host': os.environ['SMTP_HOST'],
-                  'smtp_port': int(os.environ['SMTP_PORT']),
-                  'from_addr': os.environ['EMAIL_FROM'],
-                  'to_addr': os.environ['EMAIL_TO'],
-              },
-              'ai': {
-                  'model': os.environ.get('AI_MODEL', 'anthropic:claude-sonnet-4-6'),
-                  'top_n': int(os.environ.get('AI_TOP_N', '5')),
-              },
-          }
-          p = Path('~/.config/minizen').expanduser()
-          p.mkdir(parents=True, exist_ok=True)
-          (p / 'config.toml').write_bytes(tomli_w.dumps(cfg).encode())
-          "
+          uv run minizen setup --no-interactive \
+            --from-addr "$EMAIL_FROM" \
+            --to-addr "$EMAIL_TO" \
+            --smtp-host "$SMTP_HOST" \
+            --smtp-port "$SMTP_PORT" \
+            --model "$AI_MODEL" \
+            --top-n "$AI_TOP_N"
 
       - name: Run digest
-        env:
-          MINIFLUX_API_KEY: ${{ secrets.MINIFLUX_API_KEY }}
-          EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
-          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
         run: uv run minizen run
