@@ -25,7 +25,7 @@ def test_run_invokes_pipeline(mocker: MockerFixture, tmp_path: Path) -> None:
     # assert
     assert result.exit_code == 0
     mock_load.assert_called_once_with(config_path=config_path)
-    mock_pipeline.assert_called_once_with(settings=mock_settings)
+    mock_pipeline.assert_called_once_with(settings=mock_settings, dry_run=False)
 
 
 def test_run_uses_default_config_path(mocker: MockerFixture) -> None:
@@ -59,6 +59,25 @@ def test_run_exits_with_error_on_missing_config(mocker: MockerFixture) -> None:
 
     # assert
     assert result.exit_code != 0
+
+
+def test_run_dry_run_flag_passes_dry_run_to_pipeline(
+    mocker: MockerFixture, tmp_path: Path
+) -> None:
+    # arrange
+    mock_settings = MagicMock()
+    mocker.patch("minizen.cli.commands.run.load_settings", return_value=mock_settings)
+    mock_pipeline = mocker.patch("minizen.cli.commands.run.run_pipeline")
+    config_path = tmp_path / "config.toml"
+    config_path.touch()
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(app, ["run", "--dry-run", "--config", str(config_path)])
+
+    # assert
+    assert result.exit_code == 0
+    mock_pipeline.assert_called_once_with(settings=mock_settings, dry_run=True)
 
 
 @pytest.mark.parametrize(
