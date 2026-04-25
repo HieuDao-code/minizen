@@ -17,6 +17,11 @@ check:
     uv audit
     cz check --rev-range origin/main..HEAD
 
+# Start development environment
+[group('Project')]
+dev:
+    nix develop -c fish
+
 # Show docs
 [group('Project')]
 docs:
