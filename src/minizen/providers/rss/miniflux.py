@@ -1,9 +1,12 @@
+import logging
 from datetime import datetime
 
 import miniflux
 from pydantic import BaseModel, Field
 
 from minizen.config.models import MinifluxConfig
+
+logger = logging.getLogger(__name__)
 
 
 class Article(BaseModel):
@@ -38,6 +41,8 @@ class MinifluxProvider:
             A list of ``Article`` objects, one per unread entry.
         """
         response = self._client.get_entries(status=["unread"])
+        entries = response["entries"]
+        logger.debug("Fetched %d unread entries from Miniflux", len(entries))
         return [
             Article(
                 id=entry["id"],
@@ -49,7 +54,7 @@ class MinifluxProvider:
                     entry["published_at"].replace("Z", "+00:00")
                 ),
             )
-            for entry in response["entries"]
+            for entry in entries
         ]
 
     def mark_as_read(self, *, article_ids: list[int]) -> None:
@@ -58,4 +63,5 @@ class MinifluxProvider:
         Args:
             article_ids: IDs of articles to mark as read.
         """
+        logger.debug("Marking articles as read: ids=%s", article_ids)
         self._client.update_entries(entry_ids=article_ids, status="read")

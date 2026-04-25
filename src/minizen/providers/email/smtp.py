@@ -1,8 +1,11 @@
+import logging
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from minizen.config.models import EmailConfig
+
+logger = logging.getLogger(__name__)
 
 
 class EmailProvider:
@@ -24,6 +27,13 @@ class EmailProvider:
             html: HTML body of the message.
             plain_text: Optional plain-text alternative; omitted if empty.
         """
+        logger.debug(
+            "Sending email: subject=%r, to=%s, smtp=%s:%d",
+            subject,
+            self._config.to_addr,
+            self._config.smtp_host,
+            self._config.smtp_port,
+        )
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
         msg["From"] = self._config.from_addr
