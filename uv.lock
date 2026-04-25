@@ -3,7 +3,7 @@ revision = 3
 requires-python = ">=3.14"
 
 [options]
-exclude-newer = "2026-04-18T09:31:17.586952744Z"
+exclude-newer = "2026-04-18T14:00:54.860766104Z"
 exclude-newer-span = "P1W"
 
 [[package]]
@@ -492,18 +492,24 @@ docs = [
     { name = "zensical" },
 ]
 lint = [
-    { name = "commitizen" },
     { name = "ruff" },
-    { name = "ty" },
-    { name = "zizmor" },
+]
+miscellaneous = [
+    { name = "prek" },
 ]
 release = [
     { name = "commitizen" },
+]
+security = [
+    { name = "zizmor" },
 ]
 test = [
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "pytest-mock" },
+]
+typing = [
+    { name = "ty" },
 ]
 
 [package.metadata]
@@ -530,18 +536,16 @@ dev = [
     { name = "zizmor", specifier = "==1.24.1" },
 ]
 docs = [{ name = "zensical", specifier = "==0.0.32" }]
-lint = [
-    { name = "commitizen", specifier = "==4.13.10" },
-    { name = "ruff", specifier = "==0.15.10" },
-    { name = "ty", specifier = "==0.0.29" },
-    { name = "zizmor", specifier = "==1.24.1" },
-]
+lint = [{ name = "ruff", specifier = "==0.15.10" }]
+miscellaneous = [{ name = "prek", specifier = "==0.3.9" }]
 release = [{ name = "commitizen", specifier = "==4.13.10" }]
+security = [{ name = "zizmor", specifier = "==1.24.1" }]
 test = [
     { name = "pytest", specifier = "==9.0.3" },
     { name = "pytest-cov", specifier = "==7.1.0" },
     { name = "pytest-mock", specifier = "==3.15.1" },
 ]
+typing = [{ name = "ty", specifier = "==0.0.29" }]
 
 [[package]]
 name = "mistune"

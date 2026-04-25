@@ -49,18 +49,19 @@ minizen = "minizen.main:app"
 dev = [
   { include-group = "docs" },
   { include-group = "lint" },
+  { include-group = "miscellaneous" },
+  { include-group = "release" },
+  { include-group = "security" },
   { include-group = "test" },
-  "prek==0.3.9",
+  { include-group = "typing" },
 ]
 docs = ["zensical==0.0.32"]
-lint = [
-  { include-group = "release" },
-  "ruff==0.15.10",
-  "ty==0.0.29",
-  "zizmor==1.24.1",
-]
+lint = ["ruff==0.15.10"]
+miscellaneous = ["prek==0.3.9"]
 release = ["commitizen==4.13.10"]
+security = ["zizmor==1.24.1"]
 test = ["pytest==9.0.3", "pytest-cov==7.1.0", "pytest-mock==3.15.1"]
+typing = ["ty==0.0.29"]
 
 [tool.uv]
 exclude-newer = "1 week"
@@ -128,7 +129,7 @@ docstring-code-format = true
 omit = ["*/minizen/main.py"]
 
 [tool.tox]
-env_list = ["py314", "lint"]
+env_list = ["py314", "commit-msg", "lint", "security", "typing"]
 
 [tool.tox.env_run_base]
 description = "Run tests"
@@ -142,34 +143,25 @@ commands = [
   ],
 ]
 
+[tool.tox.env.commit-msg]
+description = "Run commitizen checks"
+skip_install = true
+dependency_groups = ["release"]
+commands = [["cz", "check", "--rev-range", "origin/main..HEAD"]]
+
 [tool.tox.env.lint]
 description = "Run linters"
 skip_install = true
 dependency_groups = ["lint"]
-commands = [
-  [
-    "ruff",
-    "check",
-  ],
-  [
-    "ruff",
-    "format",
-    "--check",
-  ],
-  [
-    "ty",
-    "check",
-  ],
-  [
-    "zizmor",
-    '.',
-    "--persona",
-    "auditor",
-  ],
-  [
-    "cz",
-    "check",
-    "--rev-range",
-    "origin/main..HEAD",
-  ],
-]
+commands = [["ruff", "check"], ["ruff", "format", "--check"]]
+
+[tool.tox.env.security]
+description = "Run security checks"
+skip_install = true
+dependency_groups = ["security"]
+commands = [["uv", "audit"], ["zizmor", '.', "--persona", "auditor"]]
+
+[tool.tox.env.typing]
+description = "Run type checks"
+dependency_groups = ["test", "typing"]
+commands = [["ty", "check"]]
