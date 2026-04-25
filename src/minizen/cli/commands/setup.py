@@ -5,8 +5,9 @@ import tomli_w
 import typer
 
 _DEFAULT_CONFIG = Path.home() / ".config" / "minizen" / "config.toml"
+_DEFAULT_ENV = Path.home() / ".config" / "minizen" / ".env"
 
-_DEFAULT_MODEL = "anthropic:claude-sonnet-4-6"
+_DEFAULT_MODEL = "anthropic:claude-haiku-4-5"
 _DEFAULT_TOP_N = 5
 
 
@@ -20,16 +21,18 @@ def setup(
     typer.echo("minizen setup wizard")
     typer.echo("--------------------")
 
-    miniflux_url = typer.prompt("Miniflux URL")
-    smtp_host = typer.prompt("SMTP host")
+    miniflux_api_key = typer.prompt("Miniflux API key", hide_input=True)
+    anthropic_api_key = typer.prompt("Anthropic API key", hide_input=True)
+    smtp_host = typer.prompt("SMTP host", default="smtp.gmail.com")
     smtp_port = typer.prompt("SMTP port", default=587)
     from_addr = typer.prompt("From email address")
     to_addr = typer.prompt("To email address")
+    email_username = typer.prompt("Email username (SMTP login)")
+    email_password = typer.prompt("Email password (App Password)", hide_input=True)
     model = typer.prompt("AI model", default=_DEFAULT_MODEL)
     top_n = typer.prompt("Number of top articles", default=_DEFAULT_TOP_N)
 
-    data = {
-        "miniflux": {"url": miniflux_url},
+    config_data = {
         "email": {
             "smtp_host": smtp_host,
             "smtp_port": int(smtp_port),
@@ -43,10 +46,15 @@ def setup(
     }
 
     config.parent.mkdir(parents=True, exist_ok=True)
-    config.write_bytes(tomli_w.dumps(data).encode())
+    config.write_bytes(tomli_w.dumps(config_data).encode())
 
-    typer.echo(f"\nConfig written to: {config}")
-    typer.echo("\nRemember to set the following environment variables:")
-    typer.echo("  MINIFLUX_API_KEY  — your Miniflux API key")
-    typer.echo("  EMAIL_USERNAME    — your SMTP username")
-    typer.echo("  EMAIL_PASSWORD    — your SMTP password")
+    env_path = config.parent / ".env"
+    env_path.write_text(
+        f"MINIFLUX_API_KEY={miniflux_api_key}\n"
+        f"ANTHROPIC_API_KEY={anthropic_api_key}\n"
+        f"MINIZEN_EMAIL_USERNAME={email_username}\n"
+        f"MINIZEN_EMAIL_PASSWORD={email_password}\n"
+    )
+
+    typer.echo(f"\nConfig written to:      {config}")
+    typer.echo(f"Credentials written to: {env_path}")

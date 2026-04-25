@@ -18,8 +18,9 @@ def run(
     """Run the full digest pipeline: fetch, summarise, and email."""
     try:
         settings = load_settings(config_path=config)
-    except FileNotFoundError as e:
-        typer.echo(f"Error: {e}")
+    except FileNotFoundError:
+        typer.echo(f"Config file not found: {config}")
+        typer.echo("Run `minizen setup` to create one.")
         raise typer.Exit(code=1)
     except KeyError as e:
         typer.echo(f"Error: missing environment variable {e.args[0]}")
