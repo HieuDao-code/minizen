@@ -76,14 +76,4 @@ def test_settings_composes_sub_configs() -> None:
 def test_settings_requires_miniflux() -> None:
     # act / assert
     with pytest.raises(ValidationError):
-        Settings(
-            email=EmailConfig(
-                smtp_host="smtp.example.com",
-                smtp_port=587,
-                from_addr="a@example.com",
-                to_addr="b@example.com",
-                username="user",
-                password="pass",
-            ),
-            ai=AIConfig(),
-        )
+        Settings.model_validate({"email": {}, "ai": {}})

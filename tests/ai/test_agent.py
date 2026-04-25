@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 
 from pytest_mock import MockerFixture
 
-from minizen.ai.agent import DigestAgent, DigestResult
+from minizen.ai.agent import _SYSTEM_PROMPT, DigestAgent, DigestResult
 from minizen.providers.rss.miniflux import Article
 
 
@@ -35,7 +35,7 @@ def test_run_returns_digest_result(mocker: MockerFixture) -> None:
     # assert
     assert result.markdown == "# Digest\n\nSome news."
     assert result.articles_used == [1]
-    mock_agent_cls.return_value.run_sync.assert_called_once()
+    mock_agent_cls.return_value.run_sync.assert_called_once_with(mocker.ANY)
 
 
 def test_run_passes_article_data_to_agent(mocker: MockerFixture) -> None:
@@ -66,6 +66,8 @@ def test_agent_initialized_with_correct_model(mocker: MockerFixture) -> None:
     DigestAgent(model="openai:gpt-4o", top_n=3)
 
     # assert
-    mock_agent_cls.assert_called_once()
-    call_kwargs = mock_agent_cls.call_args[1]
-    assert call_kwargs["model"] == "openai:gpt-4o"
+    mock_agent_cls.assert_called_once_with(
+        model="openai:gpt-4o",
+        output_type=DigestResult,
+        system_prompt=_SYSTEM_PROMPT,
+    )

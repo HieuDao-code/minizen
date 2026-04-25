@@ -1,20 +1,11 @@
 import tomllib
 from pathlib import Path
+from unittest.mock import ANY
 
 from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
 from minizen.cli import app
-
-_MINIMAL_INPUT = (
-    "https://rss.example.com\n"
-    "smtp.example.com\n"
-    "587\n"
-    "from@example.com\n"
-    "to@example.com\n"
-    "\n"  # accept default model
-    "\n"  # accept default top_n
-)
 
 
 def test_setup_creates_config_file(tmp_path: Path) -> None:
@@ -26,7 +17,15 @@ def test_setup_creates_config_file(tmp_path: Path) -> None:
     result = runner.invoke(
         app,
         ["setup", "--config", str(config_path)],
-        input=_MINIMAL_INPUT,
+        input=(
+            "https://rss.example.com\n"
+            "smtp.example.com\n"
+            "587\n"
+            "from@example.com\n"
+            "to@example.com\n"
+            "\n"
+            "\n"
+        ),
     )
 
     # assert
@@ -43,7 +42,15 @@ def test_setup_writes_correct_toml(tmp_path: Path) -> None:
     runner.invoke(
         app,
         ["setup", "--config", str(config_path)],
-        input=_MINIMAL_INPUT,
+        input=(
+            "https://rss.example.com\n"
+            "smtp.example.com\n"
+            "587\n"
+            "from@example.com\n"
+            "to@example.com\n"
+            "\n"
+            "\n"
+        ),
     )
 
     # assert
@@ -94,7 +101,15 @@ def test_setup_prints_env_reminder(tmp_path: Path) -> None:
     result = runner.invoke(
         app,
         ["setup", "--config", str(config_path)],
-        input=_MINIMAL_INPUT,
+        input=(
+            "https://rss.example.com\n"
+            "smtp.example.com\n"
+            "587\n"
+            "from@example.com\n"
+            "to@example.com\n"
+            "\n"
+            "\n"
+        ),
     )
 
     # assert
@@ -112,7 +127,15 @@ def test_setup_creates_parent_directories(tmp_path: Path) -> None:
     result = runner.invoke(
         app,
         ["setup", "--config", str(config_path)],
-        input=_MINIMAL_INPUT,
+        input=(
+            "https://rss.example.com\n"
+            "smtp.example.com\n"
+            "587\n"
+            "from@example.com\n"
+            "to@example.com\n"
+            "\n"
+            "\n"
+        ),
     )
 
     # assert
@@ -130,8 +153,16 @@ def test_setup_uses_default_config_path(mocker: MockerFixture) -> None:
     runner.invoke(
         app,
         ["setup"],
-        input=_MINIMAL_INPUT,
+        input=(
+            "https://rss.example.com\n"
+            "smtp.example.com\n"
+            "587\n"
+            "from@example.com\n"
+            "to@example.com\n"
+            "\n"
+            "\n"
+        ),
     )
 
     # assert
-    mock_write.assert_called_once()
+    mock_write.assert_called_once_with(ANY)
