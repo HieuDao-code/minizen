@@ -13,6 +13,18 @@ requires-python = ">=3.14"
 authors = [
   { name = "Hieu Dao", email = "106801182+HieuDao-code@users.noreply.github.com" },
 ]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Intended Audience :: End Users/Desktop",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Internet :: WWW/HTTP :: Dynamic Content :: News/Diary",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dependencies = [
   "miniflux>=1.1.6,<2.0.0",
   "mistune>=3.2.0,<4.0.0",
@@ -25,7 +37,11 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/hieudao-code/minizen"
+Documentation = "https://hieudao-code.github.io/minizen/"
+Repository = "https://github.com/hieudao-code/minizen"
 Issues = "https://github.com/hieudao-code/minizen/issues"
+Changelog = "https://github.com/hieudao-code/minizen/releases"
+
 [project.scripts]
 minizen = "minizen.main:app"
 
@@ -34,14 +50,16 @@ dev = [
   { include-group = "docs" },
   { include-group = "lint" },
   { include-group = "test" },
+  "prek>=0.3.9,<1.0.0",
 ]
 docs = ["zensical>=0.0.32,<1.0.0"]
 lint = [
-  "commitizen>=4.13.10,<5.0.0",
+  { include-group = "release" },
   "ruff>=0.15.10,<1.0.0",
   "ty>=0.0.29,<1.0.0",
   "zizmor>=1.24.1,<2.0.0",
 ]
+release = ["commitizen>=4.13.10,<5.0.0"]
 test = [
   "pytest>=9.0.3,<10.0.0",
   "pytest-cov>=7.1.0,<8.0.0",

@@ -14,7 +14,7 @@ hooks = [
 [[repos]]
 repo = "https://github.com/astral-sh/uv-pre-commit"
 rev = "6a280ba12b7901e47757c868c8c13c6a624c9ecb"    # frozen: 0.11.7
-hooks = [{ id = "uv-audit" }]
+hooks = [{ id = "uv-audit" }, { id = "uv-lock" }]
 
 # zizmor
 [[repos]]
