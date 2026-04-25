@@ -171,6 +171,36 @@ def test_digest_send_test_exits_early_when_no_articles(
     mock_email.send.assert_not_called()
 
 
+def test_digest_preview_dry_run_prints_articles_and_skips_llm(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mock_settings = _make_settings_mock()
+    mocker.patch(
+        "minizen.cli.commands.digest.load_settings", return_value=mock_settings
+    )
+    mock_article = MagicMock()
+    mock_article.feed_name = "Tech Feed"
+    mock_article.title = "Article Title"
+    mock_article.url = "https://example.com/article"
+    mock_rss = MagicMock()
+    mock_rss.fetch_unread.return_value = [mock_article]
+    mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
+    mock_agent = MagicMock()
+    mocker.patch("minizen.cli.commands.digest.DigestAgent", return_value=mock_agent)
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(app, ["digest", "preview", "--dry-run"])
+
+    # assert
+    assert result.exit_code == 0
+    assert "Tech Feed" in result.output
+    assert "Article Title" in result.output
+    assert "https://example.com/article" in result.output
+    mock_agent.run.assert_not_called()
+
+
 def test_digest_fetch_verbose_calls_configure_logging(
     mocker: MockerFixture,
 ) -> None:

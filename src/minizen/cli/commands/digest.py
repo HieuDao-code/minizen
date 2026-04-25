@@ -24,6 +24,14 @@ _VERBOSE_OPTION = Annotated[
     typer.Option("--verbose", "-v", help="Enable debug logging."),
 ]
 
+_DRY_RUN_OPTION = Annotated[
+    bool,
+    typer.Option(
+        "--dry-run",
+        help="Fetch articles but skip LLM call and any external sends.",
+    ),
+]
+
 app = typer.Typer(help="Preview or test the digest without marking articles as read.")
 
 
@@ -70,6 +78,7 @@ def fetch(
 def preview(
     config: _CONFIG_OPTION = _DEFAULT_CONFIG,
     verbose: _VERBOSE_OPTION = False,
+    dry_run: _DRY_RUN_OPTION = False,
 ) -> None:
     """Fetch and summarise articles, then print the Markdown digest."""
     configure_logging(verbose=verbose)
@@ -78,6 +87,12 @@ def preview(
     articles = rss.fetch_unread()
     if not articles:
         typer.echo("No unread articles.")
+        return
+    if dry_run:
+        typer.echo(f"{len(articles)} unread article(s):\n")
+        for article in articles:
+            typer.echo(f"[{article.feed_name}] {article.title}")
+            typer.echo(f"  {article.url}")
         return
     agent = DigestAgent(model=settings.ai.model, top_n=settings.ai.top_n)
     result = agent.run(articles=articles)
