@@ -16,12 +16,13 @@
         packages = with pkgs; [
           just # Handy way to save and run project-specific commands
           pinact # Pin GitHub Actions versions
-          prek # Better `pre-commit`
-          python314Packages.tox # Generic virtualenv management and test command line tool
           uv # Extremely fast Python package installer and resolver
         ];
 
         shellHook = ''
+          if ! uv tool list 2>/dev/null | grep -q '^tox '; then
+            uv tool install tox --with tox-uv-bare
+          fi
           echo "🐍 $(python --version)"
           exec fish
         '';
