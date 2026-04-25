@@ -125,6 +125,9 @@ combine-as-imports = true
 [tool.ruff.format]
 docstring-code-format = true
 
+[tool.coverage.run]
+omit = ["src/minizen/main.py"]
+
 [tool.tox]
 env_list = ["py314", "lint"]
 
