@@ -10,11 +10,13 @@ from minizen.providers.rss.miniflux import MinifluxProvider
 logger = logging.getLogger(__name__)
 
 
-def run_pipeline(*, settings: Settings) -> None:
+def run_pipeline(*, settings: Settings, dry_run: bool = False) -> None:
     """Fetch unread articles, generate a digest, email it, then mark articles as read.
 
     Args:
         settings: Fully loaded application settings (Miniflux, email, AI config).
+        dry_run: When ``True``, fetch articles but skip the LLM call, email send,
+            and mark-as-read. Logs a summary instead.
     """
     logger.info("Fetching unread articles from Miniflux")
     rss = MinifluxProvider(config=settings.miniflux)
@@ -24,6 +26,14 @@ def run_pipeline(*, settings: Settings) -> None:
         return
 
     logger.info("Found %d article(s)", len(articles))
+
+    if dry_run:
+        logger.info(
+            "Dry run: %d article(s) fetched. LLM, email, and mark-as-read skipped.",
+            len(articles),
+        )
+        return
+
     email = EmailProvider(config=settings.email)
     agent = DigestAgent(model=settings.ai.model, top_n=settings.ai.top_n)
     result = agent.run(articles=articles)

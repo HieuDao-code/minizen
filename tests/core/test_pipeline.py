@@ -90,6 +90,28 @@ def test_pipeline_exits_early_when_no_articles(mocker: MockerFixture) -> None:
     mock_rss.mark_as_read.assert_not_called()
 
 
+def test_pipeline_dry_run_skips_llm_email_and_mark(mocker: MockerFixture) -> None:
+    # arrange
+    articles = [_make_article(1), _make_article(2)]
+    mock_rss = MagicMock()
+    mock_rss.fetch_unread.return_value = articles
+    mock_email = MagicMock()
+    mock_agent = MagicMock()
+    mocker.patch("minizen.core.pipeline.MinifluxProvider", return_value=mock_rss)
+    mocker.patch("minizen.core.pipeline.EmailProvider", return_value=mock_email)
+    mocker.patch("minizen.core.pipeline.DigestAgent", return_value=mock_agent)
+    settings = _make_settings()
+
+    # act
+    run_pipeline(settings=settings, dry_run=True)
+
+    # assert
+    mock_rss.fetch_unread.assert_called_once_with()
+    mock_agent.run.assert_not_called()
+    mock_email.send.assert_not_called()
+    mock_rss.mark_as_read.assert_not_called()
+
+
 def test_pipeline_does_not_mark_read_when_email_fails(mocker: MockerFixture) -> None:
     # arrange
     articles = [_make_article(1)]
