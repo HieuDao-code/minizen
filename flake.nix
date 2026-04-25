@@ -24,7 +24,6 @@
             uv tool install tox --with tox-uv-bare
           fi
           echo "🐍 $(python --version)"
-          exec fish
         '';
       };
     };
