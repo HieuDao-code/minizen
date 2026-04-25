@@ -50,21 +50,17 @@ dev = [
   { include-group = "docs" },
   { include-group = "lint" },
   { include-group = "test" },
-  "prek>=0.3.9,<1.0.0",
+  "prek==0.3.9",
 ]
-docs = ["zensical>=0.0.32,<1.0.0"]
+docs = ["zensical==0.0.32"]
 lint = [
   { include-group = "release" },
-  "ruff>=0.15.10,<1.0.0",
-  "ty>=0.0.29,<1.0.0",
-  "zizmor>=1.24.1,<2.0.0",
+  "ruff==0.15.10",
+  "ty==0.0.29",
+  "zizmor==1.24.1",
 ]
-release = ["commitizen>=4.13.10,<5.0.0"]
-test = [
-  "pytest>=9.0.3,<10.0.0",
-  "pytest-cov>=7.1.0,<8.0.0",
-  "pytest-mock>=3.15.1,<4.0.0",
-]
+release = ["commitizen==4.13.10"]
+test = ["pytest==9.0.3", "pytest-cov==7.1.0", "pytest-mock==3.15.1"]
 
 [tool.uv]
 exclude-newer = "1 week"
