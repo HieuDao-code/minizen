@@ -5,6 +5,24 @@ site_description = "A quieter way to stay informed"
 site_author = "Hieu Dao"
 repo_url = "https://github.com/HieuDao-Code/minizen"
 
+# ---------------------------------------------------------------------------
+# Navigation
+# ---------------------------------------------------------------------------
+[[project.nav]]
+Home = "index.md"
+
+[[project.nav]]
+"Getting Started" = "getting-started.md"
+
+[[project.nav]]
+"How It Works" = "rss.md"
+
+[[project.nav]]
+Changelog = "changelog.md"
+
+# ---------------------------------------------------------------------------
+# Theme
+# ---------------------------------------------------------------------------
 [project.theme]
 features = ["content.code.copy", "content.tooltips"]
 
@@ -31,6 +49,9 @@ scheme = "slate"
 toggle.icon = "material/brightness-4"
 toggle.name = "Switch to system preference"
 
+# ---------------------------------------------------------------------------
+# Extensions
+# ---------------------------------------------------------------------------
 [project.markdown_extensions.abbr]
 [project.markdown_extensions.attr_list]
 
