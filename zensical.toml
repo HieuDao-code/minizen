@@ -15,7 +15,7 @@ Home = "index.md"
 "Getting Started" = "getting-started.md"
 
 [[project.nav]]
-"How It Works" = "rss.md"
+"How It Works" = "how_it_works.md"
 
 [[project.nav]]
 Changelog = "changelog.md"

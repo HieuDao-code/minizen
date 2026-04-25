@@ -1,5 +1,5 @@
 - Always use `uv` instead of `pip` commands`
-- Write docstrings for all functions, methods, and classes to explain their purpose and usage.
+- Write docstrings for all modules, functions, methods, and classes to explain their purpose and usage.
 - Use Google-style docstrings with `Args:`, `Returns:`, and `Raises:` sections where applicable. Omit sections that are not relevant (e.g. no `Returns:` for `-> None`).
 
 ## Test Writing Conventions
