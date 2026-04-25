@@ -10,7 +10,13 @@
   - Add a FAQ section to the documentation to answer common questions and troubleshoot common issues
 
 - verbose logging does not work, fix it
-- improve UX of the mail. I don't like the colors
+- improve UX of the mail. I don't like the colors, I like the Claude, niri wm colors
+- UI framework to test wich a mock response from the LLM, to test the UI without having to make actual API calls
+- print the result in digest fetch and digest preview or pipe it into stdout, so that it can be used in a terminal or in a script
+- Also link the comments section of the article if there is one
+- Create a test with a real response from the RSS feed, to make sure everything works as expected
+- Create a test with a real response from the LLM, to make sure everything works as expected
+- Create a test with a real email, to make sure everything works as expected
 
 - Long-term:
   - Do a research of what the best model is to use with API key and free tier, or a cheap
