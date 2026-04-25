@@ -8,6 +8,7 @@ from minizen.config.models import AIConfig, EmailConfig, MinifluxConfig, Setting
 
 
 def load_settings(*, config_path: Path) -> Settings:
+    load_dotenv(config_path.parent / ".env")
     load_dotenv()
 
     with open(config_path, "rb") as f:
@@ -25,8 +26,8 @@ def load_settings(*, config_path: Path) -> Settings:
             smtp_port=raw["email"]["smtp_port"],
             from_addr=raw["email"]["from_addr"],
             to_addr=raw["email"]["to_addr"],
-            username=os.environ["EMAIL_USERNAME"],
-            password=os.environ["EMAIL_PASSWORD"],
+            username=os.environ["MINIZEN_EMAIL_USERNAME"],
+            password=os.environ["MINIZEN_EMAIL_PASSWORD"],
         ),
         ai=AIConfig(**ai_raw),
     )

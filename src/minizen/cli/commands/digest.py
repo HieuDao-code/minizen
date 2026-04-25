@@ -23,12 +23,28 @@ app = typer.Typer(help="Preview or test the digest without marking articles as r
 def _load(config: Path) -> Settings:
     try:
         return load_settings(config_path=config)
-    except FileNotFoundError as e:
-        typer.echo(f"Error: {e}")
+    except FileNotFoundError:
+        typer.echo(f"Config file not found: {config}")
+        typer.echo("Run `minizen setup` to create one.")
         raise typer.Exit(code=1)
     except KeyError as e:
         typer.echo(f"Error: missing environment variable {e.args[0]}")
         raise typer.Exit(code=1)
+
+
+@app.command("fetch")
+def fetch(config: _CONFIG_OPTION = _DEFAULT_CONFIG) -> None:
+    """Fetch unread articles and print their titles and URLs."""
+    settings = _load(config)
+    rss = MinifluxProvider(config=settings.miniflux)
+    articles = rss.fetch_unread()
+    if not articles:
+        typer.echo("No unread articles.")
+        return
+    typer.echo(f"{len(articles)} unread article(s):\n")
+    for article in articles:
+        typer.echo(f"[{article.feed_name}] {article.title}")
+        typer.echo(f"  {article.url}")
 
 
 @app.command("preview")

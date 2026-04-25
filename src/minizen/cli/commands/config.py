@@ -24,8 +24,9 @@ def show(config: _CONFIG_OPTION = _DEFAULT_CONFIG) -> None:
     try:
         with open(config, "rb") as f:
             data = tomllib.load(f)
-    except FileNotFoundError as e:
-        typer.echo(f"Error: {e}")
+    except FileNotFoundError:
+        typer.echo(f"Config file not found: {config}")
+        typer.echo("Run `minizen setup` to create one.")
         raise typer.Exit(code=1)
 
     typer.echo(f"Config file: {config}")
@@ -38,9 +39,7 @@ def show(config: _CONFIG_OPTION = _DEFAULT_CONFIG) -> None:
     typer.echo(f"  email.smtp_port:    {em.get('smtp_port', '(unset)')}")
     typer.echo(f"  email.from_addr:    {em.get('from_addr', '(unset)')}")
     typer.echo(f"  email.to_addr:      {em.get('to_addr', '(unset)')}")
-    typer.echo(
-        f"  ai.model:           {ai.get('model', 'anthropic:claude-sonnet-4-6')}"
-    )
+    typer.echo(f"  ai.model:           {ai.get('model', 'anthropic:claude-haiku-4-5')}")
     typer.echo(f"  ai.top_n:           {ai.get('top_n', 5)}")
 
 
@@ -49,8 +48,9 @@ def validate(config: _CONFIG_OPTION = _DEFAULT_CONFIG) -> None:
     """Validate the configuration file and environment variables."""
     try:
         load_settings(config_path=config)
-    except FileNotFoundError as e:
-        typer.echo(f"Error: {e}")
+    except FileNotFoundError:
+        typer.echo(f"Config file not found: {config}")
+        typer.echo("Run `minizen setup` to create one.")
         raise typer.Exit(code=1)
     except KeyError as e:
         typer.echo(f"Error: missing environment variable {e.args[0]}")
@@ -86,8 +86,9 @@ def set_value(
     try:
         with open(config, "rb") as f:
             data = tomllib.load(f)
-    except FileNotFoundError as e:
-        typer.echo(f"Error: {e}")
+    except FileNotFoundError:
+        typer.echo(f"Config file not found: {config}")
+        typer.echo("Run `minizen setup` to create one.")
         raise typer.Exit(code=1)
 
     section, field = key.split(".", 1)

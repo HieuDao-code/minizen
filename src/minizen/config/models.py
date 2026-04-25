@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class MinifluxConfig(BaseModel):
-    url: str
+    url: str = "https://reader.miniflux.app"
     api_key: str
 
 
@@ -16,7 +16,7 @@ class EmailConfig(BaseModel):
 
 
 class AIConfig(BaseModel):
-    model: str = "anthropic:claude-sonnet-4-6"
+    model: str = "anthropic:claude-haiku-4-5"
     top_n: int = 5
 
 
