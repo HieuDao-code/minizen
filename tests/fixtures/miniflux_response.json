@@ -1,0 +1,45 @@
+{
+  "total": 5,
+  "entries": [
+    {
+      "id": 101,
+      "title": "Rust's async ecosystem reaches maturity",
+      "url": "https://blog.rust-lang.org/2026/04/async-maturity",
+      "content": "<p>After years of incremental improvements, Rust's async ecosystem has reached a state of maturity that makes it viable for production workloads. The tokio runtime, async-std, and smol have all stabilised their APIs, and the standard library's async traits are now available on stable Rust.</p><p>In benchmarks conducted by the Rust foundation, async Rust outperforms equivalent Go code by 15–30% in throughput-heavy scenarios while maintaining memory safety guarantees. The main remaining challenge is compile times, which the team is actively addressing through incremental compilation improvements.</p><p>Migration guides from synchronous codebases are now available, and the community has coalesced around a set of best practices that make async Rust significantly more approachable than it was two years ago.</p>",
+      "feed": {"title": "Hacker News"},
+      "published_at": "2026-04-25T07:30:00Z"
+    },
+    {
+      "id": 102,
+      "title": "The hidden cost of LLM context windows",
+      "url": "https://www.anthropic.com/research/context-window-cost",
+      "content": "<p>As context windows have grown from 4k to 1M tokens, the economic and environmental costs have scaled in unexpected ways. A new paper from researchers at Anthropic and Stanford examines how quadratic attention complexity makes large-context inference disproportionately expensive.</p><p>The paper introduces a new metric, \"effective context utilization,\" which measures how much of a given context window actually influences the model output. Surprisingly, most real-world tasks use fewer than 10% of available tokens effectively, suggesting that smarter retrieval strategies could reduce costs by an order of magnitude.</p><p>The authors propose a hybrid approach combining sparse attention with dense retrieval, achieving 90% of full-context accuracy at 8% of the compute cost in their experiments.</p>",
+      "feed": {"title": "Hacker News"},
+      "published_at": "2026-04-25T06:15:00Z"
+    },
+    {
+      "id": 103,
+      "title": "Apple's M4 Ultra sets new records in creative workloads",
+      "url": "https://www.theverge.com/2026/4/25/apple-m4-ultra-review",
+      "content": "<p>Apple's M4 Ultra chip, shipping inside the new Mac Pro, has set records across every creative benchmark tested. Video transcoding, 3D rendering, and machine learning inference all show generational improvements over the M3 Ultra, with the chip drawing roughly the same peak power.</p><p>The unified memory architecture has been expanded to 256GB maximum, which finally makes the Mac Pro competitive with high-end workstations for tasks that require keeping large datasets in RAM. Film editors working with 8K RAW footage report that the machine feels qualitatively more fluid, not just faster.</p>",
+      "feed": {"title": "The Verge"},
+      "published_at": "2026-04-24T18:00:00Z"
+    },
+    {
+      "id": 104,
+      "title": "Social media's attention economy is quietly shifting",
+      "url": "https://www.theverge.com/2026/4/24/attention-economy-shift",
+      "content": "<p>A confluence of regulatory pressure, user fatigue, and competition from AI-native products is reshaping how social platforms optimise for engagement. Several major platforms have quietly rolled back algorithmic amplification of outrage-inducing content following EU Digital Services Act enforcement actions.</p><p>Internal metrics shared with researchers show that reducing inflammatory content recommendation decreased daily active user time by 4%, but improved 30-day retention by 11%. The finding challenges the assumption that maximising session length maximises platform value.</p>",
+      "feed": {"title": "The Verge"},
+      "published_at": "2026-04-24T14:30:00Z"
+    },
+    {
+      "id": 105,
+      "title": "Webb telescope finds unexpected chemistry on TRAPPIST-1e",
+      "url": "https://arstechnica.com/science/2026/04/webb-trappist-chemistry",
+      "content": "<p>New spectroscopic data from the James Webb Space Telescope has detected sulfur dioxide and water vapour in the atmosphere of TRAPPIST-1e, a rocky exoplanet in its star's habitable zone. While not conclusive evidence of life, the chemical signature is inconsistent with purely geological processes according to two independent research teams.</p><p>The detection required combining 47 transit observations taken over 14 months. Dr. Elena Marchetti, lead author of the Nature paper, cautions that abiotic sources of SO₂ cannot yet be ruled out, but notes that the observed ratio of sulfur isotopes is \"anomalous and worth investigating urgently.\" A follow-up observing campaign has been approved for 2027.</p>",
+      "feed": {"title": "Ars Technica"},
+      "published_at": "2026-04-24T10:00:00Z"
+    }
+  ]
+}
