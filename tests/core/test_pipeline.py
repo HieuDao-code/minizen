@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from unittest.mock import MagicMock
 
 import pytest
@@ -49,17 +49,23 @@ def test_pipeline_runs_full_flow(mocker: MockerFixture) -> None:
     mocker.patch("minizen.core.pipeline.MinifluxProvider", return_value=mock_rss)
     mocker.patch("minizen.core.pipeline.EmailProvider", return_value=mock_email)
     mocker.patch("minizen.core.pipeline.DigestAgent", return_value=mock_agent)
-    mocker.patch("minizen.core.pipeline.mistune.html", return_value="<h2>Digest</h2>")
+    mocker.patch(
+        "minizen.core.pipeline.render_email",
+        return_value=("<h2>Digest</h2>", "## Digest"),
+    )
     settings = _make_settings()
 
     # act
     run_pipeline(settings=settings)
 
     # assert
+    today = date.today().strftime("%B %-d, %Y")
     mock_rss.fetch_unread.assert_called_once_with()
     mock_agent.run.assert_called_once_with(articles=articles)
     mock_email.send.assert_called_once_with(
-        subject="Your Daily Digest", html="<h2>Digest</h2>"
+        subject=f"Your Daily Zen — {today}",
+        html="<h2>Digest</h2>",
+        plain_text="## Digest",
     )
     mock_rss.mark_as_read.assert_called_once_with(article_ids=[1, 2])
 
@@ -99,7 +105,10 @@ def test_pipeline_does_not_mark_read_when_email_fails(mocker: MockerFixture) -> 
     mocker.patch("minizen.core.pipeline.MinifluxProvider", return_value=mock_rss)
     mocker.patch("minizen.core.pipeline.EmailProvider", return_value=mock_email)
     mocker.patch("minizen.core.pipeline.DigestAgent", return_value=mock_agent)
-    mocker.patch("minizen.core.pipeline.mistune.html", return_value="<h2>Digest</h2>")
+    mocker.patch(
+        "minizen.core.pipeline.render_email",
+        return_value=("<h2>Digest</h2>", "## Digest"),
+    )
     settings = _make_settings()
 
     # act / assert

@@ -47,8 +47,8 @@ def test_config_show_prints_key_fields(
     config_path = tmp_path / "config.toml"
     _minimal_config(config_path)
     monkeypatch.setenv("MINIFLUX_API_KEY", "mf-key")
-    monkeypatch.setenv("EMAIL_USERNAME", "email-user")
-    monkeypatch.setenv("EMAIL_PASSWORD", "email-pass")
+    monkeypatch.setenv("MINIZEN_EMAIL_USERNAME", "email-user")
+    monkeypatch.setenv("MINIZEN_EMAIL_PASSWORD", "email-pass")
     runner = CliRunner()
 
     # act
@@ -67,8 +67,8 @@ def test_config_validate_succeeds_with_valid_config(
     config_path = tmp_path / "config.toml"
     _minimal_config(config_path)
     monkeypatch.setenv("MINIFLUX_API_KEY", "mf-key")
-    monkeypatch.setenv("EMAIL_USERNAME", "email-user")
-    monkeypatch.setenv("EMAIL_PASSWORD", "email-pass")
+    monkeypatch.setenv("MINIZEN_EMAIL_USERNAME", "email-user")
+    monkeypatch.setenv("MINIZEN_EMAIL_PASSWORD", "email-pass")
     runner = CliRunner()
 
     # act
@@ -86,6 +86,7 @@ def test_config_validate_fails_with_missing_env(
     config_path = tmp_path / "config.toml"
     _minimal_config(config_path)
     monkeypatch.delenv("MINIFLUX_API_KEY", raising=False)
+    monkeypatch.setattr("minizen.config.loader.load_dotenv", lambda *a, **k: None)
     runner = CliRunner()
 
     # act
@@ -221,5 +222,5 @@ def test_config_show_displays_ai_defaults_when_section_absent(
 
     # assert
     assert result.exit_code == 0
-    assert "anthropic:claude-sonnet-4-6" in result.output
+    assert "anthropic:claude-haiku-4-5" in result.output
     assert "5" in result.output

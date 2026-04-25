@@ -38,7 +38,7 @@ def test_ai_config_defaults() -> None:
     config = AIConfig()
 
     # assert
-    assert config.model == "anthropic:claude-sonnet-4-6"
+    assert config.model == "anthropic:claude-haiku-4-5"
     assert config.top_n == 5
 
 

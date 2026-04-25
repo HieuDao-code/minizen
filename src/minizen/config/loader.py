@@ -8,6 +8,22 @@ from minizen.config.models import AIConfig, EmailConfig, MinifluxConfig, Setting
 
 
 def load_settings(*, config_path: Path) -> Settings:
+    """Load application settings from a TOML config file and environment variables.
+
+    Reads the TOML file at ``config_path``, then overlays secrets from the
+    environment (with ``config_path.parent/.env`` taking precedence over the
+    shell environment).
+
+    Args:
+        config_path: Path to the TOML configuration file.
+
+    Returns:
+        A fully populated ``Settings`` instance.
+
+    Raises:
+        FileNotFoundError: If ``config_path`` does not exist.
+        KeyError: If a required environment variable is not set.
+    """
     load_dotenv(config_path.parent / ".env")
     load_dotenv()
 

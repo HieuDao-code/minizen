@@ -29,8 +29,8 @@ def test_load_settings_reads_toml_and_env(
         },
     )
     monkeypatch.setenv("MINIFLUX_API_KEY", "mf-key")
-    monkeypatch.setenv("EMAIL_USERNAME", "email-user")
-    monkeypatch.setenv("EMAIL_PASSWORD", "email-pass")
+    monkeypatch.setenv("MINIZEN_EMAIL_USERNAME", "email-user")
+    monkeypatch.setenv("MINIZEN_EMAIL_PASSWORD", "email-pass")
     # act
     settings = load_settings(config_path=config_file)
 
@@ -64,14 +64,14 @@ def test_load_settings_uses_ai_defaults_when_section_absent(
         },
     )
     monkeypatch.setenv("MINIFLUX_API_KEY", "mf-key")
-    monkeypatch.setenv("EMAIL_USERNAME", "email-user")
-    monkeypatch.setenv("EMAIL_PASSWORD", "email-pass")
+    monkeypatch.setenv("MINIZEN_EMAIL_USERNAME", "email-user")
+    monkeypatch.setenv("MINIZEN_EMAIL_PASSWORD", "email-pass")
 
     # act
     settings = load_settings(config_path=config_file)
 
     # assert
-    assert settings.ai.model == "anthropic:claude-sonnet-4-6"
+    assert settings.ai.model == "anthropic:claude-haiku-4-5"
     assert settings.ai.top_n == 5
 
 
@@ -94,6 +94,7 @@ def test_load_settings_raises_when_env_var_missing(
         },
     )
     monkeypatch.delenv("MINIFLUX_API_KEY", raising=False)
+    monkeypatch.setattr("minizen.config.loader.load_dotenv", lambda *a, **k: None)
 
     # act / assert
     with pytest.raises(KeyError, match="MINIFLUX_API_KEY"):
