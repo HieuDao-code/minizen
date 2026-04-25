@@ -1,5 +1,6 @@
 import typer
 
+from minizen.cli.commands import config as config_module
 from minizen.cli.commands.run import run
 
 app = typer.Typer(
@@ -15,3 +16,4 @@ def _callback() -> None:
 
 
 app.command("run")(run)
+app.add_typer(config_module.app, name="config")
