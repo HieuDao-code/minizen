@@ -145,6 +145,34 @@ def test_config_set_string_value(tmp_path: Path) -> None:
     assert updated["ai"]["model"] == "openai:gpt-4o"
 
 
+def test_config_set_updates_value_in_existing_section(tmp_path: Path) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    _minimal_config(config_path)
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(
+        app,
+        [
+            "config",
+            "set",
+            "miniflux.url",
+            "https://new.example.com",
+            "--config",
+            str(config_path),
+        ],
+    )
+
+    # assert
+    assert result.exit_code == 0
+    import tomllib
+
+    with open(config_path, "rb") as f:
+        updated = tomllib.load(f)
+    assert updated["miniflux"]["url"] == "https://new.example.com"
+
+
 def test_config_set_exits_on_invalid_key(tmp_path: Path) -> None:
     # arrange
     config_path = tmp_path / "config.toml"

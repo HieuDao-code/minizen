@@ -103,6 +103,7 @@ def preview(
 def send_test(
     config: _CONFIG_OPTION = _DEFAULT_CONFIG,
     verbose: _VERBOSE_OPTION = False,
+    dry_run: _DRY_RUN_OPTION = False,
 ) -> None:
     """Send a test digest email without marking articles as read."""
     configure_logging(verbose=verbose)
@@ -112,9 +113,18 @@ def send_test(
     if not articles:
         typer.echo("No unread articles.")
         return
+    if dry_run:
+        typer.confirm(
+            "This will make a real LLM API call but will not send an email. Continue?",
+            abort=True,
+        )
     agent = DigestAgent(model=settings.ai.model, top_n=settings.ai.top_n)
     result = agent.run(articles=articles)
     html, plain_text = render_email(result.markdown)
+    if dry_run:
+        typer.echo("Dry run — email not sent:\n")
+        typer.echo(plain_text)
+        return
     today = date.today().strftime("%B %-d, %Y")
     email = EmailProvider(config=settings.email)
     email.send(

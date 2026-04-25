@@ -3,6 +3,7 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
+import typer
 from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
@@ -314,3 +315,99 @@ def test_digest_preview_uses_custom_config(
 
     # assert
     mock_load.assert_called_once_with(config_path=config_path)
+
+
+def test_digest_send_test_dry_run_shows_confirm_prompt(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mock_settings = _make_settings_mock()
+    mocker.patch(
+        "minizen.cli.commands.digest.load_settings", return_value=mock_settings
+    )
+    mock_rss = MagicMock()
+    mock_rss.fetch_unread.return_value = [MagicMock()]
+    mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
+    mock_confirm = mocker.patch("minizen.cli.commands.digest.typer.confirm")
+    mock_agent = MagicMock()
+    mock_agent.run.return_value = MagicMock(markdown="## Digest")
+    mocker.patch("minizen.cli.commands.digest.DigestAgent", return_value=mock_agent)
+    mocker.patch("minizen.cli.commands.digest.EmailProvider", return_value=MagicMock())
+    mocker.patch(
+        "minizen.cli.commands.digest.render_email",
+        return_value=("<h2>Digest</h2>", "## Digest"),
+    )
+    runner = CliRunner()
+
+    # act
+    runner.invoke(app, ["digest", "send-test", "--dry-run"])
+
+    # assert
+    mock_confirm.assert_called_once_with(
+        "This will make a real LLM API call but will not send an email. Continue?",
+        abort=True,
+    )
+
+
+def test_digest_send_test_dry_run_aborts_when_confirm_declined(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mock_settings = _make_settings_mock()
+    mocker.patch(
+        "minizen.cli.commands.digest.load_settings", return_value=mock_settings
+    )
+    mock_rss = MagicMock()
+    mock_rss.fetch_unread.return_value = [MagicMock()]
+    mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
+    mocker.patch("minizen.cli.commands.digest.typer.confirm", side_effect=typer.Abort())
+    mock_agent = MagicMock()
+    mocker.patch("minizen.cli.commands.digest.DigestAgent", return_value=mock_agent)
+    runner = CliRunner()
+
+    # act
+    runner.invoke(app, ["digest", "send-test", "--dry-run"])
+
+    # assert
+    mock_agent.run.assert_not_called()
+
+
+def test_digest_send_test_dry_run_calls_llm_and_prints_plain_text(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mock_settings = _make_settings_mock()
+    mocker.patch(
+        "minizen.cli.commands.digest.load_settings", return_value=mock_settings
+    )
+    mock_article = MagicMock()
+    mock_rss = MagicMock()
+    mock_rss.fetch_unread.return_value = [mock_article]
+    mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
+    mock_confirm = mocker.patch("minizen.cli.commands.digest.typer.confirm")
+    mock_result = MagicMock()
+    mock_result.markdown = "## Digest"
+    mock_agent = MagicMock()
+    mock_agent.run.return_value = mock_result
+    mocker.patch("minizen.cli.commands.digest.DigestAgent", return_value=mock_agent)
+    mock_email = MagicMock()
+    mocker.patch("minizen.cli.commands.digest.EmailProvider", return_value=mock_email)
+    mocker.patch(
+        "minizen.cli.commands.digest.render_email",
+        return_value=("<h2>Digest</h2>", "Plain text digest"),
+    )
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(app, ["digest", "send-test", "--dry-run"])
+
+    # assert
+    assert result.exit_code == 0
+    mock_confirm.assert_called_once_with(
+        "This will make a real LLM API call but will not send an email. Continue?",
+        abort=True,
+    )
+    mock_agent.run.assert_called_once_with(articles=[mock_article])
+    mock_email.send.assert_not_called()
+    assert "Dry run — email not sent:" in result.output
+    assert "Plain text digest" in result.output
