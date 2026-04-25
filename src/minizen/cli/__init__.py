@@ -1,3 +1,6 @@
+import logging
+from typing import Annotated
+
 import typer
 
 from minizen.cli.commands import (
@@ -15,8 +18,17 @@ app = typer.Typer(
 
 
 @app.callback()
-def _callback() -> None:
-    pass
+def _callback(
+    verbose: Annotated[
+        bool,
+        typer.Option("--verbose", "-v", help="Enable debug logging."),
+    ] = False,
+) -> None:
+    """Configure logging for the CLI session."""
+    logging.basicConfig(
+        level=logging.DEBUG if verbose else logging.INFO,
+        format="%(levelname)s: %(message)s",
+    )
 
 
 app.command("run")(run)
