@@ -2,6 +2,8 @@ import math
 from datetime import date
 from importlib.metadata import version as pkg_version
 
+import mistune
+
 
 def _reading_time(markdown: str) -> int:
     """Estimate reading time in minutes assuming 200 words per minute.
@@ -26,8 +28,6 @@ def render_email(markdown: str) -> tuple[str, str]:
         A ``(html, plain_text)`` tuple where ``html`` is a fully styled email
         document and ``plain_text`` is the original Markdown unchanged.
     """
-    import mistune
-
     today = date.today().strftime("%B %-d, %Y")
     read_time = _reading_time(markdown)
     minizen_version = pkg_version("minizen")
