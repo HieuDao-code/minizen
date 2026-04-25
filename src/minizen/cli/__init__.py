@@ -5,6 +5,7 @@ from minizen.cli.commands import (
     digest as digest_module,
 )
 from minizen.cli.commands.run import run
+from minizen.cli.commands.setup import setup
 
 app = typer.Typer(
     name="minizen",
@@ -19,5 +20,6 @@ def _callback() -> None:
 
 
 app.command("run")(run)
+app.command("setup")(setup)
 app.add_typer(config_module.app, name="config")
 app.add_typer(digest_module.app, name="digest")
