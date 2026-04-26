@@ -19,11 +19,18 @@
   - Handling API errors and rate limits
   - Handling email sending errors
   - Handling invalid input from the user
+- [ ] minizen as third party package allow, `from minizen import ...` for all the main functions and classes, so that it can be easily imported and used in other projects, such as a terminal script or a web app
+  - [ ] document it for it
 
-- Long-term:
-  - Do a research of what the best model is to use with API key and free tier, or a cheap
-  - Implement more LLM models provider
-  - Add additional filtering options, such as keywords, add more articles but as additional entries which only contain the title and link without the summary (or a one sentece summary) at the end.
+### Short-term:
+
+- [ ] check how to optimize tokens. Fetch original content
+
+### Long-term:
+
+- Do a research of what the best model is to use with API key and free tier, or a cheap
+- Implement more LLM models provider
+- Add additional filtering options, such as keywords, add more articles but as additional entries which only contain the title and link without the summary (or a one sentece summary) at the end.
 
 ### Out of scope for now but maybe in the future:
 

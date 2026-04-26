@@ -44,6 +44,7 @@ Changelog = "https://github.com/hieudao-code/minizen/releases"
 
 [project.scripts]
 minizen = "minizen.main:app"
+mz = "minizen.main:app"
 
 [dependency-groups]
 dev = [
