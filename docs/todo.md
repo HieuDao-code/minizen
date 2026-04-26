@@ -5,16 +5,8 @@
 - Add docs on how to setup credential manually with rc file and env vars
 - Add module and function docstrings to the codebase, to explain the purpose and usage of each module and function
 
-#### Setup wizard:
-
-- Bug: The setup wizard must also need to write the miniflux part or rather the app need to use the default values if the field miniflux is missing
-- Add a setup for openai key as well. When setup wizard is run, ask for llm model first and the ask for the api key. Update all the docs regarding openai key and write specific tests.
-- The setup wizard should as for the miniflux api key and anthropic key last
-- Set the permission of .env to 600 to prevent unauthorized access to sensitive information
-
 #### Improvements
 
-- Improve the workflow: Make it possible to run the minizen run command without the setup wizard so we do not store credentials locally. Add flags for all option we need for the setup so we can run the command with all necessary information
 - Also link the comments section of the article if there is one
 
 #### lower priority
