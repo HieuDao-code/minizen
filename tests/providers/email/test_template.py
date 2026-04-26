@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from minizen.providers.email.template import render_email
 
 
@@ -25,3 +27,23 @@ def test_render_email_html_contains_minizen_version() -> None:
 
     # assert
     assert "minizen" in html
+
+
+def test_render_email_with_fixture_digest() -> None:
+    # arrange
+    fixture_path = Path(__file__).parents[2] / "fixtures" / "digest_result.md"
+    content = fixture_path.read_text()
+
+    # act
+    html, plain_text = render_email(markdown=content)
+
+    # assert
+    assert "#7A9E7E" in html
+    assert "#F2EFE9" in html
+    assert "Rust" in html
+    assert "Most LLM" in html
+    assert "Apple" in html
+    assert "Platforms" in html
+    assert "Webb" in html
+    assert "~3 min read" in html
+    assert plain_text == content

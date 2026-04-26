@@ -44,31 +44,31 @@ def render_email(markdown: str) -> tuple[str, str]:
     img {{ border:0; display:block; }}
 
     body {{
-      background: #f0f4ff;
+      background: #F2EFE9;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      color: #1f2937;
+      color: #2E2A25;
       font-size: 16px;
       line-height: 1.6;
     }}
     .wrapper {{
       max-width: 620px;
       margin: 32px auto;
-      background: #ffffff;
+      background: #FAFAF8;
       border-radius: 16px;
       overflow: hidden;
       box-shadow: 0 4px 24px rgba(0,0,0,0.08);
     }}
     .header {{
-      background: linear-gradient(135deg, #F0E6D3 0%, #C8956C 50%, #A0614A 100%);
+      background: linear-gradient(135deg, #F2EFE9 0%, #C8B89A 50%, #9E8A72 100%);
       padding: 36px 32px 28px;
-      color: #ffffff;
+      color: #2E2A25;
     }}
     .header-label {{
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      opacity: 0.85;
+      opacity: 0.65;
       margin: 0 0 8px;
     }}
     .header h1 {{
@@ -80,7 +80,7 @@ def render_email(markdown: str) -> tuple[str, str]:
     .header .meta {{
       margin: 0;
       font-size: 14px;
-      opacity: 0.8;
+      opacity: 0.7;
     }}
     .content {{
       padding: 32px 32px 24px;
@@ -88,61 +88,61 @@ def render_email(markdown: str) -> tuple[str, str]:
     .content h1 {{
       font-size: 22px;
       font-weight: 700;
-      color: #111827;
+      color: #2E2A25;
       margin: 28px 0 6px;
       line-height: 1.3;
     }}
     .content h2 {{
       font-size: 18px;
       font-weight: 700;
-      color: #111827;
+      color: #2E2A25;
       margin: 36px 0 8px;
       padding-left: 12px;
-      border-left: 4px solid #C8956C;
+      border-left: 4px solid #7A9E7E;
       line-height: 1.3;
     }}
     .content p {{
       font-size: 16px;
       line-height: 1.8;
-      color: #374151;
+      color: #2E2A25;
       margin: 8px 0 18px;
     }}
     .content a {{
-      color: #6366f1;
+      color: #6B8F6E;
       text-decoration: none;
       font-weight: 500;
     }}
     .content a:hover {{ text-decoration: underline; }}
-    .content strong {{ color: #111827; font-weight: 600; }}
-    .content em {{ color: #6b7280; }}
+    .content strong {{ color: #2E2A25; font-weight: 600; }}
+    .content em {{ color: #6B6560; }}
     .content hr {{
       border: none;
-      border-top: 1px solid #e5e7eb;
+      border-top: 1px solid #D4CEC8;
       margin: 28px 0;
     }}
     .content ul, .content ol {{
       padding-left: 20px;
-      color: #374151;
+      color: #2E2A25;
       font-size: 16px;
       line-height: 1.8;
     }}
     .content blockquote {{
-      border-left: 3px solid #e5e7eb;
+      border-left: 3px solid #C8B89A;
       margin: 16px 0;
       padding: 4px 16px;
-      color: #6b7280;
+      color: #6B6560;
       font-style: italic;
     }}
     .footer {{
-      background: #f9fafb;
-      border-top: 1px solid #e5e7eb;
+      background: #EAE5DC;
+      border-top: 1px solid #D4CEC8;
       padding: 20px 32px;
       font-size: 13px;
-      color: #9ca3af;
+      color: #6B6560;
       text-align: center;
     }}
     .footer a {{
-      color: #A0614A;
+      color: #7A9E7E;
       text-decoration: none;
       font-weight: 600;
     }}
@@ -162,19 +162,6 @@ def render_email(markdown: str) -> tuple[str, str]:
       .content h2 {{ font-size: 17px; }}
       .content p, .content ul, .content ol {{ font-size: 17px; line-height: 1.85; }}
       .footer {{ padding: 16px 20px; }}
-    }}
-
-    @media (prefers-color-scheme: dark) {{
-      body {{ background: #0f0f1a; color: #e5e7eb; }}
-      .wrapper {{ background: #1e1e2e; box-shadow: 0 4px 24px rgba(0,0,0,0.4); }}
-      .content h1, .content h2 {{ color: #f9fafb; }}
-      .content p, .content ul, .content ol {{ color: #d1d5db; }}
-      .content strong {{ color: #f9fafb; }}
-      .content em {{ color: #9ca3af; }}
-      .content a {{ color: #a5b4fc; }}
-      .content hr {{ border-top-color: #374151; }}
-      .content blockquote {{ border-left-color: #374151; color: #9ca3af; }}
-      .footer {{ background: #111827; border-top-color: #374151; color: #6b7280; }}
     }}
   </style>
 </head>
