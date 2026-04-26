@@ -8,7 +8,7 @@
 
 - A [Miniflux](https://miniflux.app) account (cloud at [reader.miniflux.app](https://reader.miniflux.app) or self-hosted)
 - An [Anthropic API key](https://console.anthropic.com)
-- A Gmail account with an [App Password](https://support.google.com/accounts/answer/185833)
+- An SMTP-capable email account (Gmail is the most common — see below)
 
 ---
 
@@ -40,20 +40,30 @@ You will be prompted for:
 | ---------------------- | ------------------------------------------------------------------------------------------------------ |
 | **Miniflux API key**   | Miniflux → Settings → API Keys → Create a new API key                                                  |
 | **Anthropic API key**  | [console.anthropic.com](https://console.anthropic.com) → API Keys                                      |
-| **SMTP host**          | Default: `smtp.gmail.com`                                                                              |
-| **SMTP port**          | Default: `587`                                                                                         |
-| **From email address** | The Gmail address minizen sends from                                                                   |
+| **SMTP host**          | Your SMTP server hostname (e.g. `smtp.gmail.com`)                                                      |
+| **SMTP port**          | SMTP port — use `587` for STARTTLS (works with most providers)                                         |
+| **From email address** | The address minizen sends from                                                                         |
 | **To email address**   | Where you want to receive digests                                                                      |
-| **Email username**     | Your Gmail address                                                                                     |
-| **Email password**     | Your Gmail [App Password](https://support.google.com/accounts/answer/185833) (not your login password) |
+| **Email username**     | Your SMTP login username (often your email address)                                                    |
+| **Email password**     | Your SMTP password or app password (see your provider's docs)                                          |
 
-### Getting a Gmail App Password
+### Email provider setup
+
+minizen works with any SMTP server that supports STARTTLS on port 587.
+
+**Gmail** is the most common choice. To use it:
 
 1. Go to your Google Account → Security
 2. Under "How you sign in to Google", enable 2-Step Verification if not already on
 3. Search for "App passwords" in your Google Account settings
-4. Create a new App Password (e.g. name it `minizen` and press "Create")
+4. Create a new App Password (e.g. name it `minizen`)
 5. Copy the 16-character password — use this as your **Email password**
+
+For other providers (Fastmail, Outlook, Proton Mail Bridge, etc.), consult your
+provider's SMTP documentation. The `smtp_host`, `smtp_port`, username, and password
+fields map directly to your provider's settings.
+
+See the [Configuration reference](configuration.md) for all available settings.
 
 The wizard writes two files:
 
