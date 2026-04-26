@@ -1,29 +1,28 @@
 # Implementation TODOs
 
-- Add more Documentation:
-  - Fill out the Homepage with more details about the tool, its features, and how it can be used
-  - Add more examples of how to use the library
-  - Go over the documentation at improve it:
-    - of which model we support, what keys you need (e.g. OpenAI, Anthropic)
-    - be more concise about the email setup, it doesnt have to be gmail, just an SMTP server, but we can provide instructions for Gmail as its the most common one
-  - Will out the How it works section with a diagram and more details about the architecture of the tool. For that you can use mermaid.js to create a diagram and embed it in the documentation. Make sure the zensical plugin is enabled and working https://mermaid.ai/docs/ and https://zensical.org/docs/authoring/diagrams/?h=mermaid#configuration
-  - Add a FAQ section to the documentation to answer common questions and troubleshoot common issues
-  - Add an AI Disclaimer to the documentation, to inform that this tool is powered by AI and developed with the help of AI (Claude Code)
-  - Add a develop section to the documentation, which just have the packages we use and a brief description of it with a link to their documentation
+#### Documentation:
 
-- [ ] minizen as third party package allow, `from minizen import ...` for all the main functions and classes, so that it can be easily imported and used in other projects, such as a terminal script or a web app
-- [ ] document it for it
+- Add docs on how to setup credential manually with rc file and env vars
 - Add module and function docstrings to the codebase, to explain the purpose and usage of each module and function
 
-- UI framework to test with a mock response from the LLM, to test the UI without having to make actual API calls
-- Print the result in digest fetch and digest preview or pipe it into stdout, so that it can be used in a terminal or in a script
+- Improve the workflow: Make it possible to run the minizen run command without the setup wizard so we do not store credentials locally. Add flags for all option we need for the setup so we can run the command with all necessary information
+
+#### Setup wizard:
+
+- Bug: The setup wizard must also need to write the miniflux part or rather the app need to use the default values if the field miniflux is missing
+- Add a setup for openai key as well. When setup wizard is run, ask for llm model first and the ask for the api key. Update all the docs regarding openai key and write specific tests.
+- The setup wizard should as for the miniflux api key and anthropic key last
+- Set the permission of .env to 600 to prevent unauthorized access to sensitive information
+
 - Also link the comments section of the article if there is one
+
 - Do a analysis on how robust the code is and add try catch blocks where necessary to handle potential errors and edge cases, such as (you can do a websearch for api docs https://miniflux.app/docs/api.html#endpoint-get-entries and https://pydantic.dev/docs/ai/llms.txt):
   - Handling API errors and rate limits
   - Handling email sending errors
 - do an security review of the codebase to identify and fix any potential security vulnerabilities, such as:
   - Handling sensitive information, such as API keys and email credentials, securely and not hardcoding them in the codebase
   - Implementing proper authentication and authorization mechanisms for accessing the tool and its features
+  - Document in a security.md file with considerations
 
 ### Short-term:
 
@@ -32,7 +31,7 @@
 ### Long-term:
 
 - Implement more LLM models provider
-- Add additional filtering options, such as keywords, add more articles but as additional entries which only contain the title and link without the summary (or a one sentece summary) at the end.
+- Add additional filtering options, such as keywords, add more articles but as additional entries which only contain the title and link without the summary (or a one sentence summary) at the end.
 
 ### Out of scope for now but maybe in the future:
 

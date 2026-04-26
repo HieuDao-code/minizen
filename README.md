@@ -1,4 +1,9 @@
-# minizen — A quieter way to stay informed
+# minizen
+
+<p align="center">A quieter way to stay informed</p>
+<p align="center">
+  <a href="https://hieudao-code.github.io/minizen/">Documentation</a> | <a href="https://hieudao-code.github.io/minizen/getting_started/">Getting Started</a> | <a href="https://hieudao-code.github.io/minizen/configuration/">Configuration</a>
+</p>
 
 **minizen** fetches your unread RSS articles from [Miniflux](https://miniflux.app),
 uses AI to curate and summarise the most interesting ones, and emails you a clean daily digest.
@@ -19,7 +24,3 @@ minizen setup            # interactive wizard — configure Miniflux, AI, and em
 minizen digest preview   # preview today's digest in your terminal
 minizen run              # fetch → summarise → send
 ```
-
-→ [Getting Started](getting_started.md) for full setup instructions
-
-→ [How It Works](how_it_works.md) for the architecture
