@@ -8,16 +8,16 @@ from typer.testing import CliRunner
 from minizen.cli import app
 
 _INTERACTIVE_INPUT = (
-    "miniflux-api-key\n"
-    "anthropic-api-key\n"
-    "\n"  # smtp host (default)
-    "\n"  # smtp port (default)
+    "\n"  # model (default: anthropic:claude-haiku-4-5)
+    "\n"  # top_n (default: 5)
+    "\n"  # smtp host (default: smtp.gmail.com)
+    "\n"  # smtp port (default: 587)
     "from@example.com\n"
     "to@example.com\n"
     "email-user\n"
     "email-password\n"
-    "\n"  # model (default)
-    "\n"  # top_n (default)
+    "miniflux-api-key\n"
+    "anthropic-api-key\n"
 )
 
 
@@ -71,16 +71,16 @@ def test_setup_accepts_custom_ai_values(tmp_path: Path) -> None:
         app,
         ["setup", "--config", str(config_path)],
         input=(
-            "miniflux-api-key\n"
-            "anthropic-api-key\n"
-            "\n"
-            "\n"
+            "openai:gpt-4o\n"
+            "10\n"
+            "\n"  # smtp host (default)
+            "\n"  # smtp port (default)
             "from@example.com\n"
             "to@example.com\n"
             "email-user\n"
             "email-password\n"
-            "openai:gpt-4o\n"
-            "10\n"
+            "miniflux-api-key\n"
+            "openai-api-key\n"
         ),
     )
 
@@ -250,6 +250,64 @@ def test_setup_non_interactive_fails_when_env_missing(
 
     # assert
     assert result.exit_code != 0
+
+
+def test_setup_writes_openai_key_for_openai_model(tmp_path: Path) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    runner = CliRunner()
+
+    # act
+    runner.invoke(
+        app,
+        ["setup", "--config", str(config_path)],
+        input=(
+            "openai:gpt-4o\n"
+            "\n"
+            "\n"
+            "\n"
+            "from@example.com\n"
+            "to@example.com\n"
+            "email-user\n"
+            "email-password\n"
+            "miniflux-api-key\n"
+            "openai-api-key\n"
+        ),
+    )
+
+    # assert
+    env_path = tmp_path / ".env"
+    content = env_path.read_text()
+    assert "OPENAI_API_KEY=openai-api-key" in content
+    assert "ANTHROPIC_API_KEY" not in content
+
+
+def test_setup_interactive_exits_on_unknown_model_provider(tmp_path: Path) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(
+        app,
+        ["setup", "--config", str(config_path)],
+        input=(
+            "unknown:some-model\n"
+            "\n"
+            "\n"
+            "\n"
+            "from@example.com\n"
+            "to@example.com\n"
+            "email-user\n"
+            "email-password\n"
+            "miniflux-api-key\n"
+            "some-api-key\n"
+        ),
+    )
+
+    # assert
+    assert result.exit_code != 0
+    assert "Unknown model provider" in result.output
 
 
 def test_setup_writes_miniflux_section(tmp_path: Path) -> None:
