@@ -158,15 +158,67 @@ def run(
         typer.Option(help="Path to the TOML configuration file.", show_default=True),
     ] = _DEFAULT_CONFIG,
     dry_run: _DRY_RUN_OPTION = False,
+    miniflux_url: Annotated[
+        str | None,
+        typer.Option("--miniflux-url", help="Miniflux base URL."),
+    ] = None,
+    miniflux_api_key: Annotated[
+        str | None,
+        typer.Option("--miniflux-api-key", help="Miniflux API key."),
+    ] = None,
+    model: Annotated[
+        str | None,
+        typer.Option("--model", help="AI model identifier."),
+    ] = None,
+    top_n: Annotated[
+        int | None,
+        typer.Option("--top-n", help="Number of top articles to include."),
+    ] = None,
+    from_addr: Annotated[
+        str | None,
+        typer.Option("--from-addr", help="Sender email address."),
+    ] = None,
+    to_addr: Annotated[
+        str | None,
+        typer.Option("--to-addr", help="Recipient email address."),
+    ] = None,
+    smtp_host: Annotated[
+        str | None,
+        typer.Option("--smtp-host", help="SMTP server hostname."),
+    ] = None,
+    smtp_port: Annotated[
+        int | None,
+        typer.Option("--smtp-port", help="SMTP server port."),
+    ] = None,
+    email_username: Annotated[
+        str | None,
+        typer.Option("--email-username", help="SMTP login username."),
+    ] = None,
+    email_password: Annotated[
+        str | None,
+        typer.Option("--email-password", help="SMTP login password."),
+    ] = None,
 ) -> None:
     """Run the full digest pipeline: fetch, summarise, and email."""
+    _flag_kwargs = {
+        "miniflux_url": miniflux_url,
+        "miniflux_api_key": miniflux_api_key,
+        "model": model,
+        "top_n": top_n,
+        "from_addr": from_addr,
+        "to_addr": to_addr,
+        "smtp_host": smtp_host,
+        "smtp_port": smtp_port,
+        "email_username": email_username,
+        "email_password": email_password,
+    }
     try:
         settings = load_settings(config_path=config)
     except FileNotFoundError:
-        typer.echo(f"Config file not found: {config}")
-        typer.echo("Run `minizen setup` to create one.")
-        raise typer.Exit(code=1)
+        settings = _build_settings_from_flags(**_flag_kwargs)
     except KeyError as e:
         typer.echo(f"Error: missing environment variable {e.args[0]}")
         raise typer.Exit(code=1)
+    else:
+        settings = apply_overrides(settings=settings, **_flag_kwargs)
     run_pipeline(settings=settings, dry_run=dry_run)

@@ -108,6 +108,10 @@ def test_build_settings_from_flags_exits_when_required_field_missing() -> None:
 def test_run_invokes_pipeline(mocker: MockerFixture, tmp_path: Path) -> None:
     # arrange
     mock_settings = MagicMock()
+    mock_settings.miniflux.model_copy.return_value = mock_settings.miniflux
+    mock_settings.email.model_copy.return_value = mock_settings.email
+    mock_settings.ai.model_copy.return_value = mock_settings.ai
+    mock_settings.model_copy.return_value = mock_settings
     mock_load = mocker.patch(
         "minizen.cli.commands.run.load_settings", return_value=mock_settings
     )
@@ -163,6 +167,10 @@ def test_run_dry_run_flag_passes_dry_run_to_pipeline(
 ) -> None:
     # arrange
     mock_settings = MagicMock()
+    mock_settings.miniflux.model_copy.return_value = mock_settings.miniflux
+    mock_settings.email.model_copy.return_value = mock_settings.email
+    mock_settings.ai.model_copy.return_value = mock_settings.ai
+    mock_settings.model_copy.return_value = mock_settings
     mocker.patch("minizen.cli.commands.run.load_settings", return_value=mock_settings)
     mock_pipeline = mocker.patch("minizen.cli.commands.run.run_pipeline")
     config_path = tmp_path / "config.toml"
@@ -196,3 +204,80 @@ def test_run_exits_with_error_on_missing_env(
     # assert
     assert result.exit_code != 0
     assert match in result.output
+
+
+def test_run_flag_overrides_loaded_setting(
+    mocker: MockerFixture, tmp_path: Path
+) -> None:
+    # arrange
+    mock_settings = MagicMock()
+    mock_settings.miniflux.model_copy.return_value = mock_settings.miniflux
+    mock_settings.email.model_copy.return_value = mock_settings.email
+    mock_settings.ai.model_copy.return_value = mock_settings.ai
+    mock_settings.model_copy.return_value = mock_settings
+    mocker.patch("minizen.cli.commands.run.load_settings", return_value=mock_settings)
+    mock_pipeline = mocker.patch("minizen.cli.commands.run.run_pipeline")
+    config_path = tmp_path / "config.toml"
+    config_path.touch()
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(
+        app,
+        ["run", "--config", str(config_path), "--miniflux-api-key", "override-key"],
+    )
+
+    # assert
+    assert result.exit_code == 0
+    mock_pipeline.assert_called_once()
+
+
+def test_run_all_flags_no_config_file(mocker: MockerFixture) -> None:
+    # arrange
+    mock_pipeline = mocker.patch("minizen.cli.commands.run.run_pipeline")
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(
+        app,
+        [
+            "run",
+            "--config",
+            "/nonexistent/config.toml",
+            "--miniflux-api-key",
+            "mf-key",
+            "--from-addr",
+            "from@example.com",
+            "--to-addr",
+            "to@example.com",
+            "--smtp-host",
+            "smtp.example.com",
+            "--smtp-port",
+            "587",
+            "--email-username",
+            "user",
+            "--email-password",
+            "pass",
+        ],
+    )
+
+    # assert
+    assert result.exit_code == 0
+    called_settings = mock_pipeline.call_args.kwargs["settings"]
+    assert called_settings.miniflux.api_key == "mf-key"
+    assert called_settings.email.from_addr == "from@example.com"
+
+
+def test_run_no_config_file_lists_missing_flags(mocker: MockerFixture) -> None:
+    # arrange
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(
+        app,
+        ["run", "--config", "/nonexistent/config.toml"],
+    )
+
+    # assert
+    assert result.exit_code != 0
+    assert "--miniflux-api-key" in result.output
