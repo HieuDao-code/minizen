@@ -310,6 +310,70 @@ def test_setup_interactive_exits_on_unknown_model_provider(tmp_path: Path) -> No
     assert "Unknown model provider" in result.output
 
 
+def test_setup_non_interactive_accepts_openai_model(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    monkeypatch.setenv("MINIFLUX_API_KEY", "mf-key")
+    monkeypatch.setenv("OPENAI_API_KEY", "oai-key")
+    monkeypatch.setenv("MINIZEN_EMAIL_USERNAME", "user")
+    monkeypatch.setenv("MINIZEN_EMAIL_PASSWORD", "pass")
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(
+        app,
+        [
+            "setup",
+            "--no-interactive",
+            "--config",
+            str(config_path),
+            "--from-addr",
+            "from@example.com",
+            "--to-addr",
+            "to@example.com",
+            "--model",
+            "openai:gpt-4o",
+        ],
+    )
+
+    # assert
+    assert result.exit_code == 0
+
+
+def test_setup_non_interactive_fails_with_unknown_model_provider(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    monkeypatch.setenv("MINIFLUX_API_KEY", "mf-key")
+    monkeypatch.setenv("MINIZEN_EMAIL_USERNAME", "user")
+    monkeypatch.setenv("MINIZEN_EMAIL_PASSWORD", "pass")
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(
+        app,
+        [
+            "setup",
+            "--no-interactive",
+            "--config",
+            str(config_path),
+            "--from-addr",
+            "from@example.com",
+            "--to-addr",
+            "to@example.com",
+            "--model",
+            "unknown:some-model",
+        ],
+    )
+
+    # assert
+    assert result.exit_code != 0
+    assert "Unknown model provider" in result.output
+
+
 def test_setup_writes_miniflux_section(tmp_path: Path) -> None:
     # arrange
     config_path = tmp_path / "config.toml"

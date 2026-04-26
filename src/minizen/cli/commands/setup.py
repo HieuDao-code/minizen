@@ -118,9 +118,11 @@ def _setup_non_interactive(
         typer.echo("Error: --to-addr is required in non-interactive mode.")
         raise typer.Exit(code=1)
 
+    _, ai_key_var = _provider_key_info(model)
+
     for var in (
         "MINIFLUX_API_KEY",
-        "ANTHROPIC_API_KEY",
+        ai_key_var,
         "MINIZEN_EMAIL_USERNAME",
         "MINIZEN_EMAIL_PASSWORD",
     ):
