@@ -36,16 +36,18 @@ minizen setup
 
 You will be prompted for:
 
-| Prompt                  | Where to find it                                                        |
-| ----------------------- | ----------------------------------------------------------------------- |
-| **Miniflux API key**    | Miniflux → Settings → API Keys → Create a new API key                   |
-| **AI provider API key** | See [Configuration reference](configuration.md) for supported providers |
-| **SMTP host**           | Your SMTP server hostname (e.g. `smtp.gmail.com`)                       |
-| **SMTP port**           | SMTP port — use `587` for STARTTLS (works with most providers)          |
-| **From email address**  | The address minizen sends from                                          |
-| **To email address**    | Where you want to receive digests                                       |
-| **Email username**      | Your SMTP login username (often your email address)                     |
-| **Email password**      | Your SMTP password or app password (see your provider's docs)           |
+| Prompt                     | Where to find it                                                                      |
+| -------------------------- | ------------------------------------------------------------------------------------- |
+| **AI model**               | Model identifier, e.g. `anthropic:claude-haiku-4-5` or `openai:gpt-4o`               |
+| **Number of top articles** | How many articles to include in the digest (default: 5)                               |
+| **SMTP host**              | Your SMTP server hostname (e.g. `smtp.gmail.com`)                                     |
+| **SMTP port**              | SMTP port — use `587` for STARTTLS (works with most providers)                        |
+| **From email address**     | The address minizen sends from                                                        |
+| **To email address**       | Where you want to receive digests                                                     |
+| **Email username**         | Your SMTP login username (often your email address)                                   |
+| **Email password**         | Your SMTP password or app password (see your provider's docs)                         |
+| **Miniflux API key**       | Miniflux → Settings → API Keys → Create a new API key                                 |
+| **AI provider API key**    | `ANTHROPIC_API_KEY` for Anthropic models; `OPENAI_API_KEY` for OpenAI models          |
 
 ### Email provider setup
 
@@ -112,11 +114,31 @@ This fetches unread articles, generates the digest, emails it, and marks the art
 
 ---
 
+## Run without a config file
+
+You can pass all credentials directly as flags — useful in CI/CD where you do not
+want to store credentials on disk:
+
+```bash
+minizen run \
+  --miniflux-api-key  "$MINIFLUX_API_KEY" \
+  --from-addr         "digest@example.com" \
+  --to-addr           "me@example.com" \
+  --smtp-host         "smtp.gmail.com" \
+  --smtp-port         587 \
+  --email-username    "$EMAIL_USER" \
+  --email-password    "$EMAIL_PASS"
+```
+
+Flags override the corresponding values in the config file when both are present.
+
+---
+
 ## Automate with GitHub Actions
 
 minizen ships with a GitHub Actions workflow that runs the digest daily. See `.github/workflows/` in the repository for the workflow file, and add the following secrets to your repository:
 
 - `MINIFLUX_API_KEY`
-- `ANTHROPIC_API_KEY`
+- `ANTHROPIC_API_KEY` (or `OPENAI_API_KEY` if using an OpenAI model)
 - `MINIZEN_EMAIL_USERNAME`
 - `MINIZEN_EMAIL_PASSWORD`
