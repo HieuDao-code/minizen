@@ -34,7 +34,7 @@ def load_settings(*, config_path: Path) -> Settings:
 
     return Settings(
         miniflux=MinifluxConfig(
-            url=raw["miniflux"]["url"],
+            url=raw.get("miniflux", {}).get("url", "https://reader.miniflux.app"),
             api_key=os.environ["MINIFLUX_API_KEY"],
         ),
         email=EmailConfig(
