@@ -4,9 +4,13 @@ from typing import Annotated
 import typer
 
 from minizen.config.loader import load_settings
+from minizen.config.models import AIConfig, EmailConfig, MinifluxConfig, Settings
 from minizen.core.pipeline import run_pipeline
 
 _DEFAULT_CONFIG = Path.home() / ".config" / "minizen" / "config.toml"
+_DEFAULT_MINIFLUX_URL = "https://reader.miniflux.app"
+_DEFAULT_MODEL = "anthropic:claude-haiku-4-5"
+_DEFAULT_TOP_N = 5
 
 _DRY_RUN_OPTION = Annotated[
     bool,
@@ -15,6 +19,137 @@ _DRY_RUN_OPTION = Annotated[
         help="Fetch articles but skip LLM call, email send, and mark-as-read.",
     ),
 ]
+
+
+def apply_overrides(
+    settings: Settings,
+    *,
+    miniflux_url: str | None = None,
+    miniflux_api_key: str | None = None,
+    model: str | None = None,
+    top_n: int | None = None,
+    from_addr: str | None = None,
+    to_addr: str | None = None,
+    smtp_host: str | None = None,
+    smtp_port: int | None = None,
+    email_username: str | None = None,
+    email_password: str | None = None,
+) -> Settings:
+    """Return a copy of settings with any non-None flag values applied.
+
+    Args:
+        settings: The base settings to override.
+        miniflux_url: Override for miniflux.url.
+        miniflux_api_key: Override for miniflux.api_key.
+        model: Override for ai.model.
+        top_n: Override for ai.top_n.
+        from_addr: Override for email.from_addr.
+        to_addr: Override for email.to_addr.
+        smtp_host: Override for email.smtp_host.
+        smtp_port: Override for email.smtp_port.
+        email_username: Override for email.username.
+        email_password: Override for email.password.
+
+    Returns:
+        A new Settings instance with overrides applied.
+    """
+    miniflux_updates = {
+        k: v
+        for k, v in {"url": miniflux_url, "api_key": miniflux_api_key}.items()
+        if v is not None
+    }
+    ai_updates = {
+        k: v for k, v in {"model": model, "top_n": top_n}.items() if v is not None
+    }
+    email_updates = {
+        k: v
+        for k, v in {
+            "from_addr": from_addr,
+            "to_addr": to_addr,
+            "smtp_host": smtp_host,
+            "smtp_port": smtp_port,
+            "username": email_username,
+            "password": email_password,
+        }.items()
+        if v is not None
+    }
+    return settings.model_copy(
+        deep=True,
+        update={
+            "miniflux": settings.miniflux.model_copy(update=miniflux_updates),
+            "ai": settings.ai.model_copy(update=ai_updates),
+            "email": settings.email.model_copy(update=email_updates),
+        },
+    )
+
+
+def _build_settings_from_flags(
+    *,
+    miniflux_url: str | None,
+    miniflux_api_key: str | None,
+    model: str | None,
+    top_n: int | None,
+    from_addr: str | None,
+    to_addr: str | None,
+    smtp_host: str | None,
+    smtp_port: int | None,
+    email_username: str | None,
+    email_password: str | None,
+) -> Settings:
+    """Build a Settings object entirely from CLI flags.
+
+    Args:
+        miniflux_url: Miniflux base URL (defaults to hosted instance if None).
+        miniflux_api_key: Miniflux API key; required.
+        model: AI model identifier (defaults to claude-haiku-4-5 if None).
+        top_n: Max articles in digest (defaults to 5 if None).
+        from_addr: Sender email address; required.
+        to_addr: Recipient email address; required.
+        smtp_host: SMTP server hostname; required.
+        smtp_port: SMTP server port; required.
+        email_username: SMTP login username; required.
+        email_password: SMTP login password; required.
+
+    Returns:
+        A fully populated Settings instance.
+
+    Raises:
+        typer.Exit: With code 1 if any required field is absent.
+    """
+    required = {
+        "--miniflux-api-key": miniflux_api_key,
+        "--from-addr": from_addr,
+        "--to-addr": to_addr,
+        "--smtp-host": smtp_host,
+        "--smtp-port": smtp_port,
+        "--email-username": email_username,
+        "--email-password": email_password,
+    }
+    missing = [flag for flag, value in required.items() if value is None]
+    if missing:
+        typer.echo("Config file not found. Required flags:")
+        for flag in missing:
+            typer.echo(f"  {flag}")
+        raise typer.Exit(code=1)
+
+    return Settings(
+        miniflux=MinifluxConfig(
+            url=miniflux_url or _DEFAULT_MINIFLUX_URL,
+            api_key=miniflux_api_key,  # type: ignore[arg-type]
+        ),
+        email=EmailConfig(
+            smtp_host=smtp_host,  # type: ignore[arg-type]
+            smtp_port=smtp_port,  # type: ignore[arg-type]
+            from_addr=from_addr,  # type: ignore[arg-type]
+            to_addr=to_addr,  # type: ignore[arg-type]
+            username=email_username,  # type: ignore[arg-type]
+            password=email_password,  # type: ignore[arg-type]
+        ),
+        ai=AIConfig(
+            model=model or _DEFAULT_MODEL,
+            top_n=top_n or _DEFAULT_TOP_N,
+        ),
+    )
 
 
 def run(

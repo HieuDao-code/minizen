@@ -116,6 +116,7 @@ ignore = [
   "S106",    # hardcoded-password-func-arg
 ]
 "src/minizen/cli/commands/setup.py" = ["PLR0913"]
+"src/minizen/cli/commands/run.py" = ["PLR0913"]
 "src/minizen/providers/email/template.py" = ["E501"]
 
 [tool.ruff.lint.isort]
