@@ -8,6 +8,7 @@ from pytest_mock import MockerFixture
 
 from minizen.config.models import AIConfig, EmailConfig, MinifluxConfig, Settings
 from minizen.core.pipeline import run_pipeline
+from minizen.providers.email import template as email_template
 from minizen.providers.rss.miniflux import Article
 
 
@@ -174,8 +175,6 @@ def test_pipeline_sends_email_with_fixture_data(mocker: MockerFixture) -> None:
     mocker.patch("minizen.core.pipeline.MinifluxProvider", return_value=mock_rss)
     mocker.patch("minizen.core.pipeline.DigestAgent", return_value=mock_agent)
     mocker.patch("minizen.core.pipeline.EmailProvider", return_value=mock_email)
-    from minizen.providers.email import template as email_template
-
     mocker.patch(
         "minizen.core.pipeline.render_email",
         wraps=email_template.render_email,
@@ -187,9 +186,12 @@ def test_pipeline_sends_email_with_fixture_data(mocker: MockerFixture) -> None:
 
     # assert
     today = date.today().strftime("%B %-d, %Y")
-    mock_email.send.assert_called_once()
     call_kwargs = mock_email.send.call_args.kwargs
+    assert mock_email.send.call_count == 1
     assert call_kwargs["subject"] == f"Your Daily Zen — {today}"
-    assert "Rust" in call_kwargs["html"]
-    assert "Webb" in call_kwargs["html"]
+    assert call_kwargs["plain_text"] == digest_markdown
+    assert all(
+        kw in call_kwargs["html"]
+        for kw in ["Rust", "LLM", "Apple", "Platforms", "Webb"]
+    )
     mock_rss.mark_as_read.assert_called_once_with(article_ids=article_ids)
