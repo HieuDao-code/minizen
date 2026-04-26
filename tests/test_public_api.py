@@ -54,6 +54,7 @@ def test_top_level_all() -> None:
 
 
 def test_top_level_imports_are_same_objects() -> None:
+    # assert
     assert run_pipeline is _run_pipeline
     assert load_settings is _load_settings
     assert Settings is _Settings
