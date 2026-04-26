@@ -59,7 +59,7 @@ Any provider it supports works:
 ## Environment variables
 
 Secrets are never stored in the config file. Set them in your shell or in
-`~/.config/minizen/.env` (created automatically by `minizen setup`).
+`~/.config/minizen/.env` (created by `minizen setup` when run interactively).
 
 | Variable | Purpose |
 |---|---|
@@ -77,5 +77,5 @@ The default config path is `~/.config/minizen/config.toml`.
 Pass a custom path with `--config`:
 
 ```bash
-minizen --config /path/to/config.toml run
+minizen run --config /path/to/config.toml
 ```
