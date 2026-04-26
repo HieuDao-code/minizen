@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, cast
 
 import typer
 
@@ -135,15 +135,15 @@ def _build_settings_from_flags(
     return Settings(
         miniflux=MinifluxConfig(
             url=miniflux_url or _DEFAULT_MINIFLUX_URL,
-            api_key=miniflux_api_key,  # type: ignore[arg-type]
+            api_key=cast(str, miniflux_api_key),
         ),
         email=EmailConfig(
-            smtp_host=smtp_host,  # type: ignore[arg-type]
-            smtp_port=smtp_port,  # type: ignore[arg-type]
-            from_addr=from_addr,  # type: ignore[arg-type]
-            to_addr=to_addr,  # type: ignore[arg-type]
-            username=email_username,  # type: ignore[arg-type]
-            password=email_password,  # type: ignore[arg-type]
+            smtp_host=cast(str, smtp_host),
+            smtp_port=cast(int, smtp_port),
+            from_addr=cast(str, from_addr),
+            to_addr=cast(str, to_addr),
+            username=cast(str, email_username),
+            password=cast(str, email_password),
         ),
         ai=AIConfig(
             model=model or _DEFAULT_MODEL,

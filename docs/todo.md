@@ -19,6 +19,8 @@
   - Implementing proper authentication and authorization mechanisms for accessing the tool and its features
   - Document in a security.md file with considerations
 
+- remove digest workflow and move it into private repo
+
 ### Short-term:
 
 - [ ] check how to optimize tokens. Fetch original content
