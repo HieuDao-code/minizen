@@ -5,8 +5,6 @@
 - Add docs on how to setup credential manually with rc file and env vars
 - Add module and function docstrings to the codebase, to explain the purpose and usage of each module and function
 
-- Improve the workflow: Make it possible to run the minizen run command without the setup wizard so we do not store credentials locally. Add flags for all option we need for the setup so we can run the command with all necessary information
-
 #### Setup wizard:
 
 - Bug: The setup wizard must also need to write the miniflux part or rather the app need to use the default values if the field miniflux is missing
@@ -14,7 +12,12 @@
 - The setup wizard should as for the miniflux api key and anthropic key last
 - Set the permission of .env to 600 to prevent unauthorized access to sensitive information
 
+#### Improvements
+
+- Improve the workflow: Make it possible to run the minizen run command without the setup wizard so we do not store credentials locally. Add flags for all option we need for the setup so we can run the command with all necessary information
 - Also link the comments section of the article if there is one
+
+#### lower priority
 
 - Do a analysis on how robust the code is and add try catch blocks where necessary to handle potential errors and edge cases, such as (you can do a websearch for api docs https://miniflux.app/docs/api.html#endpoint-get-entries and https://pydantic.dev/docs/ai/llms.txt):
   - Handling API errors and rate limits
@@ -32,6 +35,7 @@
 
 - Implement more LLM models provider
 - Add additional filtering options, such as keywords, add more articles but as additional entries which only contain the title and link without the summary (or a one sentence summary) at the end.
+- Some type of critera and rules for articles to be set to read if they got not picked in the digest, so next time they will excluded
 
 ### Out of scope for now but maybe in the future:
 

@@ -1,12 +1,18 @@
-# minizen
-
-<p align="center">A quieter way to stay informed</p>
+<h1 align="center"><p align="center">
+  <span style="font-size: 80px; font-weight: bold; color: #FFA500;">minizen</span>
+</p></h1>
+<p align="center">A quieter way to stay informed.</p>
 <p align="center">
   <a href="https://hieudao-code.github.io/minizen/">Documentation</a> | <a href="https://hieudao-code.github.io/minizen/getting_started/">Getting Started</a> | <a href="https://hieudao-code.github.io/minizen/configuration/">Configuration</a>
 </p>
 
+## About
+
 **minizen** fetches your unread RSS articles from [Miniflux](https://miniflux.app),
 uses AI to curate and summarise the most interesting ones, and emails you a clean daily digest.
+
+
+### Features
 
 - **Curated, not firehosed** — the AI picks your top N articles and writes a cohesive
   narrative, not a bullet dump
