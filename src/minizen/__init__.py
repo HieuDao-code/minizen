@@ -12,7 +12,7 @@ from minizen.core import run_pipeline
 from minizen.providers.email import EmailProvider
 from minizen.providers.rss import Article, MinifluxProvider
 
-__version__ = "0.0.0"
+__version__ = "0.1.0"
 
 __all__ = [
     "AIConfig",
