@@ -18,6 +18,9 @@ Home = "index.md"
 "How It Works" = "how_it_works.md"
 
 [[project.nav]]
+Configuration = "configuration.md"
+
+[[project.nav]]
 Changelog = "changelog.md"
 
 # ---------------------------------------------------------------------------
