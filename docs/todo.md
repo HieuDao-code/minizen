@@ -19,6 +19,7 @@
   - Handling sensitive information, such as API keys and email credentials, securely and not hardcoding them in the codebase
   - Implementing proper authentication and authorization mechanisms for accessing the tool and its features
   - Document in a security.md file with considerations
+- UX: try out different color palettes
 
 ### Short-term:
 

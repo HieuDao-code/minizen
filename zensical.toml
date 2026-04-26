@@ -58,8 +58,13 @@ scheme = "slate"
 toggle.icon = "material/brightness-4"
 toggle.name = "Switch to system preference"
 
-[project.extra]
-extra_javascript = ["https://unpkg.com/mermaid@11/dist/mermaid.min.js"]
+[[project.extra.social]]
+icon = "fontawesome/brands/github"
+link = "https://github.com/HieuDao-Code/minizen"
+
+[[project.extra.social]]
+icon = "fontawesome/brands/python"
+link = "https://pypi.org/project/minizen"
 
 # ---------------------------------------------------------------------------
 # Extensions
