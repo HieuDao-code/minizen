@@ -15,6 +15,12 @@
 ## Installation
 
 ```bash
+pip install minizen
+```
+
+Or with `uv`:
+
+```bash
 uv tool install minizen
 ```
 
@@ -30,16 +36,16 @@ minizen setup
 
 You will be prompted for:
 
-| Prompt                 | Where to find it                                                                                       |
-| ---------------------- | ------------------------------------------------------------------------------------------------------ |
-| **Miniflux API key**   | Miniflux → Settings → API Keys → Create a new API key                                                  |
-| **AI provider API key** | See [Configuration reference](configuration.md) for supported providers                               |
-| **SMTP host**          | Your SMTP server hostname (e.g. `smtp.gmail.com`)                                                      |
-| **SMTP port**          | SMTP port — use `587` for STARTTLS (works with most providers)                                         |
-| **From email address** | The address minizen sends from                                                                         |
-| **To email address**   | Where you want to receive digests                                                                      |
-| **Email username**     | Your SMTP login username (often your email address)                                                    |
-| **Email password**     | Your SMTP password or app password (see your provider's docs)                                          |
+| Prompt                  | Where to find it                                                        |
+| ----------------------- | ----------------------------------------------------------------------- |
+| **Miniflux API key**    | Miniflux → Settings → API Keys → Create a new API key                   |
+| **AI provider API key** | See [Configuration reference](configuration.md) for supported providers |
+| **SMTP host**           | Your SMTP server hostname (e.g. `smtp.gmail.com`)                       |
+| **SMTP port**           | SMTP port — use `587` for STARTTLS (works with most providers)          |
+| **From email address**  | The address minizen sends from                                          |
+| **To email address**    | Where you want to receive digests                                       |
+| **Email username**      | Your SMTP login username (often your email address)                     |
+| **Email password**      | Your SMTP password or app password (see your provider's docs)           |
 
 ### Email provider setup
 

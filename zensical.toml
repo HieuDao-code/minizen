@@ -12,7 +12,7 @@ repo_url = "https://github.com/HieuDao-Code/minizen"
 Home = "index.md"
 
 [[project.nav]]
-"Getting Started" = "getting-started.md"
+"Getting Started" = "getting_started.md"
 
 [[project.nav]]
 "How It Works" = "how_it_works.md"
@@ -24,7 +24,7 @@ Configuration = "configuration.md"
 FAQ = "faq.md"
 
 [[project.nav]]
-"AI Disclaimer" = "ai-disclaimer.md"
+"AI Disclaimer" = "ai_disclaimer.md"
 
 [[project.nav]]
 Changelog = "changelog.md"
@@ -76,7 +76,7 @@ pygments_lang_class = true
 [project.markdown_extensions.pymdownx.snippets]
 [project.markdown_extensions.pymdownx.superfences]
 custom_fences = [
-  {name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format"},
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
 ]
 
 [project.markdown_extensions.pymdownx.emoji]

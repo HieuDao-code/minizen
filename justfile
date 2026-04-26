@@ -25,7 +25,7 @@ dev:
 # Show docs
 [group('Project')]
 docs:
-    zensical serve
+    zensical serve --open
 
 # Format code
 [group('Project')]

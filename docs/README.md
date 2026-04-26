@@ -20,6 +20,6 @@ minizen digest preview   # preview today's digest in your terminal
 minizen run              # fetch → summarise → send
 ```
 
-→ [Getting Started](https://hieudao-code.github.io/minizen/getting-started/) for full setup instructions
+→ [Getting Started](getting_started.md) for full setup instructions
 
-→ [How It Works](https://hieudao-code.github.io/minizen/how_it_works/) for the architecture
+→ [How It Works](how_it_works.md) for the architecture
