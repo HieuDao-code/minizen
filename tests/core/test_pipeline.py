@@ -1,4 +1,6 @@
+import json
 from datetime import UTC, date, datetime
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
@@ -137,3 +139,57 @@ def test_pipeline_does_not_mark_read_when_email_fails(mocker: MockerFixture) -> 
     with pytest.raises(OSError, match="SMTP error"):
         run_pipeline(settings=settings)
     mock_rss.mark_as_read.assert_not_called()
+
+
+def test_pipeline_sends_email_with_fixture_data(mocker: MockerFixture) -> None:
+    # arrange
+    fixtures = Path(__file__).parents[1] / "fixtures"
+    raw = json.loads((fixtures / "miniflux_response.json").read_text())
+    digest_markdown = (fixtures / "digest_result.md").read_text()
+
+    articles = [
+        Article(
+            id=entry["id"],
+            title=entry["title"],
+            url=entry["url"],
+            content=entry["content"],
+            feed_name=entry["feed"]["title"],
+            published_at=datetime.fromisoformat(
+                entry["published_at"].replace("Z", "+00:00")
+            ),
+        )
+        for entry in raw["entries"]
+    ]
+    article_ids = [a.id for a in articles]
+
+    mock_rss = MagicMock()
+    mock_rss.fetch_unread.return_value = articles
+    mock_agent = MagicMock()
+    mock_agent.run.return_value = MagicMock(
+        markdown=digest_markdown,
+        articles_used=article_ids,
+    )
+    mock_email = MagicMock()
+
+    mocker.patch("minizen.core.pipeline.MinifluxProvider", return_value=mock_rss)
+    mocker.patch("minizen.core.pipeline.DigestAgent", return_value=mock_agent)
+    mocker.patch("minizen.core.pipeline.EmailProvider", return_value=mock_email)
+    from minizen.providers.email import template as email_template
+
+    mocker.patch(
+        "minizen.core.pipeline.render_email",
+        wraps=email_template.render_email,
+    )
+    settings = _make_settings()
+
+    # act
+    run_pipeline(settings=settings)
+
+    # assert
+    today = date.today().strftime("%B %-d, %Y")
+    mock_email.send.assert_called_once()
+    call_kwargs = mock_email.send.call_args.kwargs
+    assert call_kwargs["subject"] == f"Your Daily Zen — {today}"
+    assert "Rust" in call_kwargs["html"]
+    assert "Webb" in call_kwargs["html"]
+    mock_rss.mark_as_read.assert_called_once_with(article_ids=article_ids)
