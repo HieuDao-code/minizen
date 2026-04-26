@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "minizen"
-version = "0.1.0"
+version = "0.0.0"
 description = "A quieter way to stay informed"
 readme = "README.md"
 license = "MIT"
@@ -13,34 +13,56 @@ requires-python = ">=3.14"
 authors = [
   { name = "Hieu Dao", email = "106801182+HieuDao-code@users.noreply.github.com" },
 ]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Intended Audience :: End Users/Desktop",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Internet :: WWW/HTTP :: Dynamic Content :: News/Diary",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dependencies = [
-  "anthropic>=0.94.1,<1.0.0",
   "miniflux>=1.1.6,<2.0.0",
+  "mistune>=3.2.0,<4.0.0",
   "pydantic>=2.13.1,<3.0.0",
+  "pydantic-ai-slim[anthropic,openai]>=1.84.0,<2.0.0",
+  "python-dotenv>=1.1.0,<2.0.0",
+  "tomli-w>=1.0.0,<2.0.0",
+  "typer>=0.24.1,<0.25.0",
 ]
 
 [project.urls]
 Homepage = "https://github.com/hieudao-code/minizen"
+Documentation = "https://hieudao-code.github.io/minizen/"
+Repository = "https://github.com/hieudao-code/minizen"
 Issues = "https://github.com/hieudao-code/minizen/issues"
+Changelog = "https://github.com/hieudao-code/minizen/releases"
+
+[project.scripts]
+minizen = "minizen.main:app"
+mz = "minizen.main:app"
 
 [dependency-groups]
 dev = [
   { include-group = "docs" },
   { include-group = "lint" },
+  { include-group = "miscellaneous" },
+  { include-group = "release" },
+  { include-group = "security" },
   { include-group = "test" },
+  { include-group = "typing" },
 ]
-docs = ["zensical>=0.0.32,<1.0.0"]
-lint = [
-  "commitizen>=4.13.10,<5.0.0",
-  "ruff>=0.15.10,<1.0.0",
-  "ty>=0.0.29,<1.0.0",
-  "zizmor>=1.24.1,<2.0.0",
-]
-test = [
-  "pytest>=9.0.3,<10.0.0",
-  "pytest-cov>=7.1.0,<8.0.0",
-  "pytest-mock>=3.15.1,<4.0.0",
-]
+docs = ["zensical==0.0.32"]
+lint = ["ruff==0.15.10"]
+miscellaneous = ["prek==0.3.9"]
+release = ["commitizen==4.13.10"]
+security = ["zizmor==1.24.1"]
+test = ["pytest==9.0.3", "pytest-cov==7.1.0", "pytest-mock==3.15.1"]
+typing = ["ty==0.0.29"]
 
 [tool.uv]
 exclude-newer = "1 week"
@@ -51,8 +73,8 @@ tag_format = "$version"
 version_scheme = "pep440"
 version_provider = "uv"
 update_changelog_on_bump = true
-version_files = ["src/minizen/core/__init__.py"]
 breaking_change_exclamation_in_title = true
+version_files = ["src/minizen/__init__.py"]
 major_version_zero = true
 
 [tool.ruff]
@@ -87,8 +109,14 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "**/tests/**" = [
-  "S101", # assert
+  "PLR2004", # magic-value-comparison
+  "PLR0913", # too-many-arguments
+  "S101",    # assert
+  "S105",    # hardcoded-password-string
+  "S106",    # hardcoded-password-func-arg
 ]
+"src/minizen/cli/commands/setup.py" = ["PLR0913"]
+"src/minizen/providers/email/template.py" = ["E501"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["minizen"]
@@ -98,49 +126,42 @@ combine-as-imports = true
 [tool.ruff.format]
 docstring-code-format = true
 
+[tool.coverage.run]
+branch = true
+source = ["minizen"]
+omit = ["*/minizen/main.py"]
+
+[tool.pytest.ini_options]
+addopts = "--cov --cov-report=term-missing --cov-fail-under=100"
+testpaths = ["tests"]
+
 [tool.tox]
-env_list = ["py314", "lint"]
+env_list = ["py314", "commit-msg", "lint", "security", "typing"]
 
 [tool.tox.env_run_base]
 description = "Run tests"
 dependency_groups = ["dev"]
-commands = [
-  [
-    "pytest",
-    "--cov=minizen",
-    "--cov-report=term-missing",
-    "--cov-fail-under=100",
-  ],
-]
+commands = [["pytest"]]
+
+[tool.tox.env.commit-msg]
+description = "Run commitizen checks"
+skip_install = true
+dependency_groups = ["release"]
+commands = [["cz", "check", "--rev-range", "origin/main..HEAD"]]
 
 [tool.tox.env.lint]
 description = "Run linters"
 skip_install = true
 dependency_groups = ["lint"]
-commands = [
-  [
-    "ruff",
-    "check",
-  ],
-  [
-    "ruff",
-    "format",
-    "--check",
-  ],
-  [
-    "ty",
-    "check",
-  ],
-  [
-    "zizmor",
-    '.',
-    "--persona",
-    "auditor",
-  ],
-  [
-    "cz",
-    "check",
-    "--rev-range",
-    "origin/main..HEAD",
-  ],
-]
+commands = [["ruff", "check"], ["ruff", "format", "--check"]]
+
+[tool.tox.env.security]
+description = "Run security checks"
+skip_install = true
+dependency_groups = ["security"]
+commands = [["uv", "audit"], ["zizmor", '.', "--persona", "auditor"]]
+
+[tool.tox.env.typing]
+description = "Run type checks"
+dependency_groups = ["test", "typing"]
+commands = [["ty", "check"]]

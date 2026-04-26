@@ -1,0 +1,65 @@
+name: Daily Digest
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+      timezone: "CET"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  send-digest:
+    name: Send Daily Digest
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    environment:
+      name: minizen
+
+    env:
+      MINIFLUX_API_KEY: ${{ secrets.MINIFLUX_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      MINIZEN_EMAIL_USERNAME: ${{ secrets.MINIZEN_EMAIL_USERNAME }}
+      MINIZEN_EMAIL_PASSWORD: ${{ secrets.MINIZEN_EMAIL_PASSWORD }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          enable-cache: true
+          version: 0.11.7
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Setup config
+        env:
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          SMTP_HOST: ${{ vars.SMTP_HOST || 'smtp.gmail.com' }}
+          SMTP_PORT: ${{ vars.SMTP_PORT || '587' }}
+          AI_MODEL: ${{ vars.AI_MODEL || 'anthropic:claude-haiku-4-5' }}
+          AI_TOP_N: ${{ vars.AI_TOP_N || '5' }}
+        run: |
+          uv run minizen setup --no-interactive \
+            --from-addr "$EMAIL_FROM" \
+            --to-addr "$EMAIL_TO" \
+            --smtp-host "$SMTP_HOST" \
+            --smtp-port "$SMTP_PORT" \
+            --model "$AI_MODEL" \
+            --top-n "$AI_TOP_N"
+
+      - name: Run digest
+        run: uv run minizen run

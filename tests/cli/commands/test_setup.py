@@ -1,0 +1,270 @@
+import tomllib
+from pathlib import Path
+
+import pytest
+from pytest_mock import MockerFixture
+from typer.testing import CliRunner
+
+from minizen.cli import app
+
+_INTERACTIVE_INPUT = (
+    "miniflux-api-key\n"
+    "anthropic-api-key\n"
+    "\n"  # smtp host (default)
+    "\n"  # smtp port (default)
+    "from@example.com\n"
+    "to@example.com\n"
+    "email-user\n"
+    "email-password\n"
+    "\n"  # model (default)
+    "\n"  # top_n (default)
+)
+
+
+def test_setup_creates_config_file(tmp_path: Path) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(
+        app,
+        ["setup", "--config", str(config_path)],
+        input=_INTERACTIVE_INPUT,
+    )
+
+    # assert
+    assert result.exit_code == 0
+    assert config_path.exists()
+
+
+def test_setup_writes_correct_toml(tmp_path: Path) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    runner = CliRunner()
+
+    # act
+    runner.invoke(
+        app,
+        ["setup", "--config", str(config_path)],
+        input=_INTERACTIVE_INPUT,
+    )
+
+    # assert
+    with open(config_path, "rb") as f:
+        data = tomllib.load(f)
+    assert data["email"]["smtp_host"] == "smtp.gmail.com"
+    assert data["email"]["smtp_port"] == 587
+    assert data["email"]["from_addr"] == "from@example.com"
+    assert data["email"]["to_addr"] == "to@example.com"
+    assert data["ai"]["model"] == "anthropic:claude-haiku-4-5"
+    assert data["ai"]["top_n"] == 5
+
+
+def test_setup_accepts_custom_ai_values(tmp_path: Path) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    runner = CliRunner()
+
+    # act
+    runner.invoke(
+        app,
+        ["setup", "--config", str(config_path)],
+        input=(
+            "miniflux-api-key\n"
+            "anthropic-api-key\n"
+            "\n"
+            "\n"
+            "from@example.com\n"
+            "to@example.com\n"
+            "email-user\n"
+            "email-password\n"
+            "openai:gpt-4o\n"
+            "10\n"
+        ),
+    )
+
+    # assert
+    with open(config_path, "rb") as f:
+        data = tomllib.load(f)
+    assert data["ai"]["model"] == "openai:gpt-4o"
+    assert data["ai"]["top_n"] == 10
+
+
+def test_setup_writes_env_file(tmp_path: Path) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    runner = CliRunner()
+
+    # act
+    runner.invoke(
+        app,
+        ["setup", "--config", str(config_path)],
+        input=_INTERACTIVE_INPUT,
+    )
+
+    # assert
+    env_path = tmp_path / ".env"
+    assert env_path.exists()
+    content = env_path.read_text()
+    assert "MINIFLUX_API_KEY=miniflux-api-key" in content
+    assert "ANTHROPIC_API_KEY=anthropic-api-key" in content
+    assert "MINIZEN_EMAIL_USERNAME=email-user" in content
+    assert "MINIZEN_EMAIL_PASSWORD=email-password" in content
+
+
+def test_setup_creates_parent_directories(tmp_path: Path) -> None:
+    # arrange
+    config_path = tmp_path / "nested" / "dir" / "config.toml"
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(
+        app,
+        ["setup", "--config", str(config_path)],
+        input=_INTERACTIVE_INPUT,
+    )
+
+    # assert
+    assert result.exit_code == 0
+    assert config_path.exists()
+
+
+def test_setup_non_interactive_writes_config(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    monkeypatch.setenv("MINIFLUX_API_KEY", "mf-key")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "ant-key")
+    monkeypatch.setenv("MINIZEN_EMAIL_USERNAME", "user")
+    monkeypatch.setenv("MINIZEN_EMAIL_PASSWORD", "pass")
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(
+        app,
+        [
+            "setup",
+            "--no-interactive",
+            "--config",
+            str(config_path),
+            "--from-addr",
+            "from@example.com",
+            "--to-addr",
+            "to@example.com",
+        ],
+    )
+
+    # assert
+    assert result.exit_code == 0
+    with open(config_path, "rb") as f:
+        data = tomllib.load(f)
+    assert data["email"]["from_addr"] == "from@example.com"
+    assert data["email"]["to_addr"] == "to@example.com"
+    assert data["email"]["smtp_host"] == "smtp.gmail.com"
+    assert data["ai"]["model"] == "anthropic:claude-haiku-4-5"
+
+
+def test_setup_non_interactive_fails_without_from_addr(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    monkeypatch.setenv("MINIFLUX_API_KEY", "mf-key")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "ant-key")
+    monkeypatch.setenv("MINIZEN_EMAIL_USERNAME", "user")
+    monkeypatch.setenv("MINIZEN_EMAIL_PASSWORD", "pass")
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(
+        app,
+        [
+            "setup",
+            "--no-interactive",
+            "--config",
+            str(config_path),
+            "--to-addr",
+            "to@example.com",
+        ],
+    )
+
+    # assert
+    assert result.exit_code != 0
+
+
+def test_setup_non_interactive_fails_without_to_addr(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    monkeypatch.setenv("MINIFLUX_API_KEY", "mf-key")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "ant-key")
+    monkeypatch.setenv("MINIZEN_EMAIL_USERNAME", "user")
+    monkeypatch.setenv("MINIZEN_EMAIL_PASSWORD", "pass")
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(
+        app,
+        [
+            "setup",
+            "--no-interactive",
+            "--config",
+            str(config_path),
+            "--from-addr",
+            "from@example.com",
+        ],
+    )
+
+    # assert
+    assert result.exit_code != 0
+
+
+def test_setup_non_interactive_fails_when_env_missing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    monkeypatch.delenv("MINIFLUX_API_KEY", raising=False)
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("MINIZEN_EMAIL_USERNAME", raising=False)
+    monkeypatch.delenv("MINIZEN_EMAIL_PASSWORD", raising=False)
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(
+        app,
+        [
+            "setup",
+            "--no-interactive",
+            "--config",
+            str(config_path),
+            "--from-addr",
+            "from@example.com",
+            "--to-addr",
+            "to@example.com",
+        ],
+    )
+
+    # assert
+    assert result.exit_code != 0
+
+
+def test_setup_uses_default_config_path(mocker: MockerFixture) -> None:
+    # arrange
+    mock_write = mocker.patch("minizen.cli.commands.setup.Path.write_bytes")
+    mocker.patch("minizen.cli.commands.setup.Path.mkdir")
+    mocker.patch("minizen.cli.commands.setup.Path.write_text")
+    runner = CliRunner()
+
+    # act
+    runner.invoke(
+        app,
+        ["setup"],
+        input=_INTERACTIVE_INPUT,
+    )
+
+    # assert
+    mock_write.assert_called_once()

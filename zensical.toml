@@ -5,6 +5,33 @@ site_description = "A quieter way to stay informed"
 site_author = "Hieu Dao"
 repo_url = "https://github.com/HieuDao-Code/minizen"
 
+# ---------------------------------------------------------------------------
+# Navigation
+# ---------------------------------------------------------------------------
+[[project.nav]]
+Home = "index.md"
+
+[[project.nav]]
+"Getting Started" = "getting_started.md"
+
+[[project.nav]]
+"How It Works" = "how_it_works.md"
+
+[[project.nav]]
+Configuration = "configuration.md"
+
+[[project.nav]]
+FAQ = "faq.md"
+
+[[project.nav]]
+"AI Disclaimer" = "ai_disclaimer.md"
+
+[[project.nav]]
+Changelog = "changelog.md"
+
+# ---------------------------------------------------------------------------
+# Theme
+# ---------------------------------------------------------------------------
 [project.theme]
 features = ["content.code.copy", "content.tooltips"]
 
@@ -31,6 +58,12 @@ scheme = "slate"
 toggle.icon = "material/brightness-4"
 toggle.name = "Switch to system preference"
 
+[project.extra]
+extra_javascript = ["https://unpkg.com/mermaid@11/dist/mermaid.min.js"]
+
+# ---------------------------------------------------------------------------
+# Extensions
+# ---------------------------------------------------------------------------
 [project.markdown_extensions.abbr]
 [project.markdown_extensions.attr_list]
 
@@ -42,6 +75,9 @@ pygments_lang_class = true
 [project.markdown_extensions.pymdownx.inlinehilite]
 [project.markdown_extensions.pymdownx.snippets]
 [project.markdown_extensions.pymdownx.superfences]
+custom_fences = [
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
+]
 
 [project.markdown_extensions.pymdownx.emoji]
 emoji_index = "zensical.extensions.emoji.twemoji"
