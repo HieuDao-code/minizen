@@ -21,3 +21,10 @@ hooks = [{ id = "zizmor", args = ["--persona", "auditor"] }]
 repo = "https://github.com/commitizen-tools/commitizen"
 rev = "b5d5040f7980a5d2bce320d2a1ea1e04ac54b00c"        # frozen: v4.13.10
 hooks = [{ id = "commitizen", stages = ["pre-push"] }]
+
+# ty TODO: https://github.com/astral-sh/ty/issues/269
+[[repos]]
+repo = "local"
+hooks = [
+  { id = "local-ty", name = "ty check", entry = "ty check", language = "python", pass_filenames = false },
+]

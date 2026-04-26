@@ -10,6 +10,27 @@ _DEFAULT_MODEL = "anthropic:claude-haiku-4-5"
 _DEFAULT_TOP_N = 5
 
 
+def _provider_key_info(model: str) -> tuple[str, str]:
+    """Return the prompt label and env var name for the AI provider API key.
+
+    Args:
+        model: pydantic-ai model identifier (e.g. ``anthropic:claude-haiku-4-5``).
+
+    Returns:
+        A tuple of (prompt_label, env_var_name).
+
+    Raises:
+        typer.Exit: If the model prefix is not a recognised provider.
+    """
+    if model.startswith("anthropic:"):
+        return "Anthropic API key", "ANTHROPIC_API_KEY"
+    if model.startswith("openai:"):
+        return "OpenAI API key", "OPENAI_API_KEY"
+    prefix = model.split(":")[0] if ":" in model else model
+    typer.echo(f"Error: Unknown model provider: {prefix}")
+    raise typer.Exit(code=1)
+
+
 def setup(
     config: Annotated[
         Path,
@@ -97,9 +118,11 @@ def _setup_non_interactive(
         typer.echo("Error: --to-addr is required in non-interactive mode.")
         raise typer.Exit(code=1)
 
+    _, ai_key_var = _provider_key_info(model)
+
     for var in (
         "MINIFLUX_API_KEY",
-        "ANTHROPIC_API_KEY",
+        ai_key_var,
         "MINIZEN_EMAIL_USERNAME",
         "MINIZEN_EMAIL_PASSWORD",
     ):
@@ -143,8 +166,10 @@ def _setup_interactive(
     typer.echo("minizen setup wizard")
     typer.echo("--------------------")
 
-    miniflux_api_key = typer.prompt("Miniflux API key", hide_input=True)
-    anthropic_api_key = typer.prompt("Anthropic API key", hide_input=True)
+    resolved_model = typer.prompt("AI model", default=model or _DEFAULT_MODEL)
+    resolved_top_n = typer.prompt(
+        "Number of top articles", default=top_n or _DEFAULT_TOP_N
+    )
     resolved_smtp_host = typer.prompt(
         "SMTP host", default=smtp_host or "smtp.gmail.com"
     )
@@ -153,10 +178,10 @@ def _setup_interactive(
     resolved_to_addr = typer.prompt("To email address", default=to_addr or "")
     email_username = typer.prompt("Email username (SMTP login)")
     email_password = typer.prompt("Email password (App Password)", hide_input=True)
-    resolved_model = typer.prompt("AI model", default=model or _DEFAULT_MODEL)
-    resolved_top_n = typer.prompt(
-        "Number of top articles", default=top_n or _DEFAULT_TOP_N
-    )
+    miniflux_api_key = typer.prompt("Miniflux API key", hide_input=True)
+
+    key_label, key_env_var = _provider_key_info(resolved_model)
+    ai_api_key = typer.prompt(key_label, hide_input=True)
 
     _write_config(
         config=config,
@@ -171,10 +196,11 @@ def _setup_interactive(
     env_path = config.parent / ".env"
     env_path.write_text(
         f"MINIFLUX_API_KEY={miniflux_api_key}\n"
-        f"ANTHROPIC_API_KEY={anthropic_api_key}\n"
+        f"{key_env_var}={ai_api_key}\n"
         f"MINIZEN_EMAIL_USERNAME={email_username}\n"
         f"MINIZEN_EMAIL_PASSWORD={email_password}\n"
     )
+    env_path.chmod(0o600)
 
     typer.echo(f"\nConfig written to:      {config}")
     typer.echo(f"Credentials written to: {env_path}")
@@ -202,6 +228,9 @@ def _write_config(
         top_n: Number of top articles to include in the digest.
     """
     data = {
+        "miniflux": {
+            "url": "https://reader.miniflux.app",
+        },
         "email": {
             "smtp_host": smtp_host,
             "smtp_port": smtp_port,

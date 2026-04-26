@@ -105,3 +105,32 @@ def test_load_settings_raises_when_config_file_missing(tmp_path: Path) -> None:
     # act / assert
     with pytest.raises(FileNotFoundError):
         load_settings(config_path=tmp_path / "missing.toml")
+
+
+def test_load_settings_uses_default_miniflux_url_when_section_absent(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # arrange
+    config_file = tmp_path / "config.toml"
+    _write_config(
+        config_file,
+        {
+            "email": {
+                "smtp_host": "smtp.example.com",
+                "smtp_port": 587,
+                "from_addr": "from@example.com",
+                "to_addr": "to@example.com",
+            },
+        },
+    )
+    monkeypatch.setenv("MINIFLUX_API_KEY", "mf-key")
+    monkeypatch.setenv("MINIZEN_EMAIL_USERNAME", "email-user")
+    monkeypatch.setenv("MINIZEN_EMAIL_PASSWORD", "email-pass")
+
+    # act
+    settings = load_settings(config_path=config_file)
+
+    # assert
+    assert settings.miniflux.url == "https://reader.miniflux.app"
+    assert settings.miniflux.api_key == "mf-key"
