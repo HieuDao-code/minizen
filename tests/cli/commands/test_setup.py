@@ -374,6 +374,23 @@ def test_setup_non_interactive_fails_with_unknown_model_provider(
     assert "Unknown model provider" in result.output
 
 
+def test_setup_sets_env_file_permissions(tmp_path: Path) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    runner = CliRunner()
+
+    # act
+    runner.invoke(
+        app,
+        ["setup", "--config", str(config_path)],
+        input=_INTERACTIVE_INPUT,
+    )
+
+    # assert
+    env_path = tmp_path / ".env"
+    assert env_path.stat().st_mode & 0o777 == 0o600
+
+
 def test_setup_writes_miniflux_section(tmp_path: Path) -> None:
     # arrange
     config_path = tmp_path / "config.toml"

@@ -200,6 +200,7 @@ def _setup_interactive(
         f"MINIZEN_EMAIL_USERNAME={email_username}\n"
         f"MINIZEN_EMAIL_PASSWORD={email_password}\n"
     )
+    env_path.chmod(0o600)
 
     typer.echo(f"\nConfig written to:      {config}")
     typer.echo(f"Credentials written to: {env_path}")
