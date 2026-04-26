@@ -46,8 +46,8 @@ jobs:
 
       - name: Setup config
         env:
-          EMAIL_FROM: ${{ vars.EMAIL_FROM }}
-          EMAIL_TO: ${{ vars.EMAIL_TO }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
           SMTP_HOST: ${{ vars.SMTP_HOST || 'smtp.gmail.com' }}
           SMTP_PORT: ${{ vars.SMTP_PORT || '587' }}
           AI_MODEL: ${{ vars.AI_MODEL || 'anthropic:claude-haiku-4-5' }}
