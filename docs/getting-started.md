@@ -1,24 +1,18 @@
 # Getting Started with minizen
 
-**minizen** fetches your unread RSS articles from Miniflux, uses Claude AI to curate and summarise the most interesting ones, and emails you a daily digest.
+**minizen** fetches your unread RSS articles from Miniflux, uses AI to curate and summarise the most interesting ones, and emails you a daily digest.
 
 ---
 
 ## Prerequisites
 
 - A [Miniflux](https://miniflux.app) account (cloud at [reader.miniflux.app](https://reader.miniflux.app) or self-hosted)
-- An [Anthropic API key](https://console.anthropic.com)
+- An AI provider API key (see [Configuration reference](configuration.md) for supported providers)
 - An SMTP-capable email account (Gmail is the most common — see below)
 
 ---
 
 ## Installation
-
-```bash
-pip install minizen
-```
-
-Or with `uv`:
 
 ```bash
 uv tool install minizen
@@ -39,7 +33,7 @@ You will be prompted for:
 | Prompt                 | Where to find it                                                                                       |
 | ---------------------- | ------------------------------------------------------------------------------------------------------ |
 | **Miniflux API key**   | Miniflux → Settings → API Keys → Create a new API key                                                  |
-| **Anthropic API key**  | [console.anthropic.com](https://console.anthropic.com) → API Keys                                      |
+| **AI provider API key** | See [Configuration reference](configuration.md) for supported providers                               |
 | **SMTP host**          | Your SMTP server hostname (e.g. `smtp.gmail.com`)                                                      |
 | **SMTP port**          | SMTP port — use `587` for STARTTLS (works with most providers)                                         |
 | **From email address** | The address minizen sends from                                                                         |
