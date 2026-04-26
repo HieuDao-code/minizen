@@ -202,6 +202,9 @@ def _write_config(
         top_n: Number of top articles to include in the digest.
     """
     data = {
+        "miniflux": {
+            "url": "https://reader.miniflux.app",
+        },
         "email": {
             "smtp_host": smtp_host,
             "smtp_port": smtp_port,

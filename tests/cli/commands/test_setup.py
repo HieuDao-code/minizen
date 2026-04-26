@@ -252,6 +252,24 @@ def test_setup_non_interactive_fails_when_env_missing(
     assert result.exit_code != 0
 
 
+def test_setup_writes_miniflux_section(tmp_path: Path) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    runner = CliRunner()
+
+    # act
+    runner.invoke(
+        app,
+        ["setup", "--config", str(config_path)],
+        input=_INTERACTIVE_INPUT,
+    )
+
+    # assert
+    with open(config_path, "rb") as f:
+        data = tomllib.load(f)
+    assert data["miniflux"]["url"] == "https://reader.miniflux.app"
+
+
 def test_setup_uses_default_config_path(mocker: MockerFixture) -> None:
     # arrange
     mock_write = mocker.patch("minizen.cli.commands.setup.Path.write_bytes")
