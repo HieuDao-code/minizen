@@ -186,12 +186,11 @@ def test_pipeline_sends_email_with_fixture_data(mocker: MockerFixture) -> None:
 
     # assert
     today = date.today().strftime("%B %-d, %Y")
-    call_kwargs = mock_email.send.call_args.kwargs
-    assert mock_email.send.call_count == 1
-    assert call_kwargs["subject"] == f"Your Daily Zen — {today}"
-    assert call_kwargs["plain_text"] == digest_markdown
-    assert all(
-        kw in call_kwargs["html"]
-        for kw in ["Rust", "LLM", "Apple", "Platforms", "Webb"]
+    sent_html = mock_email.send.call_args.kwargs["html"]
+    mock_email.send.assert_called_once_with(
+        subject=f"Your Daily Zen — {today}",
+        html=sent_html,
+        plain_text=digest_markdown,
     )
+    assert all(kw in sent_html for kw in ["Rust", "LLM", "Apple", "Platforms", "Webb"])
     mock_rss.mark_as_read.assert_called_once_with(article_ids=article_ids)

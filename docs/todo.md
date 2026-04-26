@@ -6,7 +6,7 @@
   - Go over the documentation at improve it:
     - of which model we support, what keys you need (e.g. OpenAI, Anthropic)
     - be more concise about the email setup, it doesnt have to be gmail, just an SMTP server, but we can provide instructions for Gmail as its the most common one
-  - Will out the How it works section with a diagram and more details about the architecture of the tool
+  - Will out the How it works section with a diagram and more details about the architecture of the tool. For that you can use mermaid.js to create a diagram and embed it in the documentation. Make sure the zensical plugin is enabled and workinghttps://mermaid.ai/docs/
   - Add a FAQ section to the documentation to answer common questions and troubleshoot common issues
   - Add an AI Disclaimer to the documentation, to inform that this tool is powered by AI and developed with the help of AI (Claude Code)
   - Add a develop section to the documentation, which just have the packages we use and a brief description of it with a link to their documentation

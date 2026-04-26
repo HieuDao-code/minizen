@@ -103,3 +103,4 @@ def test_fetch_unread_with_fixture_data(mocker: MockerFixture) -> None:
     assert all(a.title for a in articles)
     assert all(a.url for a in articles)
     assert all(a.published_at.tzinfo is UTC for a in articles)
+    mock_client_cls.return_value.get_entries.assert_called_once_with(status=["unread"])
