@@ -21,6 +21,12 @@ Home = "index.md"
 Configuration = "configuration.md"
 
 [[project.nav]]
+FAQ = "faq.md"
+
+[[project.nav]]
+"AI Disclaimer" = "ai-disclaimer.md"
+
+[[project.nav]]
 Changelog = "changelog.md"
 
 # ---------------------------------------------------------------------------
