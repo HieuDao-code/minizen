@@ -23,12 +23,6 @@ jobs:
     environment:
       name: minizen
 
-    env:
-      MINIFLUX_API_KEY: ${{ secrets.MINIFLUX_API_KEY }}
-      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      MINIZEN_EMAIL_USERNAME: ${{ secrets.MINIZEN_EMAIL_USERNAME }}
-      MINIZEN_EMAIL_PASSWORD: ${{ secrets.MINIZEN_EMAIL_PASSWORD }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -44,22 +38,27 @@ jobs:
       - name: Install dependencies
         run: uv sync --no-dev
 
-      - name: Setup config
+      - name: Run digest
         env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          MINIFLUX_API_KEY: ${{ secrets.MINIFLUX_API_KEY }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
           SMTP_HOST: ${{ vars.SMTP_HOST || 'smtp.gmail.com' }}
           SMTP_PORT: ${{ vars.SMTP_PORT || '587' }}
+          MINIZEN_EMAIL_USERNAME: ${{ secrets.MINIZEN_EMAIL_USERNAME }}
+          MINIZEN_EMAIL_PASSWORD: ${{ secrets.MINIZEN_EMAIL_PASSWORD }}
           AI_MODEL: ${{ vars.AI_MODEL || 'anthropic:claude-haiku-4-5' }}
           AI_TOP_N: ${{ vars.AI_TOP_N || '5' }}
         run: |
-          uv run minizen setup --no-interactive \
+          uv run minizen run \
+            --miniflux-api-key "$MINIFLUX_API_KEY" \
             --from-addr "$EMAIL_FROM" \
             --to-addr "$EMAIL_TO" \
             --smtp-host "$SMTP_HOST" \
             --smtp-port "$SMTP_PORT" \
+            --email-username "$MINIZEN_EMAIL_USERNAME" \
+            --email-password "$MINIZEN_EMAIL_PASSWORD" \
             --model "$AI_MODEL" \
             --top-n "$AI_TOP_N"
-
-      - name: Run digest
-        run: uv run minizen run
