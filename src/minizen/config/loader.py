@@ -1,7 +1,4 @@
-"""Settings loader.
-
-Reads TOML config and overlays secrets from environment variables.
-"""
+"""Settings loader — reads TOML config and overlays secrets from environment."""
 
 import os
 import tomllib
