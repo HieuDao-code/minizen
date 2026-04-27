@@ -14,7 +14,7 @@ from minizen.config.defaults import (
 
 def test_default_config_path() -> None:
     # act / assert
-    assert DEFAULT_CONFIG_PATH == Path.home() / ".config" / "minizen" / "config.toml"
+    assert Path.home() / ".config" / "minizen" / "config.toml" == DEFAULT_CONFIG_PATH
 
 
 def test_default_miniflux_url() -> None:

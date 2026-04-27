@@ -5,14 +5,15 @@ from typing import Annotated, cast
 
 import typer
 
+from minizen.config.defaults import (
+    DEFAULT_CONFIG_PATH,
+    DEFAULT_MINIFLUX_URL,
+    DEFAULT_MODEL,
+    DEFAULT_TOP_N,
+)
 from minizen.config.loader import load_settings
 from minizen.config.models import AIConfig, EmailConfig, MinifluxConfig, Settings
 from minizen.core.pipeline import run_pipeline
-
-_DEFAULT_CONFIG = Path.home() / ".config" / "minizen" / "config.toml"
-_DEFAULT_MINIFLUX_URL = "https://reader.miniflux.app"
-_DEFAULT_MODEL = "anthropic:claude-haiku-4-5"
-_DEFAULT_TOP_N = 5
 
 _DRY_RUN_OPTION = Annotated[
     bool,
@@ -136,7 +137,7 @@ def _build_settings_from_flags(
 
     return Settings(
         miniflux=MinifluxConfig(
-            url=miniflux_url or _DEFAULT_MINIFLUX_URL,
+            url=miniflux_url or DEFAULT_MINIFLUX_URL,
             api_key=cast(str, miniflux_api_key),
         ),
         email=EmailConfig(
@@ -148,8 +149,8 @@ def _build_settings_from_flags(
             password=cast(str, email_password),
         ),
         ai=AIConfig(
-            model=model or _DEFAULT_MODEL,
-            top_n=top_n or _DEFAULT_TOP_N,
+            model=model or DEFAULT_MODEL,
+            top_n=top_n or DEFAULT_TOP_N,
         ),
     )
 
@@ -158,7 +159,7 @@ def run(
     config: Annotated[
         Path,
         typer.Option(help="Path to the TOML configuration file.", show_default=True),
-    ] = _DEFAULT_CONFIG,
+    ] = DEFAULT_CONFIG_PATH,
     dry_run: _DRY_RUN_OPTION = False,
     miniflux_url: Annotated[
         str | None,
