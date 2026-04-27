@@ -77,7 +77,6 @@ DEFAULT_SMTP_PORT: int = 587
 
 - **`config/models.py`** — import and use `DEFAULT_MINIFLUX_URL`, `DEFAULT_MODEL`, `DEFAULT_TOP_N` as Pydantic field defaults
 - **`config/loader.py`** — replace hardcoded fallback URL with `DEFAULT_MINIFLUX_URL`
-- **`config/__init__.py`** — re-export `defaults` module or constants as needed
 - **`cli/commands/config.py`** — replace `_DEFAULT_CONFIG` with `DEFAULT_CONFIG_PATH`; replace inline `'anthropic:claude-haiku-4-5'` and `5` in `show()` with imports
 - **`cli/commands/digest.py`** — replace `_DEFAULT_CONFIG` with `DEFAULT_CONFIG_PATH`
 - **`cli/commands/run.py`** — replace `_DEFAULT_CONFIG`, `_DEFAULT_MODEL`, `_DEFAULT_TOP_N` with imports; remove `_DEFAULT_MINIFLUX_URL` (already covered)
