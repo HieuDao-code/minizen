@@ -1,11 +1,19 @@
+"""Pydantic settings models for the minizen configuration."""
+
 from pydantic import BaseModel, Field
+
+from minizen.config.defaults import (
+    DEFAULT_MINIFLUX_URL,
+    DEFAULT_MODEL,
+    DEFAULT_TOP_N,
+)
 
 
 class MinifluxConfig(BaseModel):
     """Connection settings for the Miniflux RSS server."""
 
     url: str = Field(
-        default="https://reader.miniflux.app",
+        default=DEFAULT_MINIFLUX_URL,
         description="Base URL of the Miniflux instance (without /v1/ suffix).",
     )
     api_key: str = Field(description="Miniflux API key for authentication.")
@@ -26,11 +34,11 @@ class AIConfig(BaseModel):
     """AI model selection and digest size settings."""
 
     model: str = Field(
-        default="anthropic:claude-haiku-4-5",
+        default=DEFAULT_MODEL,
         description="pydantic-ai model identifier (e.g. ``anthropic:claude-haiku-4-5``).",  # noqa: E501
     )
     top_n: int = Field(
-        default=5,
+        default=DEFAULT_TOP_N,
         description="Maximum number of articles to include in the digest.",
     )
 

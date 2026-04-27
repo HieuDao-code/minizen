@@ -1,3 +1,5 @@
+"""Shared CLI state and logging configuration."""
+
 import logging
 
 

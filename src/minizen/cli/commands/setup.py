@@ -1,3 +1,5 @@
+"""Interactive and non-interactive setup wizard for minizen."""
+
 import os
 from pathlib import Path
 from typing import Annotated
@@ -5,9 +7,14 @@ from typing import Annotated
 import tomli_w
 import typer
 
-_DEFAULT_CONFIG = Path.home() / ".config" / "minizen" / "config.toml"
-_DEFAULT_MODEL = "anthropic:claude-haiku-4-5"
-_DEFAULT_TOP_N = 5
+from minizen.config.defaults import (
+    DEFAULT_CONFIG_PATH,
+    DEFAULT_MINIFLUX_URL,
+    DEFAULT_MODEL,
+    DEFAULT_SMTP_HOST,
+    DEFAULT_SMTP_PORT,
+    DEFAULT_TOP_N,
+)
 
 
 def _provider_key_info(model: str) -> tuple[str, str]:
@@ -35,7 +42,7 @@ def setup(
     config: Annotated[
         Path,
         typer.Option(help="Path to write the TOML configuration file."),
-    ] = _DEFAULT_CONFIG,
+    ] = DEFAULT_CONFIG_PATH,
     no_interactive: Annotated[
         bool,
         typer.Option(
@@ -73,10 +80,10 @@ def setup(
             config=config,
             from_addr=from_addr,
             to_addr=to_addr,
-            smtp_host=smtp_host or "smtp.gmail.com",
-            smtp_port=smtp_port or 587,
-            model=model or _DEFAULT_MODEL,
-            top_n=top_n or _DEFAULT_TOP_N,
+            smtp_host=smtp_host or DEFAULT_SMTP_HOST,
+            smtp_port=smtp_port or DEFAULT_SMTP_PORT,
+            model=model or DEFAULT_MODEL,
+            top_n=top_n or DEFAULT_TOP_N,
         )
     else:
         _setup_interactive(
@@ -166,14 +173,16 @@ def _setup_interactive(
     typer.echo("minizen setup wizard")
     typer.echo("--------------------")
 
-    resolved_model = typer.prompt("AI model", default=model or _DEFAULT_MODEL)
+    resolved_model = typer.prompt("AI model", default=model or DEFAULT_MODEL)
     resolved_top_n = typer.prompt(
-        "Number of top articles", default=top_n or _DEFAULT_TOP_N
+        "Number of top articles", default=top_n or DEFAULT_TOP_N
     )
     resolved_smtp_host = typer.prompt(
-        "SMTP host", default=smtp_host or "smtp.gmail.com"
+        "SMTP host", default=smtp_host or DEFAULT_SMTP_HOST
     )
-    resolved_smtp_port = typer.prompt("SMTP port", default=smtp_port or 587)
+    resolved_smtp_port = typer.prompt(
+        "SMTP port", default=smtp_port or DEFAULT_SMTP_PORT
+    )
     resolved_from_addr = typer.prompt("From email address", default=from_addr or "")
     resolved_to_addr = typer.prompt("To email address", default=to_addr or "")
     email_username = typer.prompt("Email username (SMTP login)")
@@ -229,7 +238,7 @@ def _write_config(
     """
     data = {
         "miniflux": {
-            "url": "https://reader.miniflux.app",
+            "url": DEFAULT_MINIFLUX_URL,
         },
         "email": {
             "smtp_host": smtp_host,

@@ -1,3 +1,5 @@
+"""CLI commands to preview or test the digest without sending."""
+
 from datetime import date
 from pathlib import Path
 from typing import Annotated
@@ -6,13 +8,12 @@ import typer
 
 from minizen.ai.agent import DigestAgent
 from minizen.cli.state import configure_logging
+from minizen.config.defaults import DEFAULT_CONFIG_PATH
 from minizen.config.loader import load_settings
 from minizen.config.models import Settings
 from minizen.providers.email.smtp import EmailProvider
 from minizen.providers.email.template import render_email
 from minizen.providers.rss.miniflux import MinifluxProvider
-
-_DEFAULT_CONFIG = Path.home() / ".config" / "minizen" / "config.toml"
 
 _CONFIG_OPTION = Annotated[
     Path,
@@ -57,7 +58,7 @@ def _load(config: Path) -> Settings:
 
 @app.command("fetch")
 def fetch(
-    config: _CONFIG_OPTION = _DEFAULT_CONFIG,
+    config: _CONFIG_OPTION = DEFAULT_CONFIG_PATH,
     verbose: _VERBOSE_OPTION = False,
 ) -> None:
     """Fetch unread articles and print their titles and URLs."""
@@ -76,7 +77,7 @@ def fetch(
 
 @app.command("preview")
 def preview(
-    config: _CONFIG_OPTION = _DEFAULT_CONFIG,
+    config: _CONFIG_OPTION = DEFAULT_CONFIG_PATH,
     verbose: _VERBOSE_OPTION = False,
     dry_run: _DRY_RUN_OPTION = False,
 ) -> None:
@@ -101,7 +102,7 @@ def preview(
 
 @app.command("send-test")
 def send_test(
-    config: _CONFIG_OPTION = _DEFAULT_CONFIG,
+    config: _CONFIG_OPTION = DEFAULT_CONFIG_PATH,
     verbose: _VERBOSE_OPTION = False,
     dry_run: _DRY_RUN_OPTION = False,
 ) -> None:

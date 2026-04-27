@@ -1,3 +1,5 @@
+"""Email template renderer — converts Markdown digest to styled HTML and plain text."""
+
 import math
 from datetime import date
 from importlib.metadata import version as pkg_version

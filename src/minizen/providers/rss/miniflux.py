@@ -1,3 +1,5 @@
+"""Miniflux RSS provider for fetching and marking articles via the Miniflux API."""
+
 import logging
 from datetime import datetime
 

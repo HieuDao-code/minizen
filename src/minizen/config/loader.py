@@ -1,9 +1,12 @@
+"""Settings loader — reads TOML config and overlays secrets from environment."""
+
 import os
 import tomllib
 from pathlib import Path
 
 from dotenv import load_dotenv
 
+from minizen.config.defaults import DEFAULT_MINIFLUX_URL
 from minizen.config.models import AIConfig, EmailConfig, MinifluxConfig, Settings
 
 
@@ -34,7 +37,7 @@ def load_settings(*, config_path: Path) -> Settings:
 
     return Settings(
         miniflux=MinifluxConfig(
-            url=raw.get("miniflux", {}).get("url", "https://reader.miniflux.app"),
+            url=raw.get("miniflux", {}).get("url", DEFAULT_MINIFLUX_URL),
             api_key=os.environ["MINIFLUX_API_KEY"],
         ),
         email=EmailConfig(

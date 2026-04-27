@@ -1,3 +1,5 @@
+"""CLI commands to inspect and update the minizen configuration."""
+
 import contextlib
 import tomllib
 from pathlib import Path
@@ -6,9 +8,8 @@ from typing import Annotated
 import tomli_w
 import typer
 
+from minizen.config.defaults import DEFAULT_CONFIG_PATH, DEFAULT_MODEL, DEFAULT_TOP_N
 from minizen.config.loader import load_settings
-
-_DEFAULT_CONFIG = Path.home() / ".config" / "minizen" / "config.toml"
 
 _CONFIG_OPTION = Annotated[
     Path,
@@ -19,7 +20,7 @@ app = typer.Typer(help="Inspect and update configuration.")
 
 
 @app.command("show")
-def show(config: _CONFIG_OPTION = _DEFAULT_CONFIG) -> None:
+def show(config: _CONFIG_OPTION = DEFAULT_CONFIG_PATH) -> None:
     """Display the current configuration."""
     try:
         with open(config, "rb") as f:
@@ -39,12 +40,12 @@ def show(config: _CONFIG_OPTION = _DEFAULT_CONFIG) -> None:
     typer.echo(f"  email.smtp_port:    {em.get('smtp_port', '(unset)')}")
     typer.echo(f"  email.from_addr:    {em.get('from_addr', '(unset)')}")
     typer.echo(f"  email.to_addr:      {em.get('to_addr', '(unset)')}")
-    typer.echo(f"  ai.model:           {ai.get('model', 'anthropic:claude-haiku-4-5')}")
-    typer.echo(f"  ai.top_n:           {ai.get('top_n', 5)}")
+    typer.echo(f"  ai.model:           {ai.get('model', DEFAULT_MODEL)}")
+    typer.echo(f"  ai.top_n:           {ai.get('top_n', DEFAULT_TOP_N)}")
 
 
 @app.command("validate")
-def validate(config: _CONFIG_OPTION = _DEFAULT_CONFIG) -> None:
+def validate(config: _CONFIG_OPTION = DEFAULT_CONFIG_PATH) -> None:
     """Validate the configuration file and environment variables."""
     try:
         load_settings(config_path=config)
@@ -75,7 +76,7 @@ def set_value(
         str, typer.Argument(help="Dot-separated config key (e.g. ai.top_n).")
     ],
     value: Annotated[str, typer.Argument(help="New value.")],
-    config: _CONFIG_OPTION = _DEFAULT_CONFIG,
+    config: _CONFIG_OPTION = DEFAULT_CONFIG_PATH,
 ) -> None:
     """Set a configuration value in the TOML file."""
     if key not in _ALLOWED_KEYS:

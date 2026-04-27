@@ -1,3 +1,5 @@
+"""End-to-end digest pipeline: fetch articles, summarise, email, mark as read."""
+
 import logging
 from datetime import date
 

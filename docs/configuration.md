@@ -79,3 +79,74 @@ Pass a custom path with `--config`:
 ```bash
 minizen run --config /path/to/config.toml
 ```
+
+---
+
+## Manual setup (without `minizen setup`)
+
+You can configure minizen entirely by hand — no wizard required.
+
+### 1. Create the config file
+
+Copy this template to `~/.config/minizen/config.toml` and fill in your values:
+
+```toml
+[miniflux]
+url = "https://reader.miniflux.app"  # or your self-hosted URL
+
+[email]
+smtp_host = "smtp.gmail.com"
+smtp_port = 587
+from_addr = "you@example.com"
+to_addr = "you@example.com"
+
+[ai]
+model = "anthropic:claude-haiku-4-5"
+top_n = 5
+```
+
+Use `minizen config set` to update individual values later:
+
+```bash
+minizen config set ai.top_n 10
+minizen config set ai.model "openai:gpt-4o-mini"
+```
+
+### 2. Set secrets via `.env` file
+
+Create `~/.config/minizen/.env` (same directory as `config.toml`):
+
+```dotenv
+MINIFLUX_API_KEY=your-miniflux-api-key
+ANTHROPIC_API_KEY=your-anthropic-key   # or OPENAI_API_KEY
+MINIZEN_EMAIL_USERNAME=your-smtp-username
+MINIZEN_EMAIL_PASSWORD=your-smtp-app-password
+```
+
+Restrict permissions so only your user can read it:
+
+```bash
+chmod 600 ~/.config/minizen/.env
+```
+
+### 3. Set secrets via shell rc file
+
+As an alternative to `.env`, export the variables in your shell profile
+(`~/.bashrc`, `~/.zshrc`, or equivalent):
+
+```bash
+export MINIFLUX_API_KEY="your-miniflux-api-key"
+export ANTHROPIC_API_KEY="your-anthropic-key"   # or OPENAI_API_KEY
+export MINIZEN_EMAIL_USERNAME="your-smtp-username"
+export MINIZEN_EMAIL_PASSWORD="your-smtp-app-password"
+```
+
+Reload your shell after editing: `source ~/.zshrc` (or `source ~/.bashrc`).
+
+### 4. Verify the setup
+
+```bash
+minizen config validate
+```
+
+A clean output confirms minizen can read all required values.
