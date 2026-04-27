@@ -1,3 +1,5 @@
+"""SMTP email sender for delivering multipart HTML/plain-text digest emails."""
+
 import logging
 import smtplib
 from email.mime.multipart import MIMEMultipart
