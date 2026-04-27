@@ -1,3 +1,5 @@
+"""Interactive and non-interactive setup wizard for minizen."""
+
 import os
 from pathlib import Path
 from typing import Annotated

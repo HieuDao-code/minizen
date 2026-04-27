@@ -1,3 +1,5 @@
+"""CLI application root — registers all sub-commands."""
+
 from typing import Annotated
 
 import typer

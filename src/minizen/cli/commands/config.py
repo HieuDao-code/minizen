@@ -1,3 +1,5 @@
+"""CLI commands to inspect and update the minizen configuration."""
+
 import contextlib
 import tomllib
 from pathlib import Path

@@ -1,3 +1,5 @@
+"""CLI command to run the full fetch-summarise-email pipeline."""
+
 from pathlib import Path
 from typing import Annotated, cast
 
