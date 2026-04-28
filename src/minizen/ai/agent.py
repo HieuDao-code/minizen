@@ -27,7 +27,7 @@ Then write one section per selected article using this template exactly:
 
 {2-3 sentence summary. Concise. No bullet points.}
 
-[Read ->]({url}) . [Comments]({comments_url})
+[Comments]({comments_url})
 
 Rules:
 - The feed name must be bold text on its own line above the heading.

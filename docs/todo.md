@@ -2,10 +2,8 @@
 
 #### Improvements
 
-- [ ] Streamline the ouput format of the summary, maybe with a template or something, to make it more consistent and easier to read in the email
-- Also link the comments section of the article if there is one
+- [ ] Show the comments link after the title and the estimated reading time of miniflux api after the title. Both in a smaller font size
 - Better how-it-works diagram, make it top to bottom instead of left to right, and make it more visually appealing
-- UX: try out different color palettes
 
 #### lower priority
 
