@@ -29,7 +29,7 @@ def test_default_model() -> None:
 
 def test_default_top_n() -> None:
     # act / assert
-    assert DEFAULT_TOP_N == 5
+    assert DEFAULT_TOP_N == 10
 
 
 def test_default_smtp_host() -> None:
