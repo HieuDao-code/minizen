@@ -25,7 +25,7 @@ def test_load_settings_reads_toml_and_env(
                 "from_addr": "from@example.com",
                 "to_addr": "to@example.com",
             },
-            "ai": {"model": "anthropic:claude-sonnet-4-6", "top_n": 5},
+            "ai": {"model": "anthropic:claude-sonnet-4-6", "top_n": 10},
         },
     )
     monkeypatch.setenv("MINIFLUX_API_KEY", "mf-key")
@@ -42,7 +42,7 @@ def test_load_settings_reads_toml_and_env(
     assert settings.email.username == "email-user"
     assert settings.email.password == "email-pass"
     assert settings.ai.model == "anthropic:claude-sonnet-4-6"
-    assert settings.ai.top_n == 5
+    assert settings.ai.top_n == 10
 
 
 def test_load_settings_uses_ai_defaults_when_section_absent(
@@ -72,7 +72,7 @@ def test_load_settings_uses_ai_defaults_when_section_absent(
 
     # assert
     assert settings.ai.model == "anthropic:claude-haiku-4-5"
-    assert settings.ai.top_n == 5
+    assert settings.ai.top_n == 10
 
 
 def test_load_settings_raises_when_env_var_missing(
