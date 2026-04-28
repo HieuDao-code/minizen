@@ -20,6 +20,10 @@ class Article(BaseModel):
     content: str = Field(description="Full HTML or text content of the article.")
     feed_name: str = Field(description="Name of the feed the article belongs to.")
     published_at: datetime = Field(description="Publication timestamp (UTC-aware).")
+    comments_url: str | None = Field(
+        default=None,
+        description="URL of the article's comments section, if available.",
+    )
 
 
 class MinifluxProvider:
@@ -55,6 +59,7 @@ class MinifluxProvider:
                 published_at=datetime.fromisoformat(
                     entry["published_at"].replace("Z", "+00:00")
                 ),
+                comments_url=entry.get("comments_url") or None,
             )
             for entry in entries
         ]
