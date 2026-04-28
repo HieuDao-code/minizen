@@ -13,11 +13,28 @@ logger = logging.getLogger(__name__)
 _SYSTEM_PROMPT = """\
 You are a personal news curator. You receive a list of unread articles and must:
 1. Select the top N most important and interesting articles.
-2. Write a cohesive, well-structured Markdown digest covering those articles.
+2. Write a cohesive Markdown digest following this exact structure.
 3. Return the digest and the IDs of the articles you selected.
 
-Each article section must include a direct link to the original article URL.
-Be concise. Prioritise articles with broad significance over niche topics.
+Start the digest with a short narrative intro paragraph (2-4 sentences). Do not mention
+specific articles in the intro.
+
+Then write one section per selected article using this template exactly:
+
+**{feed_name}**
+
+## [{Article Title}]({url})
+
+{2-3 sentence summary. Concise. No bullet points.}
+
+[Read ->]({url}) . [Comments]({comments_url})
+
+Rules:
+- The feed name must be bold text on its own line above the heading.
+- The article title must be a Markdown link to the article URL.
+- Omit the [Comments] link entirely if no comments_url is provided for that article.
+- Summary: exactly 2-3 sentences, no lists, no sub-headings.
+- Be concise. Prioritise articles with broad significance over niche topics.
 """
 
 
@@ -64,8 +81,9 @@ class DigestAgent:
             f"Feed: {a.feed_name}\n"
             f"Title: {a.title}\n"
             f"URL: {a.url}\n"
-            f"Published: {a.published_at.isoformat()}\n\n"
-            f"{a.content}"
+            f"Published: {a.published_at.isoformat()}\n"
+            + (f"Comments URL: {a.comments_url}\n" if a.comments_url else "")
+            + f"\n{a.content}"
             for a in articles
         )
         user_prompt = (
