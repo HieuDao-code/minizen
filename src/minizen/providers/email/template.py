@@ -1,10 +1,22 @@
-"""Email template renderer — converts Markdown digest to styled HTML and plain text."""
+"""Email template renderer -- converts Markdown digest to styled HTML and plain text."""
 
 import math
+import re
 from datetime import date
 from importlib.metadata import version as pkg_version
 
 import mistune
+
+# Colour palette
+_BG = "#EEF2F7"
+_CARD_BG = "#FFFFFF"
+_TEXT = "#1E2D3D"
+_ACCENT_BLUE = "#2D7DD2"
+_ACCENT_ORANGE = "#D4622A"
+_BORDER = "#D4DCE8"
+_MUTED = "#5A6A7A"
+_HEADER_BG = "#1E2D3D"
+_HEADER_TEXT = "#FFFFFF"
 
 
 def _reading_time(markdown: str) -> int:
@@ -20,6 +32,40 @@ def _reading_time(markdown: str) -> int:
     return max(1, math.ceil(words / 200))
 
 
+def _build_article_cards(html: str) -> str:
+    """Wrap each article section in a styled card div and convert feed names to badges.
+
+    Scans for ``<p><strong>Feed Name</strong></p>`` patterns (the feed name line
+    produced by the AI template) and groups each with its following content into a
+    card ``<div>``. Content before the first feed name becomes the intro block.
+
+    Args:
+        html: Raw HTML produced by mistune from the AI Markdown digest.
+
+    Returns:
+        HTML with article sections wrapped in card divs and feed names as badge spans.
+    """
+    badge_pattern = re.compile(r"<p><strong>(.*?)</strong></p>", re.DOTALL)
+    parts = badge_pattern.split(html)
+
+    # parts[0] = intro text
+    # parts[1], parts[2] = first feed name, first article body
+    # parts[3], parts[4] = second feed name, second article body, etc.
+    result = parts[0]
+
+    for i in range(1, len(parts), 2):
+        feed_name = parts[i]
+        content = parts[i + 1] if i + 1 < len(parts) else ""
+        result += (
+            f'<div class="article-card">'
+            f'<span class="feed-badge">{feed_name}</span>'
+            f"{content}"
+            f"</div>"
+        )
+
+    return result
+
+
 def render_email(markdown: str) -> tuple[str, str]:
     """Render a Markdown digest into a styled HTML email and a plain-text fallback.
 
@@ -33,8 +79,9 @@ def render_email(markdown: str) -> tuple[str, str]:
     today = date.today().strftime("%B %-d, %Y")
     read_time = _reading_time(markdown)
     minizen_version = pkg_version("minizen")
-    content_html = mistune.html(markdown)
-    preheader = f"~{read_time} min read · Your curated articles for {today}"
+    raw_html = mistune.html(markdown)
+    content_html = _build_article_cards(raw_html if isinstance(raw_html, str) else "")
+    preheader = f"~{read_time} min read . Your curated articles for {today}"
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -46,24 +93,24 @@ def render_email(markdown: str) -> tuple[str, str]:
     img {{ border:0; display:block; }}
 
     body {{
-      background: #F2EFE9;
+      background: {_BG};
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      color: #2E2A25;
+      color: {_TEXT};
       font-size: 16px;
       line-height: 1.6;
     }}
     .wrapper {{
       max-width: 620px;
       margin: 32px auto;
-      background: #FAFAF8;
+      background: {_BG};
       border-radius: 16px;
       overflow: hidden;
       box-shadow: 0 4px 24px rgba(0,0,0,0.08);
     }}
     .header {{
-      background: linear-gradient(135deg, #F2EFE9 0%, #C8B89A 50%, #9E8A72 100%);
+      background: {_HEADER_BG};
       padding: 36px 32px 28px;
-      color: #2E2A25;
+      color: {_HEADER_TEXT};
     }}
     .header-label {{
       font-size: 12px;
@@ -78,73 +125,78 @@ def render_email(markdown: str) -> tuple[str, str]:
       font-size: 28px;
       font-weight: 800;
       line-height: 1.2;
+      color: {_HEADER_TEXT};
     }}
     .header .meta {{
       margin: 0;
       font-size: 14px;
       opacity: 0.7;
+      color: {_HEADER_TEXT};
     }}
     .content {{
       padding: 32px 32px 24px;
     }}
-    .content h1 {{
-      font-size: 22px;
-      font-weight: 700;
-      color: #2E2A25;
-      margin: 28px 0 6px;
-      line-height: 1.3;
-    }}
-    .content h2 {{
-      font-size: 18px;
-      font-weight: 700;
-      color: #2E2A25;
-      margin: 36px 0 8px;
-      padding-left: 12px;
-      border-left: 4px solid #7A9E7E;
-      line-height: 1.3;
-    }}
-    .content p {{
+    .content > p {{
       font-size: 16px;
       line-height: 1.8;
-      color: #2E2A25;
-      margin: 8px 0 18px;
+      color: {_TEXT};
+      margin: 0 0 24px;
     }}
-    .content a {{
-      color: #6B8F6E;
+    .article-card {{
+      background: {_CARD_BG};
+      border: 1px solid {_BORDER};
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }}
+    .feed-badge {{
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: {_ACCENT_ORANGE};
+      margin-bottom: 8px;
+    }}
+    .article-card h2 {{
+      font-size: 18px;
+      font-weight: 700;
+      color: {_TEXT};
+      margin: 0 0 12px;
+      line-height: 1.3;
+    }}
+    .article-card h2 a {{
+      color: {_ACCENT_BLUE};
+      text-decoration: none;
+    }}
+    .article-card h2 a:hover {{ text-decoration: underline; }}
+    .article-card p {{
+      font-size: 15px;
+      line-height: 1.75;
+      color: {_TEXT};
+      margin: 0 0 12px;
+    }}
+    .article-card a {{
+      color: {_ACCENT_BLUE};
       text-decoration: none;
       font-weight: 500;
     }}
-    .content a:hover {{ text-decoration: underline; }}
-    .content strong {{ color: #2E2A25; font-weight: 600; }}
-    .content em {{ color: #6B6560; }}
+    .article-card a:hover {{ text-decoration: underline; }}
     .content hr {{
       border: none;
-      border-top: 1px solid #D4CEC8;
+      border-top: 1px solid {_BORDER};
       margin: 28px 0;
     }}
-    .content ul, .content ol {{
-      padding-left: 20px;
-      color: #2E2A25;
-      font-size: 16px;
-      line-height: 1.8;
-    }}
-    .content blockquote {{
-      border-left: 3px solid #C8B89A;
-      margin: 16px 0;
-      padding: 4px 16px;
-      color: #6B6560;
-      font-style: italic;
-    }}
     .footer {{
-      background: #EAE5DC;
-      border-top: 1px solid #D4CEC8;
+      background: {_BG};
+      border-top: 1px solid {_BORDER};
       padding: 20px 32px;
       font-size: 13px;
-      color: #6B6560;
+      color: {_MUTED};
       text-align: center;
     }}
     .footer a {{
-      color: #7A9E7E;
+      color: {_ACCENT_BLUE};
       text-decoration: none;
       font-weight: 600;
     }}
@@ -160,9 +212,8 @@ def render_email(markdown: str) -> tuple[str, str]:
       .header {{ padding: 28px 20px 22px; }}
       .header h1 {{ font-size: 24px; }}
       .content {{ padding: 24px 20px 20px; }}
-      .content h1 {{ font-size: 20px; }}
-      .content h2 {{ font-size: 17px; }}
-      .content p, .content ul, .content ol {{ font-size: 17px; line-height: 1.85; }}
+      .article-card {{ padding: 18px; }}
+      .article-card h2 {{ font-size: 17px; }}
       .footer {{ padding: 16px 20px; }}
     }}
   </style>
