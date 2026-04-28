@@ -2,6 +2,7 @@
 
 #### Improvements
 
+- [ ] Streamline the ouput format of the summary, maybe with a template or something, to make it more consistent and easier to read in the email
 - Also link the comments section of the article if there is one
 - Better how-it-works diagram, make it top to bottom instead of left to right, and make it more visually appealing
 - UX: try out different color palettes
@@ -19,7 +20,6 @@
 ### Short-term:
 
 - [ ] Check how to optimize tokens. Fetch original content?
-- [ ] Streamline the ouput format of the summary, maybe with a template or something, to make it more consistent and easier to read in the email
 - [ ] Build a ranking + filtering system
 
 ### Long-term:

@@ -1,5 +1,9 @@
 {
   "permissions": {
+    "allow": [
+      "Bash(mkdir -p docs/superpowers/*)",
+      "Bash(mkdir docs/superpowers/*)"
+    ],
     "ask": [
       "Bash(uv run minizen digest preview*)",
       "Bash(uv run minizen digest send-test*)",
