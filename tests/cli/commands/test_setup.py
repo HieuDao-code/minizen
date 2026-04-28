@@ -9,7 +9,7 @@ from minizen.cli import app
 
 _INTERACTIVE_INPUT = (
     "\n"  # model (default: anthropic:claude-haiku-4-5)
-    "\n"  # top_n (default: 5)
+    "\n"  # top_n (default: 10)
     "\n"  # smtp host (default: smtp.gmail.com)
     "\n"  # smtp port (default: 587)
     "from@example.com\n"
@@ -58,7 +58,7 @@ def test_setup_writes_correct_toml(tmp_path: Path) -> None:
     assert data["email"]["from_addr"] == "from@example.com"
     assert data["email"]["to_addr"] == "to@example.com"
     assert data["ai"]["model"] == "anthropic:claude-haiku-4-5"
-    assert data["ai"]["top_n"] == 5
+    assert data["ai"]["top_n"] == 10
 
 
 def test_setup_accepts_custom_ai_values(tmp_path: Path) -> None:

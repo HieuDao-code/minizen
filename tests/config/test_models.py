@@ -39,7 +39,7 @@ def test_ai_config_defaults() -> None:
 
     # assert
     assert config.model == "anthropic:claude-haiku-4-5"
-    assert config.top_n == 5
+    assert config.top_n == 10
 
 
 def test_ai_config_accepts_custom_values() -> None:
@@ -70,7 +70,7 @@ def test_settings_composes_sub_configs() -> None:
     # assert
     assert settings.miniflux.url == "https://rss.example.com"
     assert settings.email.smtp_host == "smtp.example.com"
-    assert settings.ai.top_n == 5
+    assert settings.ai.top_n == 10
 
 
 def test_settings_requires_miniflux() -> None:
