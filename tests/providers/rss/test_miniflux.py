@@ -84,6 +84,86 @@ def test_miniflux_client_initialized_with_config(mocker: MockerFixture) -> None:
     )
 
 
+def test_fetch_unread_maps_comments_url_when_present(mocker: MockerFixture) -> None:
+    # arrange
+    mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
+    mock_client_cls.return_value.get_entries.return_value = {
+        "total": 1,
+        "entries": [
+            {
+                "id": 42,
+                "title": "Test Article",
+                "url": "https://example.com/article",
+                "content": "<p>Body</p>",
+                "feed": {"title": "Example Feed"},
+                "published_at": "2026-04-24T08:00:00Z",
+                "comments_url": "https://news.ycombinator.com/item?id=99",
+            }
+        ],
+    }
+    config = MinifluxConfig(url="https://rss.example.com", api_key="key")
+    provider = MinifluxProvider(config=config)
+
+    # act
+    articles = provider.fetch_unread()
+
+    # assert
+    assert articles[0].comments_url == "https://news.ycombinator.com/item?id=99"
+
+
+def test_fetch_unread_sets_comments_url_none_when_empty(mocker: MockerFixture) -> None:
+    # arrange
+    mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
+    mock_client_cls.return_value.get_entries.return_value = {
+        "total": 1,
+        "entries": [
+            {
+                "id": 43,
+                "title": "Test Article",
+                "url": "https://example.com/article",
+                "content": "<p>Body</p>",
+                "feed": {"title": "Example Feed"},
+                "published_at": "2026-04-24T08:00:00Z",
+                "comments_url": "",
+            }
+        ],
+    }
+    config = MinifluxConfig(url="https://rss.example.com", api_key="key")
+    provider = MinifluxProvider(config=config)
+
+    # act
+    articles = provider.fetch_unread()
+
+    # assert
+    assert articles[0].comments_url is None
+
+
+def test_fetch_unread_sets_comments_url_none_when_absent(mocker: MockerFixture) -> None:
+    # arrange
+    mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
+    mock_client_cls.return_value.get_entries.return_value = {
+        "total": 1,
+        "entries": [
+            {
+                "id": 44,
+                "title": "Test Article",
+                "url": "https://example.com/article",
+                "content": "<p>Body</p>",
+                "feed": {"title": "Example Feed"},
+                "published_at": "2026-04-24T08:00:00Z",
+            }
+        ],
+    }
+    config = MinifluxConfig(url="https://rss.example.com", api_key="key")
+    provider = MinifluxProvider(config=config)
+
+    # act
+    articles = provider.fetch_unread()
+
+    # assert
+    assert articles[0].comments_url is None
+
+
 def test_fetch_unread_with_fixture_data(mocker: MockerFixture) -> None:
     # arrange
     fixture_path = Path(__file__).parents[2] / "fixtures" / "miniflux_response.json"

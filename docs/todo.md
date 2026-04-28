@@ -1,14 +1,9 @@
 # Implementation TODOs
 
-#### Documentation:
-
-- Add docs on how to setup credential manually with rc file and env vars
-- Add module and function docstrings to the codebase, to explain the purpose and usage of each module and function
-- Analyze code and optimize it, e.g. default config entries can be colleted into one central place
-
 #### Improvements
 
-- Also link the comments section of the article if there is one
+- [ ] Show the comments link after the title and the estimated reading time of miniflux api after the title. Both in a smaller font size
+- Better how-it-works diagram, make it top to bottom instead of left to right, and make it more visually appealing
 
 #### lower priority
 
@@ -19,11 +14,11 @@
   - Handling sensitive information, such as API keys and email credentials, securely and not hardcoding them in the codebase
   - Implementing proper authentication and authorization mechanisms for accessing the tool and its features
   - Document in a security.md file with considerations
-- UX: try out different color palettes
 
 ### Short-term:
 
-- [ ] check how to optimize tokens. Fetch original content
+- [ ] Check how to optimize tokens. Fetch original content?
+- [ ] Build a ranking + filtering system
 
 ### Long-term:
 

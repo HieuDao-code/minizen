@@ -7,7 +7,8 @@
       "url": "https://blog.rust-lang.org/2026/04/async-maturity",
       "content": "<p>After years of incremental improvements, Rust's async ecosystem has reached a state of maturity that makes it viable for production workloads. The tokio runtime, async-std, and smol have all stabilised their APIs, and the standard library's async traits are now available on stable Rust.</p><p>In benchmarks conducted by the Rust foundation, async Rust outperforms equivalent Go code by 15–30% in throughput-heavy scenarios while maintaining memory safety guarantees. The main remaining challenge is compile times, which the team is actively addressing through incremental compilation improvements.</p><p>Migration guides from synchronous codebases are now available, and the community has coalesced around a set of best practices that make async Rust significantly more approachable than it was two years ago.</p>",
       "feed": {"title": "Hacker News"},
-      "published_at": "2026-04-25T07:30:00Z"
+      "published_at": "2026-04-25T07:30:00Z",
+      "comments_url": "https://news.ycombinator.com/item?id=12345"
     },
     {
       "id": 102,
@@ -15,7 +16,8 @@
       "url": "https://www.anthropic.com/research/context-window-cost",
       "content": "<p>As context windows have grown from 4k to 1M tokens, the economic and environmental costs have scaled in unexpected ways. A new paper from researchers at Anthropic and Stanford examines how quadratic attention complexity makes large-context inference disproportionately expensive.</p><p>The paper introduces a new metric, \"effective context utilization,\" which measures how much of a given context window actually influences the model output. Surprisingly, most real-world tasks use fewer than 10% of available tokens effectively, suggesting that smarter retrieval strategies could reduce costs by an order of magnitude.</p><p>The authors propose a hybrid approach combining sparse attention with dense retrieval, achieving 90% of full-context accuracy at 8% of the compute cost in their experiments.</p>",
       "feed": {"title": "Hacker News"},
-      "published_at": "2026-04-25T06:15:00Z"
+      "published_at": "2026-04-25T06:15:00Z",
+      "comments_url": ""
     },
     {
       "id": 103,
