@@ -33,7 +33,7 @@ def _provider_key_info(model: str) -> tuple[str, str]:
         return "Anthropic API key", "ANTHROPIC_API_KEY"
     if model.startswith("openai:"):
         return "OpenAI API key", "OPENAI_API_KEY"
-    prefix = model.split(":")[0] if ":" in model else model
+    prefix = model.split(":", maxsplit=1)[0] if ":" in model else model
     typer.echo(f"Error: Unknown model provider: {prefix}")
     raise typer.Exit(code=1)
 

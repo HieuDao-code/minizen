@@ -1,9 +1,12 @@
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 import tomli_w
 
 from minizen.config.loader import load_settings
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def _write_config(path: Path, data: dict) -> None:
@@ -94,7 +97,7 @@ def test_load_settings_raises_when_env_var_missing(
         },
     )
     monkeypatch.delenv("MINIFLUX_API_KEY", raising=False)
-    monkeypatch.setattr("minizen.config.loader.load_dotenv", lambda *a, **k: None)
+    monkeypatch.setattr("minizen.config.loader.load_dotenv", lambda *_, **__: None)
 
     # act / assert
     with pytest.raises(KeyError, match="MINIFLUX_API_KEY"):

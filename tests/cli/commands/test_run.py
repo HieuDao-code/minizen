@@ -1,14 +1,17 @@
 from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
 import typer
-from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
 from minizen.cli import app
 from minizen.cli.commands.run import _build_settings_from_flags, apply_overrides
 from minizen.config.models import AIConfig, EmailConfig, MinifluxConfig, Settings
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 
 def _make_settings() -> Settings:
@@ -268,7 +271,7 @@ def test_run_all_flags_no_config_file(mocker: MockerFixture) -> None:
     assert called_settings.email.from_addr == "from@example.com"
 
 
-def test_run_no_config_file_lists_missing_flags(mocker: MockerFixture) -> None:
+def test_run_no_config_file_lists_missing_flags() -> None:
     # arrange
     runner = CliRunner()
 

@@ -1,8 +1,10 @@
 import logging
-
-from pytest_mock import MockerFixture
+from typing import TYPE_CHECKING
 
 from minizen.cli.state import configure_logging
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 
 def test_configure_logging_sets_debug_level(mocker: MockerFixture) -> None:

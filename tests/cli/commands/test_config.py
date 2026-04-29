@@ -1,10 +1,15 @@
-from pathlib import Path
+import tomllib
+from typing import TYPE_CHECKING
 
-import pytest
 import tomli_w
 from typer.testing import CliRunner
 
 from minizen.cli import app
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    import pytest
 
 
 def _write_config(path: Path, data: dict) -> None:
@@ -86,7 +91,7 @@ def test_config_validate_fails_with_missing_env(
     config_path = tmp_path / "config.toml"
     _minimal_config(config_path)
     monkeypatch.delenv("MINIFLUX_API_KEY", raising=False)
-    monkeypatch.setattr("minizen.config.loader.load_dotenv", lambda *a, **k: None)
+    monkeypatch.setattr("minizen.config.loader.load_dotenv", lambda *_, **__: None)
     runner = CliRunner()
 
     # act
@@ -110,9 +115,7 @@ def test_config_set_updates_value(tmp_path: Path) -> None:
 
     # assert
     assert result.exit_code == 0
-    import tomllib
-
-    with open(config_path, "rb") as f:
+    with config_path.open("rb") as f:
         updated = tomllib.load(f)
     assert updated["ai"]["top_n"] == 10
 
@@ -138,9 +141,7 @@ def test_config_set_string_value(tmp_path: Path) -> None:
 
     # assert
     assert result.exit_code == 0
-    import tomllib
-
-    with open(config_path, "rb") as f:
+    with config_path.open("rb") as f:
         updated = tomllib.load(f)
     assert updated["ai"]["model"] == "openai:gpt-4o"
 
@@ -166,9 +167,7 @@ def test_config_set_updates_value_in_existing_section(tmp_path: Path) -> None:
 
     # assert
     assert result.exit_code == 0
-    import tomllib
-
-    with open(config_path, "rb") as f:
+    with config_path.open("rb") as f:
         updated = tomllib.load(f)
     assert updated["miniflux"]["url"] == "https://new.example.com"
 

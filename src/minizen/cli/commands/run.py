@@ -138,15 +138,15 @@ def _build_settings_from_flags(
     return Settings(
         miniflux=MinifluxConfig(
             url=miniflux_url or DEFAULT_MINIFLUX_URL,
-            api_key=cast(str, miniflux_api_key),
+            api_key=cast("str", miniflux_api_key),
         ),
         email=EmailConfig(
-            smtp_host=cast(str, smtp_host),
-            smtp_port=cast(int, smtp_port),
-            from_addr=cast(str, from_addr),
-            to_addr=cast(str, to_addr),
-            username=cast(str, email_username),
-            password=cast(str, email_password),
+            smtp_host=cast("str", smtp_host),
+            smtp_port=cast("int", smtp_port),
+            from_addr=cast("str", from_addr),
+            to_addr=cast("str", to_addr),
+            username=cast("str", email_username),
+            password=cast("str", email_password),
         ),
         ai=AIConfig(
             model=model or DEFAULT_MODEL,

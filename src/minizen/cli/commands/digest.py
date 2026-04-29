@@ -1,8 +1,8 @@
 """CLI commands to preview or test the digest without sending."""
 
-from datetime import date
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 import typer
 
@@ -10,10 +10,12 @@ from minizen.ai.agent import DigestAgent
 from minizen.cli.state import configure_logging
 from minizen.config.defaults import DEFAULT_CONFIG_PATH
 from minizen.config.loader import load_settings
-from minizen.config.models import Settings
 from minizen.providers.email.smtp import EmailProvider
 from minizen.providers.email.template import render_email
 from minizen.providers.rss.miniflux import MinifluxProvider
+
+if TYPE_CHECKING:
+    from minizen.config.models import Settings
 
 _CONFIG_OPTION = Annotated[
     Path,
@@ -126,7 +128,7 @@ def send_test(
         typer.echo("Dry run — email not sent:\n")
         typer.echo(plain_text)
         return
-    today = date.today().strftime("%B %-d, %Y")
+    today = datetime.now(tz=UTC).date().strftime("%B %-d, %Y")
     email = EmailProvider(config=settings.email)
     email.send(
         subject=f"[TEST] Your Daily Zen — {today}",

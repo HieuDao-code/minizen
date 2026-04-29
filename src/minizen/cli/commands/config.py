@@ -23,7 +23,7 @@ app = typer.Typer(help="Inspect and update configuration.")
 def show(config: _CONFIG_OPTION = DEFAULT_CONFIG_PATH) -> None:
     """Display the current configuration."""
     try:
-        with open(config, "rb") as f:
+        with config.open("rb") as f:
             data = tomllib.load(f)
     except FileNotFoundError:
         typer.echo(f"Config file not found: {config}")
@@ -85,7 +85,7 @@ def set_value(
         raise typer.Exit(code=1)
 
     try:
-        with open(config, "rb") as f:
+        with config.open("rb") as f:
             data = tomllib.load(f)
     except FileNotFoundError:
         typer.echo(f"Config file not found: {config}")

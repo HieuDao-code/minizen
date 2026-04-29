@@ -1,11 +1,13 @@
 import json
 from datetime import UTC, datetime
 from pathlib import Path
-
-from pytest_mock import MockerFixture
+from typing import TYPE_CHECKING
 
 from minizen.config.models import MinifluxConfig
 from minizen.providers.rss.miniflux import MinifluxProvider
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 
 def test_fetch_unread_returns_articles(mocker: MockerFixture) -> None:

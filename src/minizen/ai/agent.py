@@ -1,12 +1,13 @@
 """AI agent for curating and summarising RSS articles into a Markdown digest."""
 
 import logging
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent, AgentRunResult
 
-from minizen.providers.rss.miniflux import Article
+if TYPE_CHECKING:
+    from minizen.providers.rss.miniflux import Article
 
 logger = logging.getLogger(__name__)
 
@@ -91,4 +92,4 @@ class DigestAgent:
             f"from the following and write a digest:\n\n{articles_text}"
         )
         result = self._agent.run_sync(user_prompt)
-        return cast(AgentRunResult[DigestResult], result).output
+        return cast("AgentRunResult[DigestResult]", result).output

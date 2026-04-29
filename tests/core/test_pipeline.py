@@ -1,15 +1,19 @@
 import json
-from datetime import UTC, date, datetime
+from datetime import UTC, datetime
 from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
-from pytest_mock import MockerFixture
+from freezegun import freeze_time
 
 from minizen.config.models import AIConfig, EmailConfig, MinifluxConfig, Settings
 from minizen.core.pipeline import run_pipeline
 from minizen.providers.email import template as email_template
 from minizen.providers.rss.miniflux import Article
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 
 def _make_settings() -> Settings:
@@ -38,6 +42,7 @@ def _make_article(article_id: int) -> Article:
     )
 
 
+@freeze_time("2026-04-29")
 def test_pipeline_runs_full_flow(mocker: MockerFixture) -> None:
     # arrange
     articles = [_make_article(1), _make_article(2)]
@@ -62,11 +67,10 @@ def test_pipeline_runs_full_flow(mocker: MockerFixture) -> None:
     run_pipeline(settings=settings)
 
     # assert
-    today = date.today().strftime("%B %-d, %Y")
     mock_rss.fetch_unread.assert_called_once_with()
     mock_agent.run.assert_called_once_with(articles=articles)
     mock_email.send.assert_called_once_with(
-        subject=f"Your Daily Zen — {today}",
+        subject="Your Daily Zen — April 29, 2026",
         html="<h2>Digest</h2>",
         plain_text="## Digest",
     )
@@ -142,6 +146,7 @@ def test_pipeline_does_not_mark_read_when_email_fails(mocker: MockerFixture) -> 
     mock_rss.mark_as_read.assert_not_called()
 
 
+@freeze_time("2026-04-29")
 def test_pipeline_sends_email_with_fixture_data(mocker: MockerFixture) -> None:
     # arrange
     fixtures = Path(__file__).parents[1] / "fixtures"
@@ -155,9 +160,7 @@ def test_pipeline_sends_email_with_fixture_data(mocker: MockerFixture) -> None:
             url=entry["url"],
             content=entry["content"],
             feed_name=entry["feed"]["title"],
-            published_at=datetime.fromisoformat(
-                entry["published_at"].replace("Z", "+00:00")
-            ),
+            published_at=datetime.fromisoformat(entry["published_at"]),
         )
         for entry in raw["entries"]
     ]
@@ -185,10 +188,9 @@ def test_pipeline_sends_email_with_fixture_data(mocker: MockerFixture) -> None:
     run_pipeline(settings=settings)
 
     # assert
-    today = date.today().strftime("%B %-d, %Y")
     sent_html = mock_email.send.call_args.kwargs["html"]
     mock_email.send.assert_called_once_with(
-        subject=f"Your Daily Zen — {today}",
+        subject="Your Daily Zen — April 29, 2026",
         html=sent_html,
         plain_text=digest_markdown,
     )
