@@ -1,5 +1,6 @@
-from datetime import date
 from typing import TYPE_CHECKING
+
+from freezegun import freeze_time
 from unittest.mock import MagicMock
 
 import pytest
@@ -115,6 +116,7 @@ def test_digest_preview_exits_early_when_no_articles(
     mock_agent.run.assert_not_called()
 
 
+@freeze_time("2026-04-29")
 def test_digest_send_test_sends_email(mocker: MockerFixture) -> None:
     # arrange
     mock_settings = _make_settings_mock()
@@ -142,10 +144,9 @@ def test_digest_send_test_sends_email(mocker: MockerFixture) -> None:
     result = runner.invoke(app, ["digest", "send-test"])
 
     # assert
-    today = date.today().strftime("%B %-d, %Y")
     assert result.exit_code == 0
     mock_email.send.assert_called_once_with(
-        subject=f"[TEST] Your Daily Zen — {today}",
+        subject="[TEST] Your Daily Zen — April 29, 2026",
         html="<h2>Digest</h2>",
         plain_text="## Digest",
     )
