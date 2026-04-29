@@ -1,7 +1,6 @@
 """CLI command to run the full fetch-summarise-email pipeline."""
 
-from pathlib import Path
-from typing import Annotated, cast
+from typing import TYPE_CHECKING, Annotated, cast
 
 import typer
 
@@ -14,6 +13,9 @@ from minizen.config.defaults import (
 from minizen.config.loader import load_settings
 from minizen.config.models import AIConfig, EmailConfig, MinifluxConfig, Settings
 from minizen.core.pipeline import run_pipeline
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 _DRY_RUN_OPTION = Annotated[
     bool,
@@ -138,15 +140,15 @@ def _build_settings_from_flags(
     return Settings(
         miniflux=MinifluxConfig(
             url=miniflux_url or DEFAULT_MINIFLUX_URL,
-            api_key=cast(str, miniflux_api_key),
+            api_key=cast("str", miniflux_api_key),
         ),
         email=EmailConfig(
-            smtp_host=cast(str, smtp_host),
-            smtp_port=cast(int, smtp_port),
-            from_addr=cast(str, from_addr),
-            to_addr=cast(str, to_addr),
-            username=cast(str, email_username),
-            password=cast(str, email_password),
+            smtp_host=cast("str", smtp_host),
+            smtp_port=cast("int", smtp_port),
+            from_addr=cast("str", from_addr),
+            to_addr=cast("str", to_addr),
+            username=cast("str", email_username),
+            password=cast("str", email_password),
         ),
         ai=AIConfig(
             model=model or DEFAULT_MODEL,

@@ -80,7 +80,7 @@ def render_email(markdown: str) -> tuple[str, str]:
     today = date.today().strftime("%B %-d, %Y")
     read_time = _reading_time(markdown)
     minizen_version = pkg_version("minizen")
-    raw_html = cast(str, mistune.html(markdown))
+    raw_html = cast("str", mistune.html(markdown))
     content_html = _build_article_cards(raw_html)
     preheader = f"~{read_time} min read \u00b7 Your curated articles for {today}"
 

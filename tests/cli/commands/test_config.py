@@ -1,10 +1,14 @@
-from pathlib import Path
+from typing import TYPE_CHECKING
 
-import pytest
 import tomli_w
 from typer.testing import CliRunner
 
 from minizen.cli import app
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    import pytest
 
 
 def _write_config(path: Path, data: dict) -> None:

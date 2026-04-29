@@ -1,8 +1,7 @@
 """Interactive and non-interactive setup wizard for minizen."""
 
 import os
-from pathlib import Path
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 import tomli_w
 import typer
@@ -15,6 +14,9 @@ from minizen.config.defaults import (
     DEFAULT_SMTP_PORT,
     DEFAULT_TOP_N,
 )
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def _provider_key_info(model: str) -> tuple[str, str]:
@@ -33,7 +35,7 @@ def _provider_key_info(model: str) -> tuple[str, str]:
         return "Anthropic API key", "ANTHROPIC_API_KEY"
     if model.startswith("openai:"):
         return "OpenAI API key", "OPENAI_API_KEY"
-    prefix = model.split(":")[0] if ":" in model else model
+    prefix = model.split(":", maxsplit=1)[0] if ":" in model else model
     typer.echo(f"Error: Unknown model provider: {prefix}")
     raise typer.Exit(code=1)
 

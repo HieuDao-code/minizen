@@ -1,10 +1,14 @@
-from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
-from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
 from minizen.cli import app
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from pytest_mock import MockerFixture
 
 
 def test_root_verbose_flag_calls_configure_logging(

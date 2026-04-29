@@ -2,11 +2,13 @@
 
 import logging
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 import miniflux
 from pydantic import BaseModel, Field
 
-from minizen.config.models import MinifluxConfig
+if TYPE_CHECKING:
+    from minizen.config.models import MinifluxConfig
 
 logger = logging.getLogger(__name__)
 
@@ -56,9 +58,7 @@ class MinifluxProvider:
                 url=entry["url"],
                 content=entry["content"],
                 feed_name=entry["feed"]["title"],
-                published_at=datetime.fromisoformat(
-                    entry["published_at"].replace("Z", "+00:00")
-                ),
+                published_at=datetime.fromisoformat(entry["published_at"]),
                 comments_url=entry.get("comments_url") or None,
             )
             for entry in entries

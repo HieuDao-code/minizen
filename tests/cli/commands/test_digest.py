@@ -1,13 +1,17 @@
 from datetime import date
-from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
 import typer
-from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
 from minizen.cli import app
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from pytest_mock import MockerFixture
 
 
 def _make_settings_mock() -> MagicMock:

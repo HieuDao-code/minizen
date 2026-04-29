@@ -1,9 +1,12 @@
-from email.mime.multipart import MIMEMultipart
-
-from pytest_mock import MockerFixture
+from typing import TYPE_CHECKING
 
 from minizen.config.models import EmailConfig
 from minizen.providers.email.smtp import EmailProvider
+
+if TYPE_CHECKING:
+    from email.mime.multipart import MIMEMultipart
+
+    from pytest_mock import MockerFixture
 
 
 def test_send_connects_and_sends_message(mocker: MockerFixture) -> None:

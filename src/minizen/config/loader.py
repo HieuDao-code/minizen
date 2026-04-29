@@ -2,12 +2,15 @@
 
 import os
 import tomllib
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from dotenv import load_dotenv
 
 from minizen.config.defaults import DEFAULT_MINIFLUX_URL
 from minizen.config.models import AIConfig, EmailConfig, MinifluxConfig, Settings
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def load_settings(*, config_path: Path) -> Settings:

@@ -1,11 +1,15 @@
 import tomllib
-from pathlib import Path
+from typing import TYPE_CHECKING
 
-import pytest
-from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
 from minizen.cli import app
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    import pytest
+    from pytest_mock import MockerFixture
 
 _INTERACTIVE_INPUT = (
     "\n"  # model (default: anthropic:claude-haiku-4-5)

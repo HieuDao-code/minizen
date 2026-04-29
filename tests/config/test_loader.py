@@ -1,9 +1,12 @@
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 import tomli_w
 
 from minizen.config.loader import load_settings
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def _write_config(path: Path, data: dict) -> None:

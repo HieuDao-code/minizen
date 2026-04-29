@@ -1,9 +1,11 @@
 from datetime import UTC, datetime
-
-from pytest_mock import MockerFixture
+from typing import TYPE_CHECKING
 
 from minizen.ai.agent import _SYSTEM_PROMPT, DigestAgent, DigestResult
 from minizen.providers.rss.miniflux import Article
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 
 def _make_article(*, article_id: int = 1, comments_url: str | None = None) -> Article:

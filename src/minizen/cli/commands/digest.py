@@ -2,7 +2,7 @@
 
 from datetime import date
 from pathlib import Path
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 import typer
 
@@ -10,10 +10,12 @@ from minizen.ai.agent import DigestAgent
 from minizen.cli.state import configure_logging
 from minizen.config.defaults import DEFAULT_CONFIG_PATH
 from minizen.config.loader import load_settings
-from minizen.config.models import Settings
 from minizen.providers.email.smtp import EmailProvider
 from minizen.providers.email.template import render_email
 from minizen.providers.rss.miniflux import MinifluxProvider
+
+if TYPE_CHECKING:
+    from minizen.config.models import Settings
 
 _CONFIG_OPTION = Annotated[
     Path,

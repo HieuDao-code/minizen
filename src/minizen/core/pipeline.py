@@ -2,12 +2,15 @@
 
 import logging
 from datetime import date
+from typing import TYPE_CHECKING
 
 from minizen.ai.agent import DigestAgent
-from minizen.config.models import Settings
 from minizen.providers.email.smtp import EmailProvider
 from minizen.providers.email.template import render_email
 from minizen.providers.rss.miniflux import MinifluxProvider
+
+if TYPE_CHECKING:
+    from minizen.config.models import Settings
 
 logger = logging.getLogger(__name__)
 

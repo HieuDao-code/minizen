@@ -1,15 +1,18 @@
 import json
 from datetime import UTC, date, datetime
 from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
-from pytest_mock import MockerFixture
 
 from minizen.config.models import AIConfig, EmailConfig, MinifluxConfig, Settings
 from minizen.core.pipeline import run_pipeline
 from minizen.providers.email import template as email_template
 from minizen.providers.rss.miniflux import Article
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 
 def _make_settings() -> Settings:
@@ -155,9 +158,7 @@ def test_pipeline_sends_email_with_fixture_data(mocker: MockerFixture) -> None:
             url=entry["url"],
             content=entry["content"],
             feed_name=entry["feed"]["title"],
-            published_at=datetime.fromisoformat(
-                entry["published_at"].replace("Z", "+00:00")
-            ),
+            published_at=datetime.fromisoformat(entry["published_at"]),
         )
         for entry in raw["entries"]
     ]
