@@ -105,12 +105,13 @@ convention = "google"
   "S106",    # hardcoded-password-func-arg
 ]
 "src/minizen/cli/**" = [
-  "FBT002",  # boolean-default-value-positional-argument — Typer requires bool defaults
-  "TC003",   # typing-only-standard-library-import — Typer evaluates annotations at runtime
+  "FBT002",  # boolean-default-value-positional-argument
+  "PLR0913", # too-many-arguments
+  "TC003",   # typing-only-standard-library-import
 ]
-"src/minizen/cli/commands/setup.py" = ["PLR0913"]
-"src/minizen/cli/commands/run.py" = ["PLR0913"]
-"src/minizen/providers/email/template.py" = ["E501"]
+"src/minizen/providers/email/template.py" = [
+  "E501", # line-too-long
+]
 
 [tool.ruff.lint.isort]
 known-first-party = ["minizen"]
