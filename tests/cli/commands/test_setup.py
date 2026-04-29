@@ -55,7 +55,7 @@ def test_setup_writes_correct_toml(tmp_path: Path) -> None:
     )
 
     # assert
-    with open(config_path, "rb") as f:
+    with config_path.open("rb") as f:
         data = tomllib.load(f)
     assert data["email"]["smtp_host"] == "smtp.gmail.com"
     assert data["email"]["smtp_port"] == 587
@@ -89,7 +89,7 @@ def test_setup_accepts_custom_ai_values(tmp_path: Path) -> None:
     )
 
     # assert
-    with open(config_path, "rb") as f:
+    with config_path.open("rb") as f:
         data = tomllib.load(f)
     assert data["ai"]["model"] == "openai:gpt-4o"
     assert data["ai"]["top_n"] == 10
@@ -162,7 +162,7 @@ def test_setup_non_interactive_writes_config(
 
     # assert
     assert result.exit_code == 0
-    with open(config_path, "rb") as f:
+    with config_path.open("rb") as f:
         data = tomllib.load(f)
     assert data["email"]["from_addr"] == "from@example.com"
     assert data["email"]["to_addr"] == "to@example.com"
@@ -408,7 +408,7 @@ def test_setup_writes_miniflux_section(tmp_path: Path) -> None:
     )
 
     # assert
-    with open(config_path, "rb") as f:
+    with config_path.open("rb") as f:
         data = tomllib.load(f)
     assert data["miniflux"]["url"] == "https://reader.miniflux.app"
 

@@ -1,12 +1,11 @@
 import json
 from datetime import UTC, datetime
-
-from freezegun import freeze_time
 from pathlib import Path
 from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
+from freezegun import freeze_time
 
 from minizen.config.models import AIConfig, EmailConfig, MinifluxConfig, Settings
 from minizen.core.pipeline import run_pipeline

@@ -97,7 +97,7 @@ def test_load_settings_raises_when_env_var_missing(
         },
     )
     monkeypatch.delenv("MINIFLUX_API_KEY", raising=False)
-    monkeypatch.setattr("minizen.config.loader.load_dotenv", lambda *a, **k: None)
+    monkeypatch.setattr("minizen.config.loader.load_dotenv", lambda *_, **__: None)
 
     # act / assert
     with pytest.raises(KeyError, match="MINIFLUX_API_KEY"):

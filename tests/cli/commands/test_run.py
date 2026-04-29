@@ -271,7 +271,7 @@ def test_run_all_flags_no_config_file(mocker: MockerFixture) -> None:
     assert called_settings.email.from_addr == "from@example.com"
 
 
-def test_run_no_config_file_lists_missing_flags(mocker: MockerFixture) -> None:
+def test_run_no_config_file_lists_missing_flags() -> None:
     # arrange
     runner = CliRunner()
 

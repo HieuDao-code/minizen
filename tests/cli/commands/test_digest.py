@@ -1,10 +1,9 @@
 from typing import TYPE_CHECKING
-
-from freezegun import freeze_time
 from unittest.mock import MagicMock
 
 import pytest
 import typer
+from freezegun import freeze_time
 from typer.testing import CliRunner
 
 from minizen.cli import app
