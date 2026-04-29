@@ -1,6 +1,6 @@
 """CLI commands to preview or test the digest without sending."""
 
-from datetime import date
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Annotated
 
@@ -128,7 +128,7 @@ def send_test(
         typer.echo("Dry run — email not sent:\n")
         typer.echo(plain_text)
         return
-    today = date.today().strftime("%B %-d, %Y")
+    today = datetime.now(tz=UTC).date().strftime("%B %-d, %Y")
     email = EmailProvider(config=settings.email)
     email.send(
         subject=f"[TEST] Your Daily Zen — {today}",

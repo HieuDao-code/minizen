@@ -1,7 +1,7 @@
 """End-to-end digest pipeline: fetch articles, summarise, email, mark as read."""
 
 import logging
-from datetime import date
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from minizen.ai.agent import DigestAgent
@@ -43,7 +43,7 @@ def run_pipeline(*, settings: Settings, dry_run: bool = False) -> None:
     agent = DigestAgent(model=settings.ai.model, top_n=settings.ai.top_n)
     result = agent.run(articles=articles)
     html, plain_text = render_email(result.markdown)
-    today = date.today().strftime("%B %-d, %Y")
+    today = datetime.now(tz=UTC).date().strftime("%B %-d, %Y")
     logger.info("Sending digest email to %s", settings.email.to_addr)
     email.send(subject=f"Your Daily Zen — {today}", html=html, plain_text=plain_text)
     logger.info("Marked %d article(s) as read", len(result.articles_used))

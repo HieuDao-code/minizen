@@ -2,7 +2,7 @@
 
 import math
 import re
-from datetime import date
+from datetime import UTC, datetime
 from importlib.metadata import version as pkg_version
 from typing import cast
 
@@ -77,7 +77,7 @@ def render_email(markdown: str) -> tuple[str, str]:
         A ``(html, plain_text)`` tuple where ``html`` is a fully styled email
         document and ``plain_text`` is the original Markdown unchanged.
     """
-    today = date.today().strftime("%B %-d, %Y")
+    today = datetime.now(tz=UTC).date().strftime("%B %-d, %Y")
     read_time = _reading_time(markdown)
     minizen_version = pkg_version("minizen")
     raw_html = cast("str", mistune.html(markdown))
