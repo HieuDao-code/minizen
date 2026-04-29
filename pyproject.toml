@@ -97,11 +97,15 @@ convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
 "**/tests/**" = [
+  "D",       # pydocstyle
   "PLR2004", # magic-value-comparison
   "PLR0913", # too-many-arguments
   "S101",    # assert
   "S105",    # hardcoded-password-string
   "S106",    # hardcoded-password-func-arg
+]
+"src/minizen/cli/**" = [
+  "FBT002",  # boolean-default-value-positional-argument — Typer requires bool defaults
 ]
 "src/minizen/cli/commands/setup.py" = ["PLR0913"]
 "src/minizen/cli/commands/run.py" = ["PLR0913"]
