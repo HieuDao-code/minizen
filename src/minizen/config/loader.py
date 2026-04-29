@@ -33,7 +33,7 @@ def load_settings(*, config_path: Path) -> Settings:
     load_dotenv(config_path.parent / ".env")
     load_dotenv()
 
-    with open(config_path, "rb") as f:
+    with config_path.open("rb") as f:
         raw = tomllib.load(f)
 
     ai_raw = raw.get("ai", {})

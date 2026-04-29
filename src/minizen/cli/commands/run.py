@@ -1,6 +1,7 @@
 """CLI command to run the full fetch-summarise-email pipeline."""
 
-from typing import TYPE_CHECKING, Annotated, cast
+from pathlib import Path
+from typing import Annotated, cast
 
 import typer
 
@@ -13,9 +14,6 @@ from minizen.config.defaults import (
 from minizen.config.loader import load_settings
 from minizen.config.models import AIConfig, EmailConfig, MinifluxConfig, Settings
 from minizen.core.pipeline import run_pipeline
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 _DRY_RUN_OPTION = Annotated[
     bool,

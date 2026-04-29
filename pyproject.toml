@@ -106,6 +106,7 @@ convention = "google"
 ]
 "src/minizen/cli/**" = [
   "FBT002",  # boolean-default-value-positional-argument — Typer requires bool defaults
+  "TC003",   # typing-only-standard-library-import — Typer evaluates annotations at runtime
 ]
 "src/minizen/cli/commands/setup.py" = ["PLR0913"]
 "src/minizen/cli/commands/run.py" = ["PLR0913"]

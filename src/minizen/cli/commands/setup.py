@@ -1,7 +1,8 @@
 """Interactive and non-interactive setup wizard for minizen."""
 
 import os
-from typing import TYPE_CHECKING, Annotated
+from pathlib import Path
+from typing import Annotated
 
 import tomli_w
 import typer
@@ -14,9 +15,6 @@ from minizen.config.defaults import (
     DEFAULT_SMTP_PORT,
     DEFAULT_TOP_N,
 )
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 
 def _provider_key_info(model: str) -> tuple[str, str]:
