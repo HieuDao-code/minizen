@@ -56,9 +56,9 @@ dev = [
   { include-group = "test" },
   { include-group = "typing" },
 ]
-docs = ["zensical==0.0.32"]
-lint = ["ruff==0.15.10"]
-miscellaneous = ["prek==0.3.9"]
+docs = ["zensical==0.0.36"]
+lint = ["ruff==0.15.11"]
+miscellaneous = ["prek==0.3.10"]
 release = ["commitizen==4.13.10"]
 security = ["zizmor==1.24.1"]
 test = [
@@ -67,7 +67,7 @@ test = [
   "pytest-cov==7.1.0",
   "pytest-mock==3.15.1",
 ]
-typing = ["ty==0.0.29"]
+typing = ["ty==0.0.32"]
 
 [tool.uv]
 exclude-newer = "1 week"
