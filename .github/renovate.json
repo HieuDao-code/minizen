@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   // https://docs.renovatebot.com/presets-config/#configbest-practices
-  "extends": ["config:best-practices"],
+  "extends": ["config:best-practices", "config:semverAllWeekly"],
   "minimumReleaseAge": "7 days",
   "nix": {
     "enabled": true
