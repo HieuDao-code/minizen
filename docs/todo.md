@@ -2,8 +2,11 @@
 
 #### Improvements
 
-- [ ] Show the comments link after the title and the estimated reading time of miniflux api after the title. Both in a smaller font size
+- restructure: instead of getting unread entries, get the last 24h entries, and use that. So that i can still use the rss feed reader and read it.
+- Also add more links then N articles, but only show the top N articles with summaries, and the rest as a list of links at the end. This way you can still use the rss feed reader and read it, but also have the option to see more articles in the digest if you want to.
+- Show the comments link after the title and the estimated reading time of miniflux api after the title. Both in a smaller font size
 - Better how-it-works diagram, make it top to bottom instead of left to right, and make it more visually appealing
+- Keep the article summary in the language the article is in
 
 #### lower priority
 
