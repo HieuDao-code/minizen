@@ -32,11 +32,6 @@ docs:
 fmt:
     ruff format
 
-# Run main script
-[group('Project')]
-run:
-    python main.py
-
 # Update dependencies, workflows, pre-commit hooks and nix flake
 [group('Project')]
 update:
