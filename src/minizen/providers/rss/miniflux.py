@@ -1,7 +1,7 @@
-"""Miniflux RSS provider for fetching and marking articles via the Miniflux API."""
+"""Miniflux RSS provider for fetching articles published in the last 24 hours."""
 
 import logging
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 
 import miniflux
@@ -11,6 +11,8 @@ if TYPE_CHECKING:
     from minizen.config.models import MinifluxConfig
 
 logger = logging.getLogger(__name__)
+
+_LOOKBACK_HOURS = 24
 
 
 class Article(BaseModel):
@@ -29,7 +31,7 @@ class Article(BaseModel):
 
 
 class MinifluxProvider:
-    """RSS provider that reads and marks articles via the Miniflux API."""
+    """RSS provider that reads articles via the Miniflux API."""
 
     def __init__(self, *, config: MinifluxConfig) -> None:
         """Initialise the Miniflux client from the given configuration.
@@ -42,15 +44,19 @@ class MinifluxProvider:
             api_key=config.api_key,
         )
 
-    def fetch_unread(self) -> list[Article]:
-        """Return all unread articles from the Miniflux instance.
+    def fetch_recent(self) -> list[Article]:
+        """Return all articles from the last 24 hours, read or unread.
 
         Returns:
-            A list of ``Article`` objects, one per unread entry.
+            A list of ``Article`` objects, one per entry in the lookback window.
         """
-        response = self._client.get_entries(status=["unread"])
+        cutoff = datetime.now(tz=UTC) - timedelta(hours=_LOOKBACK_HOURS)
+        after_ts = int(cutoff.timestamp())
+        response = self._client.get_entries(after_published_at=after_ts)
         entries = response["entries"]
-        logger.debug("Fetched %d unread entries from Miniflux", len(entries))
+        logger.debug(
+            "Fetched %d entries from the last %dh", len(entries), _LOOKBACK_HOURS
+        )
         return [
             Article(
                 id=entry["id"],
@@ -63,12 +69,3 @@ class MinifluxProvider:
             )
             for entry in entries
         ]
-
-    def mark_as_read(self, *, article_ids: list[int]) -> None:
-        """Mark the given article IDs as read in Miniflux.
-
-        Args:
-            article_ids: IDs of articles to mark as read.
-        """
-        logger.debug("Marking articles as read: ids=%s", article_ids)
-        self._client.update_entries(entry_ids=article_ids, status="read")

@@ -67,7 +67,7 @@ def fetch(
     configure_logging(verbose=verbose)
     settings = _load(config)
     rss = MinifluxProvider(config=settings.miniflux)
-    articles = rss.fetch_unread()
+    articles = rss.fetch_recent()
     if not articles:
         typer.echo("No unread articles.")
         return
@@ -87,7 +87,7 @@ def preview(
     configure_logging(verbose=verbose)
     settings = _load(config)
     rss = MinifluxProvider(config=settings.miniflux)
-    articles = rss.fetch_unread()
+    articles = rss.fetch_recent()
     if not articles:
         typer.echo("No unread articles.")
         return
@@ -112,7 +112,7 @@ def send_test(
     configure_logging(verbose=verbose)
     settings = _load(config)
     rss = MinifluxProvider(config=settings.miniflux)
-    articles = rss.fetch_unread()
+    articles = rss.fetch_recent()
     if not articles:
         typer.echo("No unread articles.")
         return

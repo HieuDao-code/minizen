@@ -23,11 +23,11 @@ def run_pipeline(*, settings: Settings, dry_run: bool = False) -> None:
         dry_run: When ``True``, fetch articles but skip the LLM call, email send,
             and mark-as-read. Logs a summary instead.
     """
-    logger.info("Fetching unread articles from Miniflux")
+    logger.info("Fetching recent articles from Miniflux")
     rss = MinifluxProvider(config=settings.miniflux)
-    articles = rss.fetch_unread()
+    articles = rss.fetch_recent()
     if not articles:
-        logger.info("No unread articles found, nothing to do")
+        logger.info("No recent articles found, nothing to do")
         return
 
     logger.info("Found %d article(s)", len(articles))
@@ -46,5 +46,4 @@ def run_pipeline(*, settings: Settings, dry_run: bool = False) -> None:
     today = datetime.now(tz=UTC).date().strftime("%B %-d, %Y")
     logger.info("Sending digest email to %s", settings.email.to_addr)
     email.send(subject=f"Your Daily Zen — {today}", html=html, plain_text=plain_text)
-    logger.info("Marked %d article(s) as read", len(result.articles_used))
-    rss.mark_as_read(article_ids=result.articles_used)
+    logger.info("Digest sent successfully")
