@@ -1,3 +1,5 @@
+"""Tests for the end-to-end digest pipeline."""
+
 import json
 from datetime import UTC, datetime
 from pathlib import Path
@@ -45,42 +47,43 @@ def _make_article(article_id: int) -> Article:
 @freeze_time("2026-04-29")
 def test_pipeline_runs_full_flow(mocker: MockerFixture) -> None:
     # arrange
-    articles = [_make_article(1), _make_article(2)]
+    articles = [_make_article(1), _make_article(2), _make_article(3)]
     mock_rss = MagicMock()
-    mock_rss.fetch_unread.return_value = articles
+    mock_rss.fetch_recent.return_value = articles
     mock_email = MagicMock()
     mock_digest_result = MagicMock()
     mock_digest_result.markdown = "## Digest"
     mock_digest_result.articles_used = [1, 2]
     mock_agent = MagicMock()
     mock_agent.run.return_value = mock_digest_result
-    mocker.patch("minizen.core.pipeline.MinifluxProvider", return_value=mock_rss)
-    mocker.patch("minizen.core.pipeline.EmailProvider", return_value=mock_email)
-    mocker.patch("minizen.core.pipeline.DigestAgent", return_value=mock_agent)
-    mocker.patch(
+    mock_render = mocker.patch(
         "minizen.core.pipeline.render_email",
         return_value=("<h2>Digest</h2>", "## Digest"),
     )
+    mocker.patch("minizen.core.pipeline.MinifluxProvider", return_value=mock_rss)
+    mocker.patch("minizen.core.pipeline.EmailProvider", return_value=mock_email)
+    mocker.patch("minizen.core.pipeline.DigestAgent", return_value=mock_agent)
     settings = _make_settings()
 
     # act
     run_pipeline(settings=settings)
 
     # assert
-    mock_rss.fetch_unread.assert_called_once_with()
+    mock_rss.fetch_recent.assert_called_once_with()
     mock_agent.run.assert_called_once_with(articles=articles)
+    extra = [a for a in articles if a.id not in {1, 2}]
+    mock_render.assert_called_once_with("## Digest", extra_articles=extra)
     mock_email.send.assert_called_once_with(
         subject="Your Daily Zen — April 29, 2026",
         html="<h2>Digest</h2>",
         plain_text="## Digest",
     )
-    mock_rss.mark_as_read.assert_called_once_with(article_ids=[1, 2])
 
 
 def test_pipeline_exits_early_when_no_articles(mocker: MockerFixture) -> None:
     # arrange
     mock_rss = MagicMock()
-    mock_rss.fetch_unread.return_value = []
+    mock_rss.fetch_recent.return_value = []
     mock_email = MagicMock()
     mock_agent = MagicMock()
     mocker.patch("minizen.core.pipeline.MinifluxProvider", return_value=mock_rss)
@@ -94,14 +97,14 @@ def test_pipeline_exits_early_when_no_articles(mocker: MockerFixture) -> None:
     # assert
     mock_agent.run.assert_not_called()
     mock_email.send.assert_not_called()
-    mock_rss.mark_as_read.assert_not_called()
 
 
-def test_pipeline_dry_run_skips_llm_email_and_mark(mocker: MockerFixture) -> None:
+@freeze_time("2026-04-29")
+def test_pipeline_dry_run_skips_llm_and_email(mocker: MockerFixture) -> None:
     # arrange
     articles = [_make_article(1), _make_article(2)]
     mock_rss = MagicMock()
-    mock_rss.fetch_unread.return_value = articles
+    mock_rss.fetch_recent.return_value = articles
     mock_email = MagicMock()
     mock_agent = MagicMock()
     mocker.patch("minizen.core.pipeline.MinifluxProvider", return_value=mock_rss)
@@ -113,37 +116,9 @@ def test_pipeline_dry_run_skips_llm_email_and_mark(mocker: MockerFixture) -> Non
     run_pipeline(settings=settings, dry_run=True)
 
     # assert
-    mock_rss.fetch_unread.assert_called_once_with()
+    mock_rss.fetch_recent.assert_called_once_with()
     mock_agent.run.assert_not_called()
     mock_email.send.assert_not_called()
-    mock_rss.mark_as_read.assert_not_called()
-
-
-def test_pipeline_does_not_mark_read_when_email_fails(mocker: MockerFixture) -> None:
-    # arrange
-    articles = [_make_article(1)]
-    mock_rss = MagicMock()
-    mock_rss.fetch_unread.return_value = articles
-    mock_email = MagicMock()
-    mock_email.send.side_effect = OSError("SMTP error")
-    mock_digest_result = MagicMock()
-    mock_digest_result.markdown = "## Digest"
-    mock_digest_result.articles_used = [1]
-    mock_agent = MagicMock()
-    mock_agent.run.return_value = mock_digest_result
-    mocker.patch("minizen.core.pipeline.MinifluxProvider", return_value=mock_rss)
-    mocker.patch("minizen.core.pipeline.EmailProvider", return_value=mock_email)
-    mocker.patch("minizen.core.pipeline.DigestAgent", return_value=mock_agent)
-    mocker.patch(
-        "minizen.core.pipeline.render_email",
-        return_value=("<h2>Digest</h2>", "## Digest"),
-    )
-    settings = _make_settings()
-
-    # act / assert
-    with pytest.raises(OSError, match="SMTP error"):
-        run_pipeline(settings=settings)
-    mock_rss.mark_as_read.assert_not_called()
 
 
 @freeze_time("2026-04-29")
@@ -167,7 +142,7 @@ def test_pipeline_sends_email_with_fixture_data(mocker: MockerFixture) -> None:
     article_ids = [a.id for a in articles]
 
     mock_rss = MagicMock()
-    mock_rss.fetch_unread.return_value = articles
+    mock_rss.fetch_recent.return_value = articles
     mock_agent = MagicMock()
     mock_agent.run.return_value = MagicMock(
         markdown=digest_markdown,
@@ -195,4 +170,30 @@ def test_pipeline_sends_email_with_fixture_data(mocker: MockerFixture) -> None:
         plain_text=digest_markdown,
     )
     assert all(kw in sent_html for kw in ["Rust", "LLM", "Apple", "Platforms", "Webb"])
-    mock_rss.mark_as_read.assert_called_once_with(article_ids=article_ids)
+
+
+@freeze_time("2026-04-29")
+def test_pipeline_raises_on_email_failure(mocker: MockerFixture) -> None:
+    # arrange
+    articles = [_make_article(1)]
+    mock_rss = MagicMock()
+    mock_rss.fetch_recent.return_value = articles
+    mock_email = MagicMock()
+    mock_email.send.side_effect = OSError("SMTP error")
+    mock_digest_result = MagicMock()
+    mock_digest_result.markdown = "## Digest"
+    mock_digest_result.articles_used = [1]
+    mock_agent = MagicMock()
+    mock_agent.run.return_value = mock_digest_result
+    mocker.patch("minizen.core.pipeline.MinifluxProvider", return_value=mock_rss)
+    mocker.patch("minizen.core.pipeline.EmailProvider", return_value=mock_email)
+    mocker.patch("minizen.core.pipeline.DigestAgent", return_value=mock_agent)
+    mocker.patch(
+        "minizen.core.pipeline.render_email",
+        return_value=("<h2>Digest</h2>", "## Digest"),
+    )
+    settings = _make_settings()
+
+    # act / assert
+    with pytest.raises(OSError, match="SMTP error"):
+        run_pipeline(settings=settings)
