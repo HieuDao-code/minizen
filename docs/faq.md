@@ -21,10 +21,9 @@ Yes. minizen uses standard STARTTLS SMTP. Set `smtp_host`, `smtp_port`,
 `MINIZEN_EMAIL_USERNAME`, and `MINIZEN_EMAIL_PASSWORD` for any SMTP provider
 (Fastmail, Outlook, Mailgun, Postmark, etc.).
 
-## What happens if there are no unread articles?
+## What happens if there are no recent articles?
 
-minizen exits cleanly with a log message — no email is sent and no articles are
-marked as read.
+minizen exits cleanly with a log message — no email is sent.
 
 ## How do I test the digest without sending a real email?
 
@@ -37,7 +36,7 @@ minizen digest fetch
 # Generate the digest in your terminal — no email sent
 minizen digest preview
 
-# Send to your inbox without marking articles as read
+# Send to your inbox as a test
 minizen digest send-test
 ```
 
