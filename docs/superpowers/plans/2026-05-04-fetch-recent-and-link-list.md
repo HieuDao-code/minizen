@@ -1000,13 +1000,15 @@ def test_digest_send_test_sends_email(mocker: MockerFixture) -> None:
     mocker.patch(
         "minizen.cli.commands.digest.load_settings", return_value=mock_settings
     )
-    mock_articles = [MagicMock()]
+    selected = MagicMock()
+    unselected = MagicMock()
+    mock_articles = [selected, unselected]
     mock_rss = MagicMock()
     mock_rss.fetch_recent.return_value = mock_articles
     mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
     mock_result = MagicMock()
     mock_result.markdown = "## Digest"
-    mock_result.articles_used = []
+    mock_result.articles_used = [selected.id]  # covers both branches of the comprehension
     mock_agent = MagicMock()
     mock_agent.run.return_value = mock_result
     mocker.patch("minizen.cli.commands.digest.DigestAgent", return_value=mock_agent)
