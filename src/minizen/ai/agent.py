@@ -99,41 +99,28 @@ class DigestAgent:
         *,
         model: str,
         top_n: int,
-        summary_language: str = "auto",
-        max_words_per_article: int | None = None,
+        max_words_per_article: int = 500,
     ) -> None:
         """Initialise the agent with the given model and digest settings.
 
         Args:
             model: pydantic-ai model identifier (e.g. ``anthropic:claude-haiku-4-5``).
             top_n: Maximum number of articles to include in the digest.
-            summary_language: Language for summaries. ``"auto"`` matches each
-                article's language; any other value (e.g. ``"English"``) forces
-                all summaries into that language.
             max_words_per_article: Maximum words of article content sent to the
-                LLM per article. ``None`` disables truncation.
+                LLM per article.
         """
         logger.debug(
-            "Initialising DigestAgent: model=%s, top_n=%d, lang=%s, max_words=%s",
+            "Initialising DigestAgent: model=%s, top_n=%d, max_words=%d",
             model,
             top_n,
-            summary_language,
             max_words_per_article,
         )
         self._top_n = top_n
         self._max_words_per_article = max_words_per_article
-        if summary_language == "auto":
-            language_rule = (
-                "Write each article's summary in the same language "
-                "the article is written in."
-            )
-        else:
-            language_rule = f"Write all summaries in {summary_language}."
-        system_prompt = _SYSTEM_PROMPT + f"- {language_rule}\n"
         self._agent = Agent(
             model=model,
             output_type=DigestResult,
-            system_prompt=system_prompt,
+            system_prompt=_SYSTEM_PROMPT,
         )
 
     def run(self, *, articles: list[Article]) -> DigestResult:
@@ -154,12 +141,7 @@ class DigestAgent:
             f"URL: {a.url}\n"
             f"Published: {a.published_at.isoformat()}\n"
             + (f"Comments URL: {a.comments_url}\n" if a.comments_url else "")
-            + "\n"
-            + (
-                _truncate_words(a.content, self._max_words_per_article)
-                if self._max_words_per_article
-                else a.content
-            )
+            + f"\n{_truncate_words(a.content, self._max_words_per_article)}"
             for a in articles
         )
         user_prompt = (

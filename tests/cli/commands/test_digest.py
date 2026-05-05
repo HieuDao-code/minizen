@@ -20,8 +20,7 @@ def _make_settings_mock() -> MagicMock:
     mock = MagicMock()
     mock.ai.model = "anthropic:claude-sonnet-4-6"
     mock.ai.top_n = 5
-    mock.ai.summary_language = "auto"
-    mock.ai.max_words_per_article = None
+    mock.ai.max_words_per_article = 500
     return mock
 
 
@@ -98,8 +97,7 @@ def test_digest_preview_prints_markdown(mocker: MockerFixture) -> None:
     mock_agent_cls.assert_called_once_with(
         model="anthropic:claude-sonnet-4-6",
         top_n=5,
-        summary_language="auto",
-        max_words_per_article=None,
+        max_words_per_article=500,
     )
 
 
@@ -169,8 +167,7 @@ def test_digest_send_test_sends_email(mocker: MockerFixture) -> None:
     mock_agent_cls.assert_called_once_with(
         model="anthropic:claude-sonnet-4-6",
         top_n=5,
-        summary_language="auto",
-        max_words_per_article=None,
+        max_words_per_article=500,
     )
 
 

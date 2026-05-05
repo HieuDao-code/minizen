@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from minizen.ai.agent import DigestAgent, DigestResult, _truncate_words
+from minizen.ai.agent import _SYSTEM_PROMPT, DigestAgent, DigestResult, _truncate_words
 from minizen.providers.rss.miniflux import Article
 
 if TYPE_CHECKING:
@@ -72,7 +72,7 @@ def test_agent_initialized_with_correct_model(mocker: MockerFixture) -> None:
     mock_agent_cls.assert_called_once_with(
         model="openai:gpt-4o",
         output_type=DigestResult,
-        system_prompt=mocker.ANY,
+        system_prompt=_SYSTEM_PROMPT,
     )
 
 
@@ -151,35 +151,6 @@ def test_truncate_words_preserves_all_words_when_under_limit() -> None:
     assert result.split() == ["one", "two", "three"]
 
 
-# --- language rule in system prompt ---
-
-
-def test_auto_language_rule_appears_in_system_prompt(mocker: MockerFixture) -> None:
-    # arrange
-    mock_agent_cls = mocker.patch("minizen.ai.agent.Agent")
-
-    # act
-    DigestAgent(model="anthropic:claude-sonnet-4-6", top_n=3, summary_language="auto")
-
-    # assert
-    system_prompt: str = mock_agent_cls.call_args.kwargs["system_prompt"]
-    assert "same language the article is written in" in system_prompt
-
-
-def test_specific_language_rule_appears_in_system_prompt(mocker: MockerFixture) -> None:
-    # arrange
-    mock_agent_cls = mocker.patch("minizen.ai.agent.Agent")
-
-    # act
-    DigestAgent(
-        model="anthropic:claude-sonnet-4-6", top_n=3, summary_language="English"
-    )
-
-    # assert
-    system_prompt: str = mock_agent_cls.call_args.kwargs["system_prompt"]
-    assert "Write all summaries in English" in system_prompt
-
-
 # --- max_words_per_article wiring ---
 
 
@@ -209,28 +180,3 @@ def test_run_truncates_content_at_max_words(mocker: MockerFixture) -> None:
     user_prompt: str = mock_agent_cls.return_value.run_sync.call_args[0][0]
     assert "word49" in user_prompt
     assert "word50" not in user_prompt
-
-
-def test_run_passes_full_content_when_max_words_is_none(mocker: MockerFixture) -> None:
-    # arrange
-    mock_agent_cls = mocker.patch("minizen.ai.agent.Agent")
-    mock_run_result = mocker.MagicMock()
-    mock_run_result.output = DigestResult(markdown="# Digest", articles_used=[1])
-    mock_agent_cls.return_value.run_sync.return_value = mock_run_result
-    long_content = "<p>" + " ".join(f"word{i}" for i in range(200)) + "</p>"
-    article = Article(
-        id=1,
-        title="Test",
-        url="https://example.com",
-        content=long_content,
-        feed_name="Feed",
-        published_at=datetime(2026, 4, 24, 8, 0, 0, tzinfo=UTC),
-    )
-    agent = DigestAgent(model="anthropic:claude-sonnet-4-6", top_n=3)
-
-    # act
-    agent.run(articles=[article])
-
-    # assert
-    user_prompt: str = mock_agent_cls.return_value.run_sync.call_args[0][0]
-    assert "word199" in user_prompt

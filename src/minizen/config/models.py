@@ -41,20 +41,9 @@ class AIConfig(BaseModel):
         default=DEFAULT_TOP_N,
         description="Maximum number of articles to include in the digest.",
     )
-    summary_language: str = Field(
-        default="auto",
-        description=(
-            'Language for article summaries. ``"auto"`` matches each article\'s '
-            'language; any other value (e.g. ``"English"``) forces all summaries '
-            "into that language."
-        ),
-    )
-    max_words_per_article: int | None = Field(
-        default=None,
-        description=(
-            "Maximum words of article content sent to the LLM per article. "
-            "``None`` disables truncation."
-        ),
+    max_words_per_article: int = Field(
+        default=500,
+        description="Maximum words of article content sent to the LLM per article.",
     )
 
 

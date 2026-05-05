@@ -83,8 +83,7 @@ def test_pipeline_runs_full_flow(mocker: MockerFixture) -> None:
     mock_agent_cls.assert_called_once_with(
         model="anthropic:claude-sonnet-4-6",
         top_n=2,
-        summary_language="auto",
-        max_words_per_article=None,
+        max_words_per_article=500,
     )
 
 

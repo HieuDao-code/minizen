@@ -100,7 +100,6 @@ def preview(
     agent = DigestAgent(
         model=settings.ai.model,
         top_n=settings.ai.top_n,
-        summary_language=settings.ai.summary_language,
         max_words_per_article=settings.ai.max_words_per_article,
     )
     result = agent.run(articles=articles)
@@ -129,7 +128,6 @@ def send_test(
     agent = DigestAgent(
         model=settings.ai.model,
         top_n=settings.ai.top_n,
-        summary_language=settings.ai.summary_language,
         max_words_per_article=settings.ai.max_words_per_article,
     )
     result = agent.run(articles=articles)
