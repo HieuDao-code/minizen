@@ -3,6 +3,7 @@
 #### Improvements
 
 - Keep the article summary in the language the article is in
+- Add a default word limit per article to limit token limit
 
 #### lower priority
 

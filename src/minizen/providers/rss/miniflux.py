@@ -52,7 +52,7 @@ class MinifluxProvider:
         """
         cutoff = datetime.now(tz=UTC) - timedelta(hours=_LOOKBACK_HOURS)
         after_ts = int(cutoff.timestamp())
-        response = self._client.get_entries(after_published_at=after_ts)
+        response = self._client.get_entries(published_after=after_ts)
         entries = response["entries"]
         logger.debug(
             "Fetched %d entries from the last %dh", len(entries), _LOOKBACK_HOURS

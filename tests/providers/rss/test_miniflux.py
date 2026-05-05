@@ -49,7 +49,7 @@ def test_fetch_recent_returns_articles(mocker: MockerFixture) -> None:
     assert articles[0].feed_name == "Example Feed"
     assert articles[0].published_at == datetime(2026, 4, 24, 8, 0, 0, tzinfo=UTC)
     mock_client_cls.return_value.get_entries.assert_called_once_with(
-        after_published_at=expected_ts
+        published_after=expected_ts
     )
 
 
@@ -189,5 +189,5 @@ def test_fetch_recent_with_fixture_data(mocker: MockerFixture) -> None:
     assert all(a.url for a in articles)
     assert all(a.published_at.tzinfo is UTC for a in articles)
     mock_client_cls.return_value.get_entries.assert_called_once_with(
-        after_published_at=expected_ts
+        published_after=expected_ts
     )
