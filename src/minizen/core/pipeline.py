@@ -40,7 +40,12 @@ def run_pipeline(*, settings: Settings, dry_run: bool = False) -> None:
         return
 
     email = EmailProvider(config=settings.email)
-    agent = DigestAgent(model=settings.ai.model, top_n=settings.ai.top_n)
+    agent = DigestAgent(
+        model=settings.ai.model,
+        top_n=settings.ai.top_n,
+        summary_language=settings.ai.summary_language,
+        max_words_per_article=settings.ai.max_words_per_article,
+    )
     result = agent.run(articles=articles)
     selected_ids = set(result.articles_used)
     extra_articles = [a for a in articles if a.id not in selected_ids]

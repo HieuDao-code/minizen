@@ -62,7 +62,9 @@ def test_pipeline_runs_full_flow(mocker: MockerFixture) -> None:
     )
     mocker.patch("minizen.core.pipeline.MinifluxProvider", return_value=mock_rss)
     mocker.patch("minizen.core.pipeline.EmailProvider", return_value=mock_email)
-    mocker.patch("minizen.core.pipeline.DigestAgent", return_value=mock_agent)
+    mock_agent_cls = mocker.patch(
+        "minizen.core.pipeline.DigestAgent", return_value=mock_agent
+    )
     settings = _make_settings()
 
     # act
@@ -77,6 +79,12 @@ def test_pipeline_runs_full_flow(mocker: MockerFixture) -> None:
         subject="Your Daily Zen — April 29, 2026",
         html="<h2>Digest</h2>",
         plain_text="## Digest",
+    )
+    mock_agent_cls.assert_called_once_with(
+        model="anthropic:claude-sonnet-4-6",
+        top_n=2,
+        summary_language="auto",
+        max_words_per_article=None,
     )
 
 
