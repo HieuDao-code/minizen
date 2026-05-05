@@ -1,4 +1,4 @@
-"""End-to-end digest pipeline: fetch articles, summarise, email, mark as read."""
+"""End-to-end digest pipeline: fetch recent articles, summarise, and email."""
 
 import logging
 from datetime import UTC, datetime
@@ -16,25 +16,25 @@ logger = logging.getLogger(__name__)
 
 
 def run_pipeline(*, settings: Settings, dry_run: bool = False) -> None:
-    """Fetch unread articles, generate a digest, email it, then mark articles as read.
+    """Fetch recent articles, generate a digest, and email it.
 
     Args:
         settings: Fully loaded application settings (Miniflux, email, AI config).
-        dry_run: When ``True``, fetch articles but skip the LLM call, email send,
-            and mark-as-read. Logs a summary instead.
+        dry_run: When ``True``, fetch articles but skip the LLM call and email send.
+            Logs a summary instead.
     """
-    logger.info("Fetching unread articles from Miniflux")
+    logger.info("Fetching recent articles from Miniflux")
     rss = MinifluxProvider(config=settings.miniflux)
-    articles = rss.fetch_unread()
+    articles = rss.fetch_recent()
     if not articles:
-        logger.info("No unread articles found, nothing to do")
+        logger.info("No recent articles found, nothing to do")
         return
 
     logger.info("Found %d article(s)", len(articles))
 
     if dry_run:
         logger.info(
-            "Dry run: %d article(s) fetched. LLM, email, and mark-as-read skipped.",
+            "Dry run: %d article(s) fetched. LLM and email skipped.",
             len(articles),
         )
         return
@@ -42,9 +42,10 @@ def run_pipeline(*, settings: Settings, dry_run: bool = False) -> None:
     email = EmailProvider(config=settings.email)
     agent = DigestAgent(model=settings.ai.model, top_n=settings.ai.top_n)
     result = agent.run(articles=articles)
-    html, plain_text = render_email(result.markdown)
+    selected_ids = set(result.articles_used)
+    extra_articles = [a for a in articles if a.id not in selected_ids]
+    html, plain_text = render_email(result.markdown, extra_articles=extra_articles)
     today = datetime.now(tz=UTC).date().strftime("%B %-d, %Y")
     logger.info("Sending digest email to %s", settings.email.to_addr)
     email.send(subject=f"Your Daily Zen — {today}", html=html, plain_text=plain_text)
-    logger.info("Marked %d article(s) as read", len(result.articles_used))
-    rss.mark_as_read(article_ids=result.articles_used)
+    logger.info("Digest sent successfully")

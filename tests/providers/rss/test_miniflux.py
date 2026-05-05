@@ -1,7 +1,11 @@
+"""Tests for the Miniflux RSS provider."""
+
 import json
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING
+
+from freezegun import freeze_time
 
 from minizen.config.models import MinifluxConfig
 from minizen.providers.rss.miniflux import MinifluxProvider
@@ -10,7 +14,8 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
 
-def test_fetch_unread_returns_articles(mocker: MockerFixture) -> None:
+@freeze_time("2026-05-04T10:00:00Z")
+def test_fetch_recent_returns_articles(mocker: MockerFixture) -> None:
     # arrange
     mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
     mock_client_cls.return_value.get_entries.return_value = {
@@ -28,9 +33,12 @@ def test_fetch_unread_returns_articles(mocker: MockerFixture) -> None:
     }
     config = MinifluxConfig(url="https://rss.example.com", api_key="key")
     provider = MinifluxProvider(config=config)
+    expected_ts = int(
+        (datetime(2026, 5, 4, 10, 0, 0, tzinfo=UTC) - timedelta(hours=24)).timestamp()
+    )
 
     # act
-    articles = provider.fetch_unread()
+    articles = provider.fetch_recent()
 
     # assert
     assert len(articles) == 1
@@ -40,10 +48,13 @@ def test_fetch_unread_returns_articles(mocker: MockerFixture) -> None:
     assert articles[0].content == "<p>Body</p>"
     assert articles[0].feed_name == "Example Feed"
     assert articles[0].published_at == datetime(2026, 4, 24, 8, 0, 0, tzinfo=UTC)
-    mock_client_cls.return_value.get_entries.assert_called_once_with(status=["unread"])
+    mock_client_cls.return_value.get_entries.assert_called_once_with(
+        published_after=expected_ts
+    )
 
 
-def test_fetch_unread_returns_empty_list_when_no_entries(mocker: MockerFixture) -> None:
+@freeze_time("2026-05-04T10:00:00Z")
+def test_fetch_recent_returns_empty_list_when_no_entries(mocker: MockerFixture) -> None:
     # arrange
     mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
     mock_client_cls.return_value.get_entries.return_value = {"total": 0, "entries": []}
@@ -51,25 +62,10 @@ def test_fetch_unread_returns_empty_list_when_no_entries(mocker: MockerFixture) 
     provider = MinifluxProvider(config=config)
 
     # act
-    articles = provider.fetch_unread()
+    articles = provider.fetch_recent()
 
     # assert
     assert articles == []
-
-
-def test_mark_as_read_calls_client_with_ids(mocker: MockerFixture) -> None:
-    # arrange
-    mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
-    config = MinifluxConfig(url="https://rss.example.com", api_key="key")
-    provider = MinifluxProvider(config=config)
-
-    # act
-    provider.mark_as_read(article_ids=[1, 2, 3])
-
-    # assert
-    mock_client_cls.return_value.update_entries.assert_called_once_with(
-        entry_ids=[1, 2, 3], status="read"
-    )
 
 
 def test_miniflux_client_initialized_with_config(mocker: MockerFixture) -> None:
@@ -86,7 +82,8 @@ def test_miniflux_client_initialized_with_config(mocker: MockerFixture) -> None:
     )
 
 
-def test_fetch_unread_maps_comments_url_when_present(mocker: MockerFixture) -> None:
+@freeze_time("2026-05-04T10:00:00Z")
+def test_fetch_recent_maps_comments_url_when_present(mocker: MockerFixture) -> None:
     # arrange
     mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
     mock_client_cls.return_value.get_entries.return_value = {
@@ -107,13 +104,14 @@ def test_fetch_unread_maps_comments_url_when_present(mocker: MockerFixture) -> N
     provider = MinifluxProvider(config=config)
 
     # act
-    articles = provider.fetch_unread()
+    articles = provider.fetch_recent()
 
     # assert
     assert articles[0].comments_url == "https://news.ycombinator.com/item?id=99"
 
 
-def test_fetch_unread_sets_comments_url_none_when_empty(mocker: MockerFixture) -> None:
+@freeze_time("2026-05-04T10:00:00Z")
+def test_fetch_recent_sets_comments_url_none_when_empty(mocker: MockerFixture) -> None:
     # arrange
     mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
     mock_client_cls.return_value.get_entries.return_value = {
@@ -134,13 +132,14 @@ def test_fetch_unread_sets_comments_url_none_when_empty(mocker: MockerFixture) -
     provider = MinifluxProvider(config=config)
 
     # act
-    articles = provider.fetch_unread()
+    articles = provider.fetch_recent()
 
     # assert
     assert articles[0].comments_url is None
 
 
-def test_fetch_unread_sets_comments_url_none_when_absent(mocker: MockerFixture) -> None:
+@freeze_time("2026-05-04T10:00:00Z")
+def test_fetch_recent_sets_comments_url_none_when_absent(mocker: MockerFixture) -> None:
     # arrange
     mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
     mock_client_cls.return_value.get_entries.return_value = {
@@ -160,13 +159,14 @@ def test_fetch_unread_sets_comments_url_none_when_absent(mocker: MockerFixture) 
     provider = MinifluxProvider(config=config)
 
     # act
-    articles = provider.fetch_unread()
+    articles = provider.fetch_recent()
 
     # assert
     assert articles[0].comments_url is None
 
 
-def test_fetch_unread_with_fixture_data(mocker: MockerFixture) -> None:
+@freeze_time("2026-05-04T10:00:00Z")
+def test_fetch_recent_with_fixture_data(mocker: MockerFixture) -> None:
     # arrange
     fixture_path = Path(__file__).parents[2] / "fixtures" / "miniflux_response.json"
     fixture = json.loads(fixture_path.read_text())
@@ -174,9 +174,12 @@ def test_fetch_unread_with_fixture_data(mocker: MockerFixture) -> None:
     mock_client_cls.return_value.get_entries.return_value = fixture
     config = MinifluxConfig(url="https://rss.example.com", api_key="key")
     provider = MinifluxProvider(config=config)
+    expected_ts = int(
+        (datetime(2026, 5, 4, 10, 0, 0, tzinfo=UTC) - timedelta(hours=24)).timestamp()
+    )
 
     # act
-    articles = provider.fetch_unread()
+    articles = provider.fetch_recent()
 
     # assert
     assert len(articles) == 5
@@ -185,4 +188,6 @@ def test_fetch_unread_with_fixture_data(mocker: MockerFixture) -> None:
     assert all(a.title for a in articles)
     assert all(a.url for a in articles)
     assert all(a.published_at.tzinfo is UTC for a in articles)
-    mock_client_cls.return_value.get_entries.assert_called_once_with(status=["unread"])
+    mock_client_cls.return_value.get_entries.assert_called_once_with(
+        published_after=expected_ts
+    )

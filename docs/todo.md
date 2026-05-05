@@ -2,8 +2,8 @@
 
 #### Improvements
 
-- [ ] Show the comments link after the title and the estimated reading time of miniflux api after the title. Both in a smaller font size
-- Better how-it-works diagram, make it top to bottom instead of left to right, and make it more visually appealing
+- Keep the article summary in the language the article is in
+- Add a default word limit per article to limit token limit
 
 #### lower priority
 

@@ -19,7 +19,7 @@ _DRY_RUN_OPTION = Annotated[
     bool,
     typer.Option(
         "--dry-run",
-        help="Fetch articles but skip LLM call, email send, and mark-as-read.",
+        help="Fetch articles but skip LLM call and email send.",
     ),
 ]
 

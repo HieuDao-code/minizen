@@ -4,9 +4,12 @@ import math
 import re
 from datetime import UTC, datetime
 from importlib.metadata import version as pkg_version
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import mistune
+
+if TYPE_CHECKING:
+    from minizen.providers.rss.miniflux import Article
 
 # Colour palette
 _BG = "#EEF2F7"
@@ -67,11 +70,31 @@ def _build_article_cards(html: str) -> str:
     return result
 
 
-def render_email(markdown: str) -> tuple[str, str]:
+def _build_more_links(articles: list[Article]) -> str:
+    """Build a compact "More to read" link list for articles without full summaries.
+
+    Args:
+        articles: Articles to list. Returns an empty string when the list is empty.
+
+    Returns:
+        An HTML ``<div>`` containing a heading and ``<ul>`` of linked titles,
+        or an empty string if ``articles`` is empty.
+    """
+    if not articles:
+        return ""
+    items = "".join(f'<li><a href="{a.url}">{a.title}</a></li>' for a in articles)
+    return f'<div class="more-links"><h3>More to read</h3><ul>{items}</ul></div>'
+
+
+def render_email(
+    markdown: str, *, extra_articles: list[Article] | None = None
+) -> tuple[str, str]:
     """Render a Markdown digest into a styled HTML email and a plain-text fallback.
 
     Args:
         markdown: Raw Markdown digest produced by the AI agent.
+        extra_articles: Articles not selected for full summaries, shown as a compact
+            link list at the bottom of the email. Defaults to no link list.
 
     Returns:
         A ``(html, plain_text)`` tuple where ``html`` is a fully styled email
@@ -82,6 +105,7 @@ def render_email(markdown: str) -> tuple[str, str]:
     minizen_version = pkg_version("minizen")
     raw_html = cast("str", mistune.html(markdown))
     content_html = _build_article_cards(raw_html)
+    more_html = _build_more_links(extra_articles or [])
     preheader = f"~{read_time} min read \u00b7 Your curated articles for {today}"
 
     html = f"""<!DOCTYPE html>
@@ -208,6 +232,34 @@ def render_email(markdown: str) -> tuple[str, str]:
       opacity: 0.7;
     }}
 
+    .more-links {{
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid {_BORDER};
+    }}
+    .more-links h3 {{
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: {_MUTED};
+      margin: 0 0 12px;
+    }}
+    .more-links ul {{
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }}
+    .more-links li {{
+      margin-bottom: 6px;
+      font-size: 14px;
+    }}
+    .more-links li a {{
+      color: {_ACCENT_BLUE};
+      text-decoration: none;
+    }}
+    .more-links li a:hover {{ text-decoration: underline; }}
+
     @media (max-width: 640px) {{
       .wrapper {{ margin: 0; border-radius: 0; box-shadow: none; }}
       .header {{ padding: 28px 20px 22px; }}
@@ -229,6 +281,7 @@ def render_email(markdown: str) -> tuple[str, str]:
     </div>
     <div class="content">
       {content_html}
+      {more_html}
     </div>
     <div class="footer">
       Curated by <a href="https://hieudao-code.github.io/minizen/">minizen</a> &middot; {today}

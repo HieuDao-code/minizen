@@ -1,8 +1,10 @@
 """Tests for minizen.providers.email.template email rendering."""
 
+from datetime import UTC, datetime
 from pathlib import Path
 
 from minizen.providers.email.template import render_email
+from minizen.providers.rss.miniflux import Article
 
 
 def test_render_email_returns_html_and_plain_text() -> None:
@@ -95,3 +97,31 @@ def test_render_email_does_not_use_old_palette() -> None:
     # assert
     assert "#7A9E7E" not in html
     assert "#F2EFE9" not in html
+
+
+def test_render_email_with_extra_articles_shows_link_list() -> None:
+    # arrange
+    extra = Article(
+        id=99,
+        title="Extra Article Title",
+        url="https://example.com/extra",
+        content="content",
+        feed_name="Feed",
+        published_at=datetime(2026, 5, 4, tzinfo=UTC),
+    )
+
+    # act
+    html, _ = render_email(markdown="## Hello", extra_articles=[extra])
+
+    # assert
+    assert "More to read" in html
+    assert "Extra Article Title" in html
+    assert "https://example.com/extra" in html
+
+
+def test_render_email_with_no_extra_articles_hides_link_list() -> None:
+    # act
+    html, _ = render_email(markdown="## Hello", extra_articles=[])
+
+    # assert
+    assert "More to read" not in html

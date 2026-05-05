@@ -35,7 +35,7 @@ _DRY_RUN_OPTION = Annotated[
     ),
 ]
 
-app = typer.Typer(help="Preview or test the digest without marking articles as read.")
+app = typer.Typer(help="Preview or test the digest pipeline.")
 
 
 def _load(config: Path) -> Settings:
@@ -63,15 +63,15 @@ def fetch(
     config: _CONFIG_OPTION = DEFAULT_CONFIG_PATH,
     verbose: _VERBOSE_OPTION = False,
 ) -> None:
-    """Fetch unread articles and print their titles and URLs."""
+    """Fetch recent articles and print their titles and URLs."""
     configure_logging(verbose=verbose)
     settings = _load(config)
     rss = MinifluxProvider(config=settings.miniflux)
-    articles = rss.fetch_unread()
+    articles = rss.fetch_recent()
     if not articles:
-        typer.echo("No unread articles.")
+        typer.echo("No recent articles.")
         return
-    typer.echo(f"{len(articles)} unread article(s):\n")
+    typer.echo(f"{len(articles)} recent article(s) in the last 24h:\n")
     for article in articles:
         typer.echo(f"[{article.feed_name}] {article.title}")
         typer.echo(f"  {article.url}")
@@ -87,12 +87,12 @@ def preview(
     configure_logging(verbose=verbose)
     settings = _load(config)
     rss = MinifluxProvider(config=settings.miniflux)
-    articles = rss.fetch_unread()
+    articles = rss.fetch_recent()
     if not articles:
-        typer.echo("No unread articles.")
+        typer.echo("No recent articles.")
         return
     if dry_run:
-        typer.echo(f"{len(articles)} unread article(s):\n")
+        typer.echo(f"{len(articles)} recent article(s) in the last 24h:\n")
         for article in articles:
             typer.echo(f"[{article.feed_name}] {article.title}")
             typer.echo(f"  {article.url}")
@@ -108,13 +108,13 @@ def send_test(
     verbose: _VERBOSE_OPTION = False,
     dry_run: _DRY_RUN_OPTION = False,
 ) -> None:
-    """Send a test digest email without marking articles as read."""
+    """Send a test digest email."""
     configure_logging(verbose=verbose)
     settings = _load(config)
     rss = MinifluxProvider(config=settings.miniflux)
-    articles = rss.fetch_unread()
+    articles = rss.fetch_recent()
     if not articles:
-        typer.echo("No unread articles.")
+        typer.echo("No recent articles.")
         return
     if dry_run:
         typer.confirm(
@@ -123,7 +123,9 @@ def send_test(
         )
     agent = DigestAgent(model=settings.ai.model, top_n=settings.ai.top_n)
     result = agent.run(articles=articles)
-    html, plain_text = render_email(result.markdown)
+    selected_ids = set(result.articles_used)
+    extra_articles = [a for a in articles if a.id not in selected_ids]
+    html, plain_text = render_email(result.markdown, extra_articles=extra_articles)
     if dry_run:
         typer.echo("Dry run — email not sent:\n")
         typer.echo(plain_text)
