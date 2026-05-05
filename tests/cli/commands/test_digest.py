@@ -1,3 +1,5 @@
+"""Tests for the digest CLI subcommands."""
+
 from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
@@ -32,7 +34,7 @@ def test_digest_fetch_prints_articles(mocker: MockerFixture) -> None:
     mock_article.title = "Article Title"
     mock_article.url = "https://example.com/article"
     mock_rss = MagicMock()
-    mock_rss.fetch_unread.return_value = [mock_article]
+    mock_rss.fetch_recent.return_value = [mock_article]
     mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
     runner = CliRunner()
 
@@ -53,7 +55,7 @@ def test_digest_fetch_exits_early_when_no_articles(mocker: MockerFixture) -> Non
         "minizen.cli.commands.digest.load_settings", return_value=mock_settings
     )
     mock_rss = MagicMock()
-    mock_rss.fetch_unread.return_value = []
+    mock_rss.fetch_recent.return_value = []
     mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
     runner = CliRunner()
 
@@ -62,7 +64,7 @@ def test_digest_fetch_exits_early_when_no_articles(mocker: MockerFixture) -> Non
 
     # assert
     assert result.exit_code == 0
-    assert "No unread articles" in result.output
+    assert "No recent articles" in result.output
 
 
 def test_digest_preview_prints_markdown(mocker: MockerFixture) -> None:
@@ -73,7 +75,7 @@ def test_digest_preview_prints_markdown(mocker: MockerFixture) -> None:
     )
     mock_articles = [MagicMock(), MagicMock()]
     mock_rss = MagicMock()
-    mock_rss.fetch_unread.return_value = mock_articles
+    mock_rss.fetch_recent.return_value = mock_articles
     mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
     mock_result = MagicMock()
     mock_result.markdown = "## Today's Digest\n\nSome content."
@@ -100,7 +102,7 @@ def test_digest_preview_exits_early_when_no_articles(
         "minizen.cli.commands.digest.load_settings", return_value=mock_settings
     )
     mock_rss = MagicMock()
-    mock_rss.fetch_unread.return_value = []
+    mock_rss.fetch_recent.return_value = []
     mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
     mock_agent = MagicMock()
     mocker.patch("minizen.cli.commands.digest.DigestAgent", return_value=mock_agent)
@@ -111,23 +113,26 @@ def test_digest_preview_exits_early_when_no_articles(
 
     # assert
     assert result.exit_code == 0
-    assert "No unread articles" in result.output
+    assert "No recent articles" in result.output
     mock_agent.run.assert_not_called()
 
 
 @freeze_time("2026-04-29")
 def test_digest_send_test_sends_email(mocker: MockerFixture) -> None:
-    # arrange
+    # arrange — two articles, one selected, to cover both branches of extra_articles
     mock_settings = _make_settings_mock()
     mocker.patch(
         "minizen.cli.commands.digest.load_settings", return_value=mock_settings
     )
-    mock_articles = [MagicMock()]
+    selected = MagicMock()
+    unselected = MagicMock()
+    mock_articles = [selected, unselected]
     mock_rss = MagicMock()
-    mock_rss.fetch_unread.return_value = mock_articles
+    mock_rss.fetch_recent.return_value = mock_articles
     mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
     mock_result = MagicMock()
     mock_result.markdown = "## Digest"
+    mock_result.articles_used = [selected.id]
     mock_agent = MagicMock()
     mock_agent.run.return_value = mock_result
     mocker.patch("minizen.cli.commands.digest.DigestAgent", return_value=mock_agent)
@@ -149,7 +154,6 @@ def test_digest_send_test_sends_email(mocker: MockerFixture) -> None:
         html="<h2>Digest</h2>",
         plain_text="## Digest",
     )
-    mock_rss.mark_as_read.assert_not_called()
 
 
 def test_digest_send_test_exits_early_when_no_articles(
@@ -161,7 +165,7 @@ def test_digest_send_test_exits_early_when_no_articles(
         "minizen.cli.commands.digest.load_settings", return_value=mock_settings
     )
     mock_rss = MagicMock()
-    mock_rss.fetch_unread.return_value = []
+    mock_rss.fetch_recent.return_value = []
     mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
     mock_email = MagicMock()
     mocker.patch("minizen.cli.commands.digest.EmailProvider", return_value=mock_email)
@@ -172,7 +176,7 @@ def test_digest_send_test_exits_early_when_no_articles(
 
     # assert
     assert result.exit_code == 0
-    assert "No unread articles" in result.output
+    assert "No recent articles" in result.output
     mock_email.send.assert_not_called()
 
 
@@ -189,7 +193,7 @@ def test_digest_preview_dry_run_prints_articles_and_skips_llm(
     mock_article.title = "Article Title"
     mock_article.url = "https://example.com/article"
     mock_rss = MagicMock()
-    mock_rss.fetch_unread.return_value = [mock_article]
+    mock_rss.fetch_recent.return_value = [mock_article]
     mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
     mock_agent = MagicMock()
     mocker.patch("minizen.cli.commands.digest.DigestAgent", return_value=mock_agent)
@@ -215,7 +219,7 @@ def test_digest_fetch_verbose_calls_configure_logging(
         "minizen.cli.commands.digest.load_settings", return_value=_make_settings_mock()
     )
     mock_rss = MagicMock()
-    mock_rss.fetch_unread.return_value = []
+    mock_rss.fetch_recent.return_value = []
     mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
     runner = CliRunner()
 
@@ -235,7 +239,7 @@ def test_digest_preview_verbose_calls_configure_logging(
         "minizen.cli.commands.digest.load_settings", return_value=_make_settings_mock()
     )
     mock_rss = MagicMock()
-    mock_rss.fetch_unread.return_value = []
+    mock_rss.fetch_recent.return_value = []
     mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
     runner = CliRunner()
 
@@ -255,7 +259,7 @@ def test_digest_send_test_verbose_calls_configure_logging(
         "minizen.cli.commands.digest.load_settings", return_value=_make_settings_mock()
     )
     mock_rss = MagicMock()
-    mock_rss.fetch_unread.return_value = []
+    mock_rss.fetch_recent.return_value = []
     mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
     runner = CliRunner()
 
@@ -308,7 +312,7 @@ def test_digest_preview_uses_custom_config(
         "minizen.cli.commands.digest.load_settings", return_value=mock_settings
     )
     mock_rss = MagicMock()
-    mock_rss.fetch_unread.return_value = []
+    mock_rss.fetch_recent.return_value = []
     mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
     config_path = tmp_path / "config.toml"
     config_path.touch()
@@ -330,11 +334,11 @@ def test_digest_send_test_dry_run_shows_confirm_prompt(
         "minizen.cli.commands.digest.load_settings", return_value=mock_settings
     )
     mock_rss = MagicMock()
-    mock_rss.fetch_unread.return_value = [MagicMock()]
+    mock_rss.fetch_recent.return_value = [MagicMock()]
     mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
     mock_confirm = mocker.patch("minizen.cli.commands.digest.typer.confirm")
     mock_agent = MagicMock()
-    mock_agent.run.return_value = MagicMock(markdown="## Digest")
+    mock_agent.run.return_value = MagicMock(markdown="## Digest", articles_used=[])
     mocker.patch("minizen.cli.commands.digest.DigestAgent", return_value=mock_agent)
     mocker.patch("minizen.cli.commands.digest.EmailProvider", return_value=MagicMock())
     mocker.patch(
@@ -362,7 +366,7 @@ def test_digest_send_test_dry_run_aborts_when_confirm_declined(
         "minizen.cli.commands.digest.load_settings", return_value=mock_settings
     )
     mock_rss = MagicMock()
-    mock_rss.fetch_unread.return_value = [MagicMock()]
+    mock_rss.fetch_recent.return_value = [MagicMock()]
     mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
     mocker.patch("minizen.cli.commands.digest.typer.confirm", side_effect=typer.Abort())
     mock_agent = MagicMock()
@@ -386,11 +390,12 @@ def test_digest_send_test_dry_run_calls_llm_and_prints_plain_text(
     )
     mock_article = MagicMock()
     mock_rss = MagicMock()
-    mock_rss.fetch_unread.return_value = [mock_article]
+    mock_rss.fetch_recent.return_value = [mock_article]
     mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
     mock_confirm = mocker.patch("minizen.cli.commands.digest.typer.confirm")
     mock_result = MagicMock()
     mock_result.markdown = "## Digest"
+    mock_result.articles_used = []
     mock_agent = MagicMock()
     mock_agent.run.return_value = mock_result
     mocker.patch("minizen.cli.commands.digest.DigestAgent", return_value=mock_agent)
