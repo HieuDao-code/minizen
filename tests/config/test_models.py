@@ -77,3 +77,35 @@ def test_settings_requires_miniflux() -> None:
     # act / assert
     with pytest.raises(ValidationError):
         Settings.model_validate({"email": {}, "ai": {}})
+
+
+def test_ai_config_default_summary_language() -> None:
+    # act
+    config = AIConfig()
+
+    # assert
+    assert config.summary_language == "auto"
+
+
+def test_ai_config_default_max_words_per_article() -> None:
+    # act
+    config = AIConfig()
+
+    # assert
+    assert config.max_words_per_article is None
+
+
+def test_ai_config_accepts_custom_summary_language() -> None:
+    # act
+    config = AIConfig(summary_language="English")
+
+    # assert
+    assert config.summary_language == "English"
+
+
+def test_ai_config_accepts_custom_max_words_per_article() -> None:
+    # act
+    config = AIConfig(max_words_per_article=500)
+
+    # assert
+    assert config.max_words_per_article == 500
