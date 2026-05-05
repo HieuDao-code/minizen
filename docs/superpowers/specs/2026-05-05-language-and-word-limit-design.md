@@ -92,7 +92,7 @@ No other pipeline or CLI logic changes.
 New tests for `_truncate_words`:
 
 - HTML tags are stripped before word counting.
-- Content at or under the limit is returned unchanged (no truncation).
+- Content at or under the limit has all words preserved (HTML is stripped but no words are cut).
 - Content over the limit is truncated at exactly `max_words` words.
 - `None` limit results in full content passed as-is (tested via agent integration, not the helper directly).
 
