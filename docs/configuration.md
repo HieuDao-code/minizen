@@ -27,7 +27,7 @@ to_addr = "you@example.com"
 | Key     | Type    | Default                        | Description                               |
 | ------- | ------- | ------------------------------ | ----------------------------------------- |
 | `model` | string  | `"anthropic:claude-haiku-4-5"` | pydantic-ai model identifier              |
-| `top_n` | integer | `5`                            | Maximum articles to include in the digest |
+| `top_n` | integer | `5`                            | Number of articles selected for full AI summaries; remaining recent articles appear as a "More to read" link list |
 
 #### Supported models
 
