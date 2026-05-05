@@ -20,6 +20,7 @@ def _make_settings_mock() -> MagicMock:
     mock = MagicMock()
     mock.ai.model = "anthropic:claude-sonnet-4-6"
     mock.ai.top_n = 5
+    mock.ai.max_words_per_article = 500
     return mock
 
 
@@ -81,7 +82,9 @@ def test_digest_preview_prints_markdown(mocker: MockerFixture) -> None:
     mock_result.markdown = "## Today's Digest\n\nSome content."
     mock_agent = MagicMock()
     mock_agent.run.return_value = mock_result
-    mocker.patch("minizen.cli.commands.digest.DigestAgent", return_value=mock_agent)
+    mock_agent_cls = mocker.patch(
+        "minizen.cli.commands.digest.DigestAgent", return_value=mock_agent
+    )
     runner = CliRunner()
 
     # act
@@ -91,6 +94,11 @@ def test_digest_preview_prints_markdown(mocker: MockerFixture) -> None:
     assert result.exit_code == 0
     assert "## Today's Digest" in result.output
     mock_agent.run.assert_called_once_with(articles=mock_articles)
+    mock_agent_cls.assert_called_once_with(
+        model="anthropic:claude-sonnet-4-6",
+        top_n=5,
+        max_words_per_article=500,
+    )
 
 
 def test_digest_preview_exits_early_when_no_articles(
@@ -135,7 +143,9 @@ def test_digest_send_test_sends_email(mocker: MockerFixture) -> None:
     mock_result.articles_used = [selected.id]
     mock_agent = MagicMock()
     mock_agent.run.return_value = mock_result
-    mocker.patch("minizen.cli.commands.digest.DigestAgent", return_value=mock_agent)
+    mock_agent_cls = mocker.patch(
+        "minizen.cli.commands.digest.DigestAgent", return_value=mock_agent
+    )
     mock_email = MagicMock()
     mocker.patch("minizen.cli.commands.digest.EmailProvider", return_value=mock_email)
     mocker.patch(
@@ -153,6 +163,11 @@ def test_digest_send_test_sends_email(mocker: MockerFixture) -> None:
         subject="[TEST] Your Daily Zen — April 29, 2026",
         html="<h2>Digest</h2>",
         plain_text="## Digest",
+    )
+    mock_agent_cls.assert_called_once_with(
+        model="anthropic:claude-sonnet-4-6",
+        top_n=5,
+        max_words_per_article=500,
     )
 
 

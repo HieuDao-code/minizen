@@ -24,10 +24,11 @@ to_addr = "you@example.com"
 
 ### `[ai]` section
 
-| Key     | Type    | Default                        | Description                               |
-| ------- | ------- | ------------------------------ | ----------------------------------------- |
-| `model` | string  | `"anthropic:claude-haiku-4-5"` | pydantic-ai model identifier              |
-| `top_n` | integer | `5`                            | Number of articles selected for full AI summaries; remaining recent articles appear as a "More to read" link list |
+| Key                     | Type    | Default                        | Description |
+| ----------------------- | ------- | ------------------------------ | ----------- |
+| `model`                 | string  | `"anthropic:claude-haiku-4-5"` | pydantic-ai model identifier |
+| `top_n`                 | integer | `5`                            | Number of articles selected for full AI summaries; remaining recent articles appear as a "More to read" link list |
+| `max_words_per_article` | integer | `500`                          | Maximum words of article content sent to the LLM per article. Increase for longer summaries, decrease to reduce token usage. |
 
 #### Supported models
 
@@ -103,6 +104,7 @@ to_addr = "you@example.com"
 [ai]
 model = "anthropic:claude-haiku-4-5"
 top_n = 5
+# max_words_per_article = 500    # default: 500
 ```
 
 Use `minizen config set` to update individual values later:

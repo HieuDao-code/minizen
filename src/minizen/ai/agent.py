@@ -1,6 +1,7 @@
 """AI agent for curating and summarising RSS articles into a Markdown digest."""
 
 import logging
+from html.parser import HTMLParser
 from typing import TYPE_CHECKING, cast
 
 from pydantic import BaseModel, Field
@@ -39,6 +40,48 @@ Rules:
 """
 
 
+class _HTMLStripper(HTMLParser):
+    """HTMLParser subclass that accumulates text nodes, discarding tags."""
+
+    def __init__(self) -> None:
+        """Initialise with an empty text buffer."""
+        super().__init__()
+        self._parts: list[str] = []
+
+    def handle_data(self, data: str) -> None:
+        """Collect a text node.
+
+        Args:
+            data: Raw text content between HTML tags.
+        """
+        self._parts.append(data)
+
+    @property
+    def text(self) -> str:
+        """All collected text nodes joined by spaces.
+
+        Returns:
+            Plain text with all HTML tags removed.
+        """
+        return " ".join(self._parts)
+
+
+def _truncate_words(html: str, max_words: int) -> str:
+    """Strip HTML tags from *html* and return at most *max_words* words.
+
+    Args:
+        html: Raw HTML string (article content from Miniflux).
+        max_words: Maximum number of whitespace-delimited words to return.
+
+    Returns:
+        Plain text with HTML stripped, truncated to *max_words* words.
+    """
+    parser = _HTMLStripper()
+    parser.feed(html)
+    words = parser.text.split()
+    return " ".join(words[:max_words])
+
+
 class DigestResult(BaseModel):
     """Structured output from the AI digest agent."""
 
@@ -51,15 +94,29 @@ class DigestResult(BaseModel):
 class DigestAgent:
     """AI-powered agent that selects and summarises articles into a Markdown digest."""
 
-    def __init__(self, *, model: str, top_n: int) -> None:
-        """Initialise the agent with the given model and article limit.
+    def __init__(
+        self,
+        *,
+        model: str,
+        top_n: int,
+        max_words_per_article: int = 500,
+    ) -> None:
+        """Initialise the agent with the given model and digest settings.
 
         Args:
             model: pydantic-ai model identifier (e.g. ``anthropic:claude-haiku-4-5``).
             top_n: Maximum number of articles to include in the digest.
+            max_words_per_article: Maximum words of article content sent to the
+                LLM per article.
         """
-        logger.debug("Initialising DigestAgent: model=%s, top_n=%d", model, top_n)
+        logger.debug(
+            "Initialising DigestAgent: model=%s, top_n=%d, max_words=%d",
+            model,
+            top_n,
+            max_words_per_article,
+        )
         self._top_n = top_n
+        self._max_words_per_article = max_words_per_article
         self._agent = Agent(
             model=model,
             output_type=DigestResult,
@@ -70,7 +127,7 @@ class DigestAgent:
         """Select the top N articles and return a structured Markdown digest.
 
         Args:
-            articles: Full list of unread articles to choose from.
+            articles: Full list of articles to choose from.
 
         Returns:
             A ``DigestResult`` containing the Markdown text and the IDs of
@@ -84,7 +141,7 @@ class DigestAgent:
             f"URL: {a.url}\n"
             f"Published: {a.published_at.isoformat()}\n"
             + (f"Comments URL: {a.comments_url}\n" if a.comments_url else "")
-            + f"\n{a.content}"
+            + f"\n{_truncate_words(a.content, self._max_words_per_article)}"
             for a in articles
         )
         user_prompt = (

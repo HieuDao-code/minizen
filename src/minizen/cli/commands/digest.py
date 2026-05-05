@@ -97,7 +97,11 @@ def preview(
             typer.echo(f"[{article.feed_name}] {article.title}")
             typer.echo(f"  {article.url}")
         return
-    agent = DigestAgent(model=settings.ai.model, top_n=settings.ai.top_n)
+    agent = DigestAgent(
+        model=settings.ai.model,
+        top_n=settings.ai.top_n,
+        max_words_per_article=settings.ai.max_words_per_article,
+    )
     result = agent.run(articles=articles)
     typer.echo(result.markdown)
 
@@ -121,7 +125,11 @@ def send_test(
             "This will make a real LLM API call but will not send an email. Continue?",
             abort=True,
         )
-    agent = DigestAgent(model=settings.ai.model, top_n=settings.ai.top_n)
+    agent = DigestAgent(
+        model=settings.ai.model,
+        top_n=settings.ai.top_n,
+        max_words_per_article=settings.ai.max_words_per_article,
+    )
     result = agent.run(articles=articles)
     selected_ids = set(result.articles_used)
     extra_articles = [a for a in articles if a.id not in selected_ids]

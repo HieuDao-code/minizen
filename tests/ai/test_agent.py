@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from minizen.ai.agent import _SYSTEM_PROMPT, DigestAgent, DigestResult
+from minizen.ai.agent import _SYSTEM_PROMPT, DigestAgent, DigestResult, _truncate_words
 from minizen.providers.rss.miniflux import Article
 
 if TYPE_CHECKING:
@@ -117,3 +117,66 @@ def test_run_omits_comments_url_in_prompt_when_none(mocker: MockerFixture) -> No
     user_prompt: str = call_args[0][0]
     assert "Comments URL: None" not in user_prompt
     assert "ycombinator" not in user_prompt
+
+
+# --- _truncate_words ---
+
+
+def test_truncate_words_strips_html_tags() -> None:
+    # act
+    result = _truncate_words(html="<p>Hello world</p>", max_words=10)
+
+    # assert
+    assert "<p>" not in result
+    assert "Hello" in result
+    assert "world" in result
+
+
+def test_truncate_words_truncates_at_exact_word_count() -> None:
+    # arrange
+    html = "<p>" + " ".join(f"word{i}" for i in range(100)) + "</p>"
+
+    # act
+    result = _truncate_words(html=html, max_words=5)
+
+    # assert
+    assert result.split() == ["word0", "word1", "word2", "word3", "word4"]
+
+
+def test_truncate_words_preserves_all_words_when_under_limit() -> None:
+    # act
+    result = _truncate_words(html="<p>one two three</p>", max_words=10)
+
+    # assert
+    assert result.split() == ["one", "two", "three"]
+
+
+# --- max_words_per_article wiring ---
+
+
+def test_run_truncates_content_at_max_words(mocker: MockerFixture) -> None:
+    # arrange
+    mock_agent_cls = mocker.patch("minizen.ai.agent.Agent")
+    mock_run_result = mocker.MagicMock()
+    mock_run_result.output = DigestResult(markdown="# Digest", articles_used=[1])
+    mock_agent_cls.return_value.run_sync.return_value = mock_run_result
+    long_content = "<p>" + " ".join(f"word{i}" for i in range(200)) + "</p>"
+    article = Article(
+        id=1,
+        title="Test",
+        url="https://example.com",
+        content=long_content,
+        feed_name="Feed",
+        published_at=datetime(2026, 4, 24, 8, 0, 0, tzinfo=UTC),
+    )
+    agent = DigestAgent(
+        model="anthropic:claude-sonnet-4-6", top_n=3, max_words_per_article=50
+    )
+
+    # act
+    agent.run(articles=[article])
+
+    # assert
+    user_prompt: str = mock_agent_cls.return_value.run_sync.call_args[0][0]
+    assert "word49" in user_prompt
+    assert "word50" not in user_prompt

@@ -41,6 +41,10 @@ class AIConfig(BaseModel):
         default=DEFAULT_TOP_N,
         description="Maximum number of articles to include in the digest.",
     )
+    max_words_per_article: int = Field(
+        default=500,
+        description="Maximum words of article content sent to the LLM per article.",
+    )
 
 
 class Settings(BaseModel):
