@@ -24,10 +24,12 @@ to_addr = "you@example.com"
 
 ### `[ai]` section
 
-| Key     | Type    | Default                        | Description                               |
-| ------- | ------- | ------------------------------ | ----------------------------------------- |
-| `model` | string  | `"anthropic:claude-haiku-4-5"` | pydantic-ai model identifier              |
-| `top_n` | integer | `5`                            | Number of articles selected for full AI summaries; remaining recent articles appear as a "More to read" link list |
+| Key                     | Type             | Default                        | Description |
+| ----------------------- | ---------------- | ------------------------------ | ----------- |
+| `model`                 | string           | `"anthropic:claude-haiku-4-5"` | pydantic-ai model identifier |
+| `top_n`                 | integer          | `5`                            | Number of articles selected for full AI summaries; remaining recent articles appear as a "More to read" link list |
+| `summary_language`      | string           | `"auto"`                       | Language for summaries. `"auto"` matches each article's original language; any other value (e.g. `"English"`) forces all summaries into that language. |
+| `max_words_per_article` | integer or unset | unset                          | Maximum words of article content sent to the LLM. Unset means no limit. Set to e.g. `500` to reduce token usage. |
 
 #### Supported models
 
@@ -103,6 +105,8 @@ to_addr = "you@example.com"
 [ai]
 model = "anthropic:claude-haiku-4-5"
 top_n = 5
+# summary_language = "English"   # default: "auto" (match article language)
+# max_words_per_article = 500    # default: unset (no truncation)
 ```
 
 Use `minizen config set` to update individual values later:
