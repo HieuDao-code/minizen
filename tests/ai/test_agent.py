@@ -198,3 +198,55 @@ def test_run_raises_ai_error_on_model_failure(mocker: MockerFixture) -> None:
     # act / assert
     with pytest.raises(AIError, match="AI model error"):
         agent.run(articles=articles)
+
+
+def test_agent_initialized_with_preference_block_when_interests_set(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mock_agent_cls = mocker.patch("minizen.ai.agent.Agent")
+
+    # act
+    DigestAgent(
+        model="anthropic:claude-sonnet-4-6",
+        top_n=5,
+        interests=["Rust", "AI safety"],
+        avoid=[],
+    )
+
+    # assert
+    call_kwargs = mock_agent_cls.call_args.kwargs
+    assert "Prioritise articles about: Rust, AI safety" in call_kwargs["system_prompt"]
+
+
+def test_agent_initialized_with_preference_block_when_avoid_set(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mock_agent_cls = mocker.patch("minizen.ai.agent.Agent")
+
+    # act
+    DigestAgent(
+        model="anthropic:claude-sonnet-4-6",
+        top_n=5,
+        interests=[],
+        avoid=["sports", "crypto"],
+    )
+
+    # assert
+    call_kwargs = mock_agent_cls.call_args.kwargs
+    assert "Avoid articles about: sports, crypto" in call_kwargs["system_prompt"]
+
+
+def test_agent_uses_base_system_prompt_when_no_preferences(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mock_agent_cls = mocker.patch("minizen.ai.agent.Agent")
+
+    # act
+    DigestAgent(model="anthropic:claude-sonnet-4-6", top_n=5)
+
+    # assert
+    call_kwargs = mock_agent_cls.call_args.kwargs
+    assert call_kwargs["system_prompt"] == _SYSTEM_PROMPT

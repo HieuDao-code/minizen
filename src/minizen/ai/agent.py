@@ -43,6 +43,27 @@ Rules:
 """
 
 
+def _build_system_prompt(*, interests: list[str], avoid: list[str]) -> str:
+    """Build the system prompt, appending a user-preference block when non-empty.
+
+    Args:
+        interests: Topics the user wants to prioritise.
+        avoid: Topics the user wants to exclude.
+
+    Returns:
+        The base system prompt unchanged when both lists are empty, or with a
+        ``User preferences:`` block appended when at least one list is non-empty.
+    """
+    if not interests and not avoid:
+        return _SYSTEM_PROMPT
+    lines = ["User preferences:"]
+    if interests:
+        lines.append(f"- Prioritise articles about: {', '.join(interests)}")
+    if avoid:
+        lines.append(f"- Avoid articles about: {', '.join(avoid)}")
+    return _SYSTEM_PROMPT + "\n" + "\n".join(lines) + "\n"
+
+
 class _HTMLStripper(HTMLParser):
     """HTMLParser subclass that accumulates text nodes, discarding tags."""
 
@@ -103,6 +124,8 @@ class DigestAgent:
         model: str,
         top_n: int,
         max_words_per_article: int = 500,
+        interests: list[str] | None = None,
+        avoid: list[str] | None = None,
     ) -> None:
         """Initialise the agent with the given model and digest settings.
 
@@ -111,6 +134,8 @@ class DigestAgent:
             top_n: Maximum number of articles to include in the digest.
             max_words_per_article: Maximum words of article content sent to the
                 LLM per article.
+            interests: Topics to prioritise when selecting articles.
+            avoid: Topics to exclude when selecting articles.
         """
         logger.debug(
             "Initialising DigestAgent: model=%s, top_n=%d, max_words=%d",
@@ -120,10 +145,14 @@ class DigestAgent:
         )
         self._top_n = top_n
         self._max_words_per_article = max_words_per_article
+        system_prompt = _build_system_prompt(
+            interests=interests or [],
+            avoid=avoid or [],
+        )
         self._agent = Agent(
             model=model,
             output_type=DigestResult,
-            system_prompt=_SYSTEM_PROMPT,
+            system_prompt=system_prompt,
         )
 
     def run(self, *, articles: list[Article]) -> DigestResult:
