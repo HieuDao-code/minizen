@@ -5,9 +5,12 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import miniflux
+import pytest
 from freezegun import freeze_time
 
 from minizen.config.models import MinifluxConfig
+from minizen.exceptions import MinifluxError
 from minizen.providers.rss.miniflux import MinifluxProvider
 
 if TYPE_CHECKING:
@@ -191,3 +194,39 @@ def test_fetch_recent_with_fixture_data(mocker: MockerFixture) -> None:
     mock_client_cls.return_value.get_entries.assert_called_once_with(
         published_after=expected_ts
     )
+
+
+@freeze_time("2026-05-04T10:00:00Z")
+def test_fetch_recent_raises_miniflux_error_on_client_error(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mock_response = mocker.MagicMock()
+    mock_response.status_code = 403
+    mock_response.headers = {"Content-Type": "application/json"}
+    mock_response.json.return_value = {"error_message": "Forbidden"}
+    mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
+    mock_client_cls.return_value.get_entries.side_effect = miniflux.ClientError(
+        mock_response
+    )
+    config = MinifluxConfig(url="https://rss.example.com", api_key="key")
+    provider = MinifluxProvider(config=config)
+
+    # act / assert
+    with pytest.raises(MinifluxError, match="Miniflux API error"):
+        provider.fetch_recent()
+
+
+@freeze_time("2026-05-04T10:00:00Z")
+def test_fetch_recent_raises_miniflux_error_on_os_error(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
+    mock_client_cls.return_value.get_entries.side_effect = OSError("Connection refused")
+    config = MinifluxConfig(url="https://rss.example.com", api_key="key")
+    provider = MinifluxProvider(config=config)
+
+    # act / assert
+    with pytest.raises(MinifluxError, match="Miniflux API error"):
+        provider.fetch_recent()

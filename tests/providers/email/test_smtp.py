@@ -1,6 +1,10 @@
+import smtplib
 from typing import TYPE_CHECKING
 
+import pytest
+
 from minizen.config.models import EmailConfig
+from minizen.exceptions import EmailError
 from minizen.providers.email.smtp import EmailProvider
 
 if TYPE_CHECKING:
@@ -80,3 +84,43 @@ def test_send_message_has_correct_headers(mocker: MockerFixture) -> None:
     assert sent_msg["Subject"] == "Daily Digest"
     assert sent_msg["From"] == "from@example.com"
     assert sent_msg["To"] == "to@example.com"
+
+
+def test_send_raises_email_error_on_smtp_exception(mocker: MockerFixture) -> None:
+    # arrange
+    mock_smtp_cls = mocker.patch("minizen.providers.email.smtp.smtplib.SMTP")
+    mock_smtp_cls.return_value.__enter__.return_value.starttls.side_effect = (
+        smtplib.SMTPException("Connection failed")
+    )
+    config = EmailConfig(
+        smtp_host="smtp.example.com",
+        smtp_port=587,
+        from_addr="from@example.com",
+        to_addr="to@example.com",
+        username="user",
+        password="pass",
+    )
+    provider = EmailProvider(config=config)
+
+    # act / assert
+    with pytest.raises(EmailError, match="Email delivery failed"):
+        provider.send(subject="Test", html="<p>Hello</p>")
+
+
+def test_send_raises_email_error_on_os_error(mocker: MockerFixture) -> None:
+    # arrange
+    mock_smtp_cls = mocker.patch("minizen.providers.email.smtp.smtplib.SMTP")
+    mock_smtp_cls.side_effect = OSError("Network unreachable")
+    config = EmailConfig(
+        smtp_host="smtp.example.com",
+        smtp_port=587,
+        from_addr="from@example.com",
+        to_addr="to@example.com",
+        username="user",
+        password="pass",
+    )
+    provider = EmailProvider(config=config)
+
+    # act / assert
+    with pytest.raises(EmailError, match="Email delivery failed"):
+        provider.send(subject="Test", html="<p>Hello</p>")

@@ -3,13 +3,17 @@
 import minizen
 from minizen import (
     AIConfig,
+    AIError,
     Article,
     DigestAgent,
     DigestResult,
     EmailConfig,
+    EmailError,
     EmailProvider,
     MinifluxConfig,
+    MinifluxError,
     MinifluxProvider,
+    MinizenError,
     Settings,
     load_settings,
     run_pipeline,
@@ -26,6 +30,12 @@ from minizen.config import (
     load_settings as _load_settings,
 )
 from minizen.core import run_pipeline as _run_pipeline
+from minizen.exceptions import (
+    AIError as _AIError,
+    EmailError as _EmailError,
+    MinifluxError as _MinifluxError,
+    MinizenError as _MinizenError,
+)
 from minizen.providers.email import EmailProvider as _EmailProvider
 from minizen.providers.rss import (
     Article as _Article,
@@ -37,13 +47,17 @@ def test_top_level_all() -> None:
     # arrange
     expected = {
         "AIConfig",
+        "AIError",
         "Article",
         "DigestAgent",
         "DigestResult",
         "EmailConfig",
+        "EmailError",
         "EmailProvider",
         "MinifluxConfig",
+        "MinifluxError",
         "MinifluxProvider",
+        "MinizenError",
         "Settings",
         "load_settings",
         "run_pipeline",
@@ -66,3 +80,11 @@ def test_top_level_imports_are_same_objects() -> None:
     assert MinifluxProvider is _MinifluxProvider
     assert DigestAgent is _DigestAgent
     assert DigestResult is _DigestResult
+
+
+def test_exception_imports_are_same_objects() -> None:
+    # assert
+    assert MinizenError is _MinizenError
+    assert MinifluxError is _MinifluxError
+    assert AIError is _AIError
+    assert EmailError is _EmailError

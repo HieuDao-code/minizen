@@ -1,15 +1,7 @@
 # Implementation TODOs
 
-#### Improvements
-
-- Keep the article summary in the language the article is in
-- Add a default word limit per article to limit token limit
-
 #### lower priority
 
-- Do a analysis on how robust the code is and add try catch blocks where necessary to handle potential errors and edge cases, such as (you can do a websearch for api docs https://miniflux.app/docs/api.html#endpoint-get-entries and https://pydantic.dev/docs/ai/llms.txt):
-  - Handling API errors and rate limits
-  - Handling email sending errors
 - do an security review of the codebase to identify and fix any potential security vulnerabilities, such as:
   - Handling sensitive information, such as API keys and email credentials, securely and not hardcoding them in the codebase
   - Implementing proper authentication and authorization mechanisms for accessing the tool and its features

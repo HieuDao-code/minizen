@@ -9,6 +9,7 @@ from typer.testing import CliRunner
 from minizen.cli import app
 from minizen.cli.commands.run import _build_settings_from_flags, apply_overrides
 from minizen.config.models import AIConfig, EmailConfig, MinifluxConfig, Settings
+from minizen.exceptions import MinifluxError
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
@@ -284,3 +285,29 @@ def test_run_no_config_file_lists_missing_flags() -> None:
     # assert
     assert result.exit_code != 0
     assert "--miniflux-api-key" in result.output
+
+
+def test_run_prints_error_and_exits_on_minizen_error(
+    mocker: MockerFixture, tmp_path: Path
+) -> None:
+    # arrange
+    mock_settings = MagicMock()
+    mock_settings.miniflux.model_copy.return_value = mock_settings.miniflux
+    mock_settings.email.model_copy.return_value = mock_settings.email
+    mock_settings.ai.model_copy.return_value = mock_settings.ai
+    mock_settings.model_copy.return_value = mock_settings
+    mocker.patch("minizen.cli.commands.run.load_settings", return_value=mock_settings)
+    mocker.patch(
+        "minizen.cli.commands.run.run_pipeline",
+        side_effect=MinifluxError("Miniflux API error: 403 Forbidden"),
+    )
+    config_path = tmp_path / "config.toml"
+    config_path.touch()
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(app, ["run", "--config", str(config_path)])
+
+    # assert
+    assert result.exit_code == 1
+    assert "Error: Miniflux API error: 403 Forbidden" in result.output

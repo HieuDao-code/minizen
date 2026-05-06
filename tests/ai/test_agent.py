@@ -1,7 +1,11 @@
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
+import pytest
+from pydantic_ai.exceptions import UnexpectedModelBehavior
+
 from minizen.ai.agent import _SYSTEM_PROMPT, DigestAgent, DigestResult, _truncate_words
+from minizen.exceptions import AIError
 from minizen.providers.rss.miniflux import Article
 
 if TYPE_CHECKING:
@@ -180,3 +184,17 @@ def test_run_truncates_content_at_max_words(mocker: MockerFixture) -> None:
     user_prompt: str = mock_agent_cls.return_value.run_sync.call_args[0][0]
     assert "word49" in user_prompt
     assert "word50" not in user_prompt
+
+
+def test_run_raises_ai_error_on_model_failure(mocker: MockerFixture) -> None:
+    # arrange
+    mock_agent_cls = mocker.patch("minizen.ai.agent.Agent")
+    mock_agent_cls.return_value.run_sync.side_effect = UnexpectedModelBehavior(
+        "Model returned empty response"
+    )
+    agent = DigestAgent(model="anthropic:claude-sonnet-4-6", top_n=5)
+    articles = [_make_article(article_id=1)]
+
+    # act / assert
+    with pytest.raises(AIError, match="AI model error"):
+        agent.run(articles=articles)

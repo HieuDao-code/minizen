@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING
 import miniflux
 from pydantic import BaseModel, Field
 
+from minizen.exceptions import MinifluxError
+
 if TYPE_CHECKING:
     from minizen.config.models import MinifluxConfig
 
@@ -49,10 +51,18 @@ class MinifluxProvider:
 
         Returns:
             A list of ``Article`` objects, one per entry in the lookback window.
+
+        Raises:
+            MinifluxError: If the Miniflux API call fails due to a client error or
+                network issue.
         """
         cutoff = datetime.now(tz=UTC) - timedelta(hours=_LOOKBACK_HOURS)
         after_ts = int(cutoff.timestamp())
-        response = self._client.get_entries(published_after=after_ts)
+        try:
+            response = self._client.get_entries(published_after=after_ts)
+        except (miniflux.ClientError, OSError) as exc:
+            msg = f"Miniflux API error: {exc}"
+            raise MinifluxError(msg) from exc
         entries = response["entries"]
         logger.debug(
             "Fetched %d entries from the last %dh", len(entries), _LOOKBACK_HOURS
