@@ -14,6 +14,7 @@ from minizen.config.defaults import (
 from minizen.config.loader import load_settings
 from minizen.config.models import AIConfig, EmailConfig, MinifluxConfig, Settings
 from minizen.core.pipeline import run_pipeline
+from minizen.exceptions import MinizenError
 
 _DRY_RUN_OPTION = Annotated[
     bool,
@@ -224,4 +225,8 @@ def run(
         raise typer.Exit(code=1)
     else:
         settings = apply_overrides(settings=settings, **_flag_kwargs)
-    run_pipeline(settings=settings, dry_run=dry_run)
+    try:
+        run_pipeline(settings=settings, dry_run=dry_run)
+    except MinizenError as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(code=1)

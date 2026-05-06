@@ -10,6 +10,7 @@ from minizen.ai.agent import DigestAgent
 from minizen.cli.state import configure_logging
 from minizen.config.defaults import DEFAULT_CONFIG_PATH
 from minizen.config.loader import load_settings
+from minizen.exceptions import MinizenError
 from minizen.providers.email.smtp import EmailProvider
 from minizen.providers.email.template import render_email
 from minizen.providers.rss.miniflux import MinifluxProvider
@@ -67,7 +68,11 @@ def fetch(
     configure_logging(verbose=verbose)
     settings = _load(config)
     rss = MinifluxProvider(config=settings.miniflux)
-    articles = rss.fetch_recent()
+    try:
+        articles = rss.fetch_recent()
+    except MinizenError as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(code=1)
     if not articles:
         typer.echo("No recent articles.")
         return
@@ -87,7 +92,11 @@ def preview(
     configure_logging(verbose=verbose)
     settings = _load(config)
     rss = MinifluxProvider(config=settings.miniflux)
-    articles = rss.fetch_recent()
+    try:
+        articles = rss.fetch_recent()
+    except MinizenError as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(code=1)
     if not articles:
         typer.echo("No recent articles.")
         return
@@ -102,7 +111,11 @@ def preview(
         top_n=settings.ai.top_n,
         max_words_per_article=settings.ai.max_words_per_article,
     )
-    result = agent.run(articles=articles)
+    try:
+        result = agent.run(articles=articles)
+    except MinizenError as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(code=1)
     typer.echo(result.markdown)
 
 
@@ -116,7 +129,11 @@ def send_test(
     configure_logging(verbose=verbose)
     settings = _load(config)
     rss = MinifluxProvider(config=settings.miniflux)
-    articles = rss.fetch_recent()
+    try:
+        articles = rss.fetch_recent()
+    except MinizenError as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(code=1)
     if not articles:
         typer.echo("No recent articles.")
         return
@@ -130,7 +147,11 @@ def send_test(
         top_n=settings.ai.top_n,
         max_words_per_article=settings.ai.max_words_per_article,
     )
-    result = agent.run(articles=articles)
+    try:
+        result = agent.run(articles=articles)
+    except MinizenError as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(code=1)
     selected_ids = set(result.articles_used)
     extra_articles = [a for a in articles if a.id not in selected_ids]
     html, plain_text = render_email(result.markdown, extra_articles=extra_articles)
@@ -140,9 +161,13 @@ def send_test(
         return
     today = datetime.now(tz=UTC).date().strftime("%B %-d, %Y")
     email = EmailProvider(config=settings.email)
-    email.send(
-        subject=f"[TEST] Your Daily Zen — {today}",
-        html=html,
-        plain_text=plain_text,
-    )
+    try:
+        email.send(
+            subject=f"[TEST] Your Daily Zen — {today}",
+            html=html,
+            plain_text=plain_text,
+        )
+    except MinizenError as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(code=1)
     typer.echo("Test digest sent.")
