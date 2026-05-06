@@ -499,3 +499,84 @@ def test_digest_send_test_prints_error_and_exits_on_minizen_error(
     # assert
     assert result.exit_code == 1
     assert "Error: Email delivery failed: SMTP auth" in result.output
+
+
+def test_digest_preview_exits_on_agent_error(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mock_settings = _make_settings_mock()
+    mocker.patch(
+        "minizen.cli.commands.digest.load_settings", return_value=mock_settings
+    )
+    mock_rss = mocker.MagicMock()
+    mock_rss.fetch_recent.return_value = [mocker.MagicMock()]
+    mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
+    mock_agent = mocker.MagicMock()
+    mock_agent.run.side_effect = AIError("AI model error: timeout")
+    mocker.patch("minizen.cli.commands.digest.DigestAgent", return_value=mock_agent)
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(app, ["digest", "preview"])
+
+    # assert
+    assert result.exit_code == 1
+    assert "Error: AI model error: timeout" in result.output
+
+
+def test_digest_send_test_exits_on_agent_error(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mock_settings = _make_settings_mock()
+    mocker.patch(
+        "minizen.cli.commands.digest.load_settings", return_value=mock_settings
+    )
+    mock_rss = mocker.MagicMock()
+    mock_rss.fetch_recent.return_value = [mocker.MagicMock()]
+    mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
+    mock_agent = mocker.MagicMock()
+    mock_agent.run.side_effect = AIError("AI model error: rate limit")
+    mocker.patch("minizen.cli.commands.digest.DigestAgent", return_value=mock_agent)
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(app, ["digest", "send-test"])
+
+    # assert
+    assert result.exit_code == 1
+    assert "Error: AI model error: rate limit" in result.output
+
+
+def test_digest_send_test_exits_on_email_error(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mock_settings = _make_settings_mock()
+    mocker.patch(
+        "minizen.cli.commands.digest.load_settings", return_value=mock_settings
+    )
+    mock_rss = mocker.MagicMock()
+    mock_rss.fetch_recent.return_value = [mocker.MagicMock()]
+    mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
+    mock_agent = mocker.MagicMock()
+    mock_agent.run.return_value = mocker.MagicMock(
+        markdown="# Digest", articles_used=[]
+    )
+    mocker.patch("minizen.cli.commands.digest.DigestAgent", return_value=mock_agent)
+    mocker.patch(
+        "minizen.cli.commands.digest.render_email",
+        return_value=("<html/>", "plain text"),
+    )
+    mock_email = mocker.MagicMock()
+    mock_email.send.side_effect = EmailError("Email delivery failed: auth")
+    mocker.patch("minizen.cli.commands.digest.EmailProvider", return_value=mock_email)
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(app, ["digest", "send-test"])
+
+    # assert
+    assert result.exit_code == 1
+    assert "Error: Email delivery failed: auth" in result.output
