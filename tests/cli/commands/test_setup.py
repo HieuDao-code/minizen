@@ -14,6 +14,8 @@ if TYPE_CHECKING:
 _INTERACTIVE_INPUT = (
     "\n"  # model (default: anthropic:claude-haiku-4-5)
     "\n"  # top_n (default: 10)
+    "\n"  # interests (skip)
+    "\n"  # avoid (skip)
     "\n"  # smtp host (default: smtp.gmail.com)
     "\n"  # smtp port (default: 587)
     "from@example.com\n"
@@ -77,6 +79,8 @@ def test_setup_accepts_custom_ai_values(tmp_path: Path) -> None:
         input=(
             "openai:gpt-4o\n"
             "10\n"
+            "\n"  # interests (skip)
+            "\n"  # avoid (skip)
             "\n"  # smtp host (default)
             "\n"  # smtp port (default)
             "from@example.com\n"
@@ -268,6 +272,8 @@ def test_setup_writes_openai_key_for_openai_model(tmp_path: Path) -> None:
         input=(
             "openai:gpt-4o\n"
             "\n"
+            "\n"  # interests (skip)
+            "\n"  # avoid (skip)
             "\n"
             "\n"
             "from@example.com\n"
@@ -298,6 +304,8 @@ def test_setup_interactive_exits_on_unknown_model_provider(tmp_path: Path) -> No
         input=(
             "unknown:some-model\n"
             "\n"
+            "\n"  # interests (skip)
+            "\n"  # avoid (skip)
             "\n"
             "\n"
             "from@example.com\n"
@@ -443,6 +451,8 @@ def test_setup_quotes_env_values_with_special_chars(tmp_path: Path) -> None:
         input=(
             "\n"  # model (default)
             "\n"  # top_n (default)
+            "\n"  # interests (skip)
+            "\n"  # avoid (skip)
             "\n"  # smtp host (default)
             "\n"  # smtp port (default)
             "from@example.com\n"
@@ -458,3 +468,94 @@ def test_setup_quotes_env_values_with_special_chars(tmp_path: Path) -> None:
     env_path = tmp_path / ".env"
     content = env_path.read_text()
     assert r'MINIZEN_EMAIL_PASSWORD="p@ss\"word"' in content
+
+
+def test_setup_interactive_writes_interests_and_avoid(tmp_path: Path) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    runner = CliRunner()
+
+    # act
+    runner.invoke(
+        app,
+        ["setup", "--config", str(config_path)],
+        input=(
+            "\n"  # model (default)
+            "\n"  # top_n (default)
+            "Rust, AI safety\n"
+            "sports, crypto\n"
+            "\n"  # smtp host (default)
+            "\n"  # smtp port (default)
+            "from@example.com\n"
+            "to@example.com\n"
+            "email-user\n"
+            "email-password\n"
+            "miniflux-api-key\n"
+            "anthropic-api-key\n"
+        ),
+    )
+
+    # assert
+    with config_path.open("rb") as f:
+        data = tomllib.load(f)
+    assert data["ai"]["interests"] == ["Rust", "AI safety"]
+    assert data["ai"]["avoid"] == ["sports", "crypto"]
+
+
+def test_setup_interactive_skipped_interests_omitted_from_config(
+    tmp_path: Path,
+) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    runner = CliRunner()
+
+    # act
+    runner.invoke(
+        app,
+        ["setup", "--config", str(config_path)],
+        input=_INTERACTIVE_INPUT,
+    )
+
+    # assert
+    with config_path.open("rb") as f:
+        data = tomllib.load(f)
+    assert "interests" not in data["ai"]
+    assert "avoid" not in data["ai"]
+
+
+def test_setup_non_interactive_writes_interests_and_avoid(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    monkeypatch.setenv("MINIFLUX_API_KEY", "mf-key")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "ant-key")
+    monkeypatch.setenv("MINIZEN_EMAIL_USERNAME", "user")
+    monkeypatch.setenv("MINIZEN_EMAIL_PASSWORD", "pass")
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(
+        app,
+        [
+            "setup",
+            "--no-interactive",
+            "--config",
+            str(config_path),
+            "--from-addr",
+            "from@example.com",
+            "--to-addr",
+            "to@example.com",
+            "--interests",
+            "Rust,AI safety",
+            "--avoid",
+            "sports,crypto",
+        ],
+    )
+
+    # assert
+    assert result.exit_code == 0
+    with config_path.open("rb") as f:
+        data = tomllib.load(f)
+    assert data["ai"]["interests"] == ["Rust", "AI safety"]
+    assert data["ai"]["avoid"] == ["sports", "crypto"]

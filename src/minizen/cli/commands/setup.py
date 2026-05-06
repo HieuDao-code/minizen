@@ -38,6 +38,20 @@ def _provider_key_info(model: str) -> tuple[str, str]:
     raise typer.Exit(code=1)
 
 
+def _parse_comma_list(value: str | None) -> list[str]:
+    """Split a comma-separated string into a stripped list, dropping empty items.
+
+    Args:
+        value: Raw comma-separated string, or ``None``.
+
+    Returns:
+        List of stripped non-empty strings. Returns ``[]`` for ``None`` or blank input.
+    """
+    if not value:
+        return []
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
 def setup(
     config: Annotated[
         Path,
@@ -73,6 +87,14 @@ def setup(
         int | None,
         typer.Option("--top-n", help="Number of top articles to include."),
     ] = None,
+    interests: Annotated[
+        str | None,
+        typer.Option("--interests", help="Comma-separated topics to prioritise."),
+    ] = None,
+    avoid: Annotated[
+        str | None,
+        typer.Option("--avoid", help="Comma-separated topics to avoid."),
+    ] = None,
 ) -> None:
     """Interactive wizard to create a minizen configuration file."""
     if no_interactive:
@@ -84,6 +106,8 @@ def setup(
             smtp_port=smtp_port or DEFAULT_SMTP_PORT,
             model=model or DEFAULT_MODEL,
             top_n=top_n or DEFAULT_TOP_N,
+            interests=_parse_comma_list(interests),
+            avoid=_parse_comma_list(avoid),
         )
     else:
         _setup_interactive(
@@ -94,6 +118,8 @@ def setup(
             smtp_port=smtp_port,
             model=model,
             top_n=top_n,
+            interests=interests,
+            avoid=avoid,
         )
 
 
@@ -106,6 +132,8 @@ def _setup_non_interactive(
     smtp_port: int,
     model: str,
     top_n: int,
+    interests: list[str],
+    avoid: list[str],
 ) -> None:
     """Write config non-interactively, reading secrets from environment variables.
 
@@ -117,6 +145,8 @@ def _setup_non_interactive(
         smtp_port: SMTP server port.
         model: AI model identifier.
         top_n: Number of top articles to include in the digest.
+        interests: Topics to prioritise when selecting articles.
+        avoid: Topics to exclude when selecting articles.
     """
     if not from_addr:
         typer.echo("Error: --from-addr is required in non-interactive mode.")
@@ -145,6 +175,8 @@ def _setup_non_interactive(
         smtp_port=smtp_port,
         model=model,
         top_n=top_n,
+        interests=interests,
+        avoid=avoid,
     )
     typer.echo(f"Config written to: {config}")
 
@@ -158,6 +190,8 @@ def _setup_interactive(
     smtp_port: int | None,
     model: str | None,
     top_n: int | None,
+    interests: str | None,
+    avoid: str | None,
 ) -> None:
     """Prompt the user for all settings interactively, then write config and .env.
 
@@ -169,6 +203,8 @@ def _setup_interactive(
         smtp_port: Pre-filled SMTP port (used as default prompt value).
         model: Pre-filled AI model identifier (used as default prompt value).
         top_n: Pre-filled article count (used as default prompt value).
+        interests: Pre-filled interests string (used as default prompt value).
+        avoid: Pre-filled avoid string (used as default prompt value).
     """
     typer.echo("minizen setup wizard")
     typer.echo("--------------------")
@@ -176,6 +212,14 @@ def _setup_interactive(
     resolved_model = typer.prompt("AI model", default=model or DEFAULT_MODEL)
     resolved_top_n = typer.prompt(
         "Number of top articles", default=top_n or DEFAULT_TOP_N
+    )
+    interests_str = typer.prompt(
+        "Topics to prioritise (comma-separated, Enter to skip)",
+        default=interests or "",
+    )
+    avoid_str = typer.prompt(
+        "Topics to avoid (comma-separated, Enter to skip)",
+        default=avoid or "",
     )
     resolved_smtp_host = typer.prompt(
         "SMTP host", default=smtp_host or DEFAULT_SMTP_HOST
@@ -200,6 +244,8 @@ def _setup_interactive(
         smtp_port=int(resolved_smtp_port),
         model=resolved_model,
         top_n=int(resolved_top_n),
+        interests=_parse_comma_list(interests_str),
+        avoid=_parse_comma_list(avoid_str),
     )
 
     env_path = config.parent / ".env"
@@ -238,6 +284,8 @@ def _write_config(
     smtp_port: int,
     model: str,
     top_n: int,
+    interests: list[str],
+    avoid: list[str],
 ) -> None:
     """Serialise the given settings to a TOML file, creating parent directories.
 
@@ -249,8 +297,15 @@ def _write_config(
         smtp_port: SMTP server port.
         model: AI model identifier.
         top_n: Number of top articles to include in the digest.
+        interests: Topics to prioritise; omitted from config when empty.
+        avoid: Topics to exclude; omitted from config when empty.
     """
-    data = {
+    ai_section: dict[str, object] = {"model": model, "top_n": top_n}
+    if interests:
+        ai_section["interests"] = interests
+    if avoid:
+        ai_section["avoid"] = avoid
+    data: dict[str, object] = {
         "miniflux": {
             "url": DEFAULT_MINIFLUX_URL,
         },
@@ -260,10 +315,7 @@ def _write_config(
             "from_addr": from_addr,
             "to_addr": to_addr,
         },
-        "ai": {
-            "model": model,
-            "top_n": top_n,
-        },
+        "ai": ai_section,
     }
     config.parent.mkdir(parents=True, exist_ok=True)
     config.write_bytes(tomli_w.dumps(data).encode())

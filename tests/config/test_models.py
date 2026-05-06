@@ -93,3 +93,24 @@ def test_ai_config_accepts_custom_max_words_per_article() -> None:
 
     # assert
     assert config.max_words_per_article == 300
+
+
+def test_ai_config_defaults_interests_and_avoid_to_empty_lists() -> None:
+    # act
+    config = AIConfig()
+
+    # assert
+    assert config.interests == []
+    assert config.avoid == []
+
+
+def test_ai_config_accepts_interests_and_avoid() -> None:
+    # act
+    config = AIConfig(
+        interests=["Rust", "AI safety"],
+        avoid=["sports", "crypto"],
+    )
+
+    # assert
+    assert config.interests == ["Rust", "AI safety"]
+    assert config.avoid == ["sports", "crypto"]
