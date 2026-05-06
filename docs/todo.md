@@ -1,12 +1,5 @@
 # Implementation TODOs
 
-#### lower priority
-
-- do an security review of the codebase to identify and fix any potential security vulnerabilities, such as:
-  - Handling sensitive information, such as API keys and email credentials, securely and not hardcoding them in the codebase
-  - Implementing proper authentication and authorization mechanisms for accessing the tool and its features
-  - Document in a security.md file with considerations
-
 ### Short-term:
 
 - [ ] Check how to optimize tokens. Fetch original content?

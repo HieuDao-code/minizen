@@ -111,10 +111,10 @@ def test_setup_writes_env_file(tmp_path: Path) -> None:
     env_path = tmp_path / ".env"
     assert env_path.exists()
     content = env_path.read_text()
-    assert "MINIFLUX_API_KEY=miniflux-api-key" in content
-    assert "ANTHROPIC_API_KEY=anthropic-api-key" in content
-    assert "MINIZEN_EMAIL_USERNAME=email-user" in content
-    assert "MINIZEN_EMAIL_PASSWORD=email-password" in content
+    assert 'MINIFLUX_API_KEY="miniflux-api-key"' in content
+    assert 'ANTHROPIC_API_KEY="anthropic-api-key"' in content
+    assert 'MINIZEN_EMAIL_USERNAME="email-user"' in content
+    assert 'MINIZEN_EMAIL_PASSWORD="email-password"' in content
 
 
 def test_setup_creates_parent_directories(tmp_path: Path) -> None:
@@ -282,7 +282,7 @@ def test_setup_writes_openai_key_for_openai_model(tmp_path: Path) -> None:
     # assert
     env_path = tmp_path / ".env"
     content = env_path.read_text()
-    assert "OPENAI_API_KEY=openai-api-key" in content
+    assert 'OPENAI_API_KEY="openai-api-key"' in content
     assert "ANTHROPIC_API_KEY" not in content
 
 
@@ -429,3 +429,32 @@ def test_setup_uses_default_config_path(mocker: MockerFixture) -> None:
 
     # assert
     mock_write.assert_called_once()
+
+
+def test_setup_quotes_env_values_with_special_chars(tmp_path: Path) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    runner = CliRunner()
+
+    # act
+    runner.invoke(
+        app,
+        ["setup", "--config", str(config_path)],
+        input=(
+            "\n"  # model (default)
+            "\n"  # top_n (default)
+            "\n"  # smtp host (default)
+            "\n"  # smtp port (default)
+            "from@example.com\n"
+            "to@example.com\n"
+            "email-user\n"
+            'p@ss"word\n'
+            "miniflux-api-key\n"
+            "anthropic-api-key\n"
+        ),
+    )
+
+    # assert
+    env_path = tmp_path / ".env"
+    content = env_path.read_text()
+    assert r'MINIZEN_EMAIL_PASSWORD="p@ss\"word"' in content

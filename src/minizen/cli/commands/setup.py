@@ -204,15 +204,29 @@ def _setup_interactive(
 
     env_path = config.parent / ".env"
     env_path.write_text(
-        f"MINIFLUX_API_KEY={miniflux_api_key}\n"
-        f"{key_env_var}={ai_api_key}\n"
-        f"MINIZEN_EMAIL_USERNAME={email_username}\n"
-        f"MINIZEN_EMAIL_PASSWORD={email_password}\n"
+        f"MINIFLUX_API_KEY={_quote_env_value(miniflux_api_key)}\n"
+        f"{key_env_var}={_quote_env_value(ai_api_key)}\n"
+        f"MINIZEN_EMAIL_USERNAME={_quote_env_value(email_username)}\n"
+        f"MINIZEN_EMAIL_PASSWORD={_quote_env_value(email_password)}\n"
     )
     env_path.chmod(0o600)
 
     typer.echo(f"\nConfig written to:      {config}")
     typer.echo(f"Credentials written to: {env_path}")
+
+
+def _quote_env_value(value: str) -> str:
+    r"""Wrap a .env value in double quotes, escaping backslashes and double quotes.
+
+    Args:
+        value: The raw credential string to quote.
+
+    Returns:
+        The value wrapped in double quotes with ``\\`` and ``"`` escaped,
+        safe for writing to a ``.env`` file parsed by python-dotenv.
+    """
+    escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+    return f'"{escaped}"'
 
 
 def _write_config(
