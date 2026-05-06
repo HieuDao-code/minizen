@@ -45,6 +45,14 @@ class AIConfig(BaseModel):
         default=500,
         description="Maximum words of article content sent to the LLM per article.",
     )
+    interests: list[str] = Field(
+        default_factory=list,
+        description="Topics to prioritise when selecting articles.",
+    )
+    avoid: list[str] = Field(
+        default_factory=list,
+        description="Topics to avoid when selecting articles.",
+    )
 
 
 class Settings(BaseModel):
