@@ -3,6 +3,7 @@
 import math
 import re
 from datetime import UTC, datetime
+from html import escape, unescape
 from importlib.metadata import version as pkg_version
 from typing import TYPE_CHECKING, cast
 
@@ -62,7 +63,7 @@ def _build_article_cards(html: str) -> str:
         content = parts[i + 1] if i + 1 < len(parts) else ""
         result += (
             f'<div class="article-card">'
-            f'<span class="feed-badge">{feed_name}</span>'
+            f'<span class="feed-badge">{escape(unescape(feed_name))}</span>'
             f"{content}"
             f"</div>"
         )
@@ -82,7 +83,13 @@ def _build_more_links(articles: list[Article]) -> str:
     """
     if not articles:
         return ""
-    items = "".join(f'<li><a href="{a.url}">{a.title}</a></li>' for a in articles)
+    items = "".join(
+        f'<li><a href="{escape(a.url)}">{escape(a.title)}</a></li>'
+        for a in articles
+        if a.url.startswith(("https://", "http://"))
+    )
+    if not items:
+        return ""
     return f'<div class="more-links"><h3>More to read</h3><ul>{items}</ul></div>'
 
 
