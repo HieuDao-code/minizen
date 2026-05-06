@@ -44,6 +44,8 @@ def run_pipeline(*, settings: Settings, dry_run: bool = False) -> None:
         model=settings.ai.model,
         top_n=settings.ai.top_n,
         max_words_per_article=settings.ai.max_words_per_article,
+        interests=settings.ai.interests,
+        avoid=settings.ai.avoid,
     )
     result = agent.run(articles=articles)
     selected_ids = set(result.articles_used)
