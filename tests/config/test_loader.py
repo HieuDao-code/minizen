@@ -39,11 +39,11 @@ def test_load_settings_reads_toml_and_env(
 
     # assert
     assert settings.miniflux.url == "https://rss.example.com"
-    assert settings.miniflux.api_key == "mf-key"
+    assert settings.miniflux.api_key.get_secret_value() == "mf-key"
     assert settings.email.smtp_host == "smtp.example.com"
     assert settings.email.smtp_port == 587
     assert settings.email.username == "email-user"
-    assert settings.email.password == "email-pass"
+    assert settings.email.password.get_secret_value() == "email-pass"
     assert settings.ai.model == "anthropic:claude-sonnet-4-6"
     assert settings.ai.top_n == 10
 
@@ -136,4 +136,4 @@ def test_load_settings_uses_default_miniflux_url_when_section_absent(
 
     # assert
     assert settings.miniflux.url == "https://reader.miniflux.app"
-    assert settings.miniflux.api_key == "mf-key"
+    assert settings.miniflux.api_key.get_secret_value() == "mf-key"

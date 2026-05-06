@@ -40,7 +40,7 @@ def test_apply_overrides_replaces_miniflux_api_key() -> None:
     result = apply_overrides(settings=settings, miniflux_api_key="new-mf-key")
 
     # assert
-    assert result.miniflux.api_key == "new-mf-key"
+    assert result.miniflux.api_key.get_secret_value() == "new-mf-key"
     assert result.miniflux.url == "https://rss.example.com"
 
 
@@ -65,7 +65,7 @@ def test_apply_overrides_ignores_none_values() -> None:
     result = apply_overrides(settings=settings, miniflux_api_key=None, smtp_host=None)
 
     # assert
-    assert result.miniflux.api_key == "old-mf-key"
+    assert result.miniflux.api_key.get_secret_value() == "old-mf-key"
     assert result.email.smtp_host == "smtp.example.com"
 
 
@@ -85,7 +85,7 @@ def test_build_settings_from_flags_succeeds_with_all_required() -> None:
     )
 
     # assert
-    assert result.miniflux.api_key == "mf-key"
+    assert result.miniflux.api_key.get_secret_value() == "mf-key"
     assert result.miniflux.url == "https://reader.miniflux.app"
     assert result.ai.model == "anthropic:claude-haiku-4-5"
     assert result.email.smtp_host == "smtp.example.com"
@@ -267,7 +267,7 @@ def test_run_all_flags_no_config_file(mocker: MockerFixture) -> None:
     # assert
     assert result.exit_code == 0
     called_settings = mock_pipeline.call_args.kwargs["settings"]
-    assert called_settings.miniflux.api_key == "mf-key"
+    assert called_settings.miniflux.api_key.get_secret_value() == "mf-key"
     assert called_settings.email.from_addr == "from@example.com"
 
 

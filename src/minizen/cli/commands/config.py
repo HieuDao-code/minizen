@@ -35,7 +35,7 @@ def show(config: _CONFIG_OPTION = DEFAULT_CONFIG_PATH) -> None:
     em = data.get("email", {})
     ai = data.get("ai", {})
     typer.echo(f"  miniflux.url:       {mf.get('url', '(unset)')}")
-    typer.echo(f"  miniflux.api_key:   {'(from env)' if mf.get('url') else '(unset)'}")
+    typer.echo("  miniflux.api_key:   (env: MINIFLUX_API_KEY)")
     typer.echo(f"  email.smtp_host:    {em.get('smtp_host', '(unset)')}")
     typer.echo(f"  email.smtp_port:    {em.get('smtp_port', '(unset)')}")
     typer.echo(f"  email.from_addr:    {em.get('from_addr', '(unset)')}")

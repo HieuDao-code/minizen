@@ -17,6 +17,23 @@ from minizen.config.defaults import (
 )
 
 
+def _quote_dotenv_value(value: str) -> str:
+    """Wrap a secret value in double quotes for safe .env file serialisation.
+
+    Escapes embedded backslashes and double quotes so that newlines or special
+    characters in a password cannot inject extra variables into the .env file.
+
+    Args:
+        value: The raw secret string (e.g. an API key or password).
+
+    Returns:
+        The value surrounded by double quotes with internal ``\\`` and ``"``
+        characters escaped.
+    """
+    escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+    return f'"{escaped}"'
+
+
 def _provider_key_info(model: str) -> tuple[str, str]:
     """Return the prompt label and env var name for the AI provider API key.
 
@@ -204,10 +221,10 @@ def _setup_interactive(
 
     env_path = config.parent / ".env"
     env_path.write_text(
-        f"MINIFLUX_API_KEY={miniflux_api_key}\n"
-        f"{key_env_var}={ai_api_key}\n"
-        f"MINIZEN_EMAIL_USERNAME={email_username}\n"
-        f"MINIZEN_EMAIL_PASSWORD={email_password}\n"
+        f"MINIFLUX_API_KEY={_quote_dotenv_value(miniflux_api_key)}\n"
+        f"{key_env_var}={_quote_dotenv_value(ai_api_key)}\n"
+        f"MINIZEN_EMAIL_USERNAME={_quote_dotenv_value(email_username)}\n"
+        f"MINIZEN_EMAIL_PASSWORD={_quote_dotenv_value(email_password)}\n"
     )
     env_path.chmod(0o600)
 
@@ -252,4 +269,6 @@ def _write_config(
         },
     }
     config.parent.mkdir(parents=True, exist_ok=True)
+    config.parent.chmod(0o700)
     config.write_bytes(tomli_w.dumps(data).encode())
+    config.chmod(0o600)

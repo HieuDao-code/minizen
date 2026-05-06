@@ -111,10 +111,10 @@ def test_setup_writes_env_file(tmp_path: Path) -> None:
     env_path = tmp_path / ".env"
     assert env_path.exists()
     content = env_path.read_text()
-    assert "MINIFLUX_API_KEY=miniflux-api-key" in content
-    assert "ANTHROPIC_API_KEY=anthropic-api-key" in content
-    assert "MINIZEN_EMAIL_USERNAME=email-user" in content
-    assert "MINIZEN_EMAIL_PASSWORD=email-password" in content
+    assert 'MINIFLUX_API_KEY="miniflux-api-key"' in content
+    assert 'ANTHROPIC_API_KEY="anthropic-api-key"' in content
+    assert 'MINIZEN_EMAIL_USERNAME="email-user"' in content
+    assert 'MINIZEN_EMAIL_PASSWORD="email-password"' in content
 
 
 def test_setup_creates_parent_directories(tmp_path: Path) -> None:
@@ -282,7 +282,7 @@ def test_setup_writes_openai_key_for_openai_model(tmp_path: Path) -> None:
     # assert
     env_path = tmp_path / ".env"
     content = env_path.read_text()
-    assert "OPENAI_API_KEY=openai-api-key" in content
+    assert 'OPENAI_API_KEY="openai-api-key"' in content
     assert "ANTHROPIC_API_KEY" not in content
 
 
@@ -418,6 +418,7 @@ def test_setup_uses_default_config_path(mocker: MockerFixture) -> None:
     mock_write = mocker.patch("minizen.cli.commands.setup.Path.write_bytes")
     mocker.patch("minizen.cli.commands.setup.Path.mkdir")
     mocker.patch("minizen.cli.commands.setup.Path.write_text")
+    mocker.patch("minizen.cli.commands.setup.Path.chmod")
     runner = CliRunner()
 
     # act
@@ -429,3 +430,35 @@ def test_setup_uses_default_config_path(mocker: MockerFixture) -> None:
 
     # assert
     mock_write.assert_called_once()
+
+
+def test_setup_sets_config_dir_permissions(tmp_path: Path) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    runner = CliRunner()
+
+    # act
+    runner.invoke(
+        app,
+        ["setup", "--config", str(config_path)],
+        input=_INTERACTIVE_INPUT,
+    )
+
+    # assert
+    assert tmp_path.stat().st_mode & 0o777 == 0o700
+
+
+def test_setup_sets_config_file_permissions(tmp_path: Path) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    runner = CliRunner()
+
+    # act
+    runner.invoke(
+        app,
+        ["setup", "--config", str(config_path)],
+        input=_INTERACTIVE_INPUT,
+    )
+
+    # assert
+    assert config_path.stat().st_mode & 0o777 == 0o600

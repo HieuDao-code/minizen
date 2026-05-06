@@ -41,7 +41,7 @@ class MinifluxProvider:
         """
         self._client = miniflux.Client(
             base_url=config.url,
-            api_key=config.api_key,
+            api_key=config.api_key.get_secret_value(),
         )
 
     def fetch_recent(self) -> list[Article]:

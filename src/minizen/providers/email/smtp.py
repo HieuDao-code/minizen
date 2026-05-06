@@ -50,5 +50,8 @@ class EmailProvider:
             host=self._config.smtp_host, port=self._config.smtp_port
         ) as server:
             server.starttls()
-            server.login(user=self._config.username, password=self._config.password)
+            server.login(
+                user=self._config.username,
+                password=self._config.password.get_secret_value(),
+            )
             server.send_message(msg)

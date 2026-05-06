@@ -1,6 +1,6 @@
 """Pydantic settings models for the minizen configuration."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, SecretStr
 
 from minizen.config.defaults import (
     DEFAULT_MINIFLUX_URL,
@@ -16,7 +16,7 @@ class MinifluxConfig(BaseModel):
         default=DEFAULT_MINIFLUX_URL,
         description="Base URL of the Miniflux instance (without /v1/ suffix).",
     )
-    api_key: str = Field(description="Miniflux API key for authentication.")
+    api_key: SecretStr = Field(description="Miniflux API key for authentication.")
 
 
 class EmailConfig(BaseModel):
@@ -27,7 +27,7 @@ class EmailConfig(BaseModel):
     from_addr: str = Field(description="Sender email address.")
     to_addr: str = Field(description="Recipient email address.")
     username: str = Field(description="SMTP login username.")
-    password: str = Field(description="SMTP login password or app password.")
+    password: SecretStr = Field(description="SMTP login password or app password.")
 
 
 class AIConfig(BaseModel):

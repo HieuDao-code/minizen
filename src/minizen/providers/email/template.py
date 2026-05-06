@@ -1,10 +1,12 @@
 """Email template renderer -- converts Markdown digest to styled HTML and plain text."""
 
+import html as html_lib
 import math
 import re
 from datetime import UTC, datetime
 from importlib.metadata import version as pkg_version
 from typing import TYPE_CHECKING, cast
+from urllib.parse import urlparse
 
 import mistune
 
@@ -70,8 +72,27 @@ def _build_article_cards(html: str) -> str:
     return result
 
 
+def _safe_url(url: str) -> str:
+    """Return *url* if its scheme is http or https, otherwise ``"#"``.
+
+    Prevents ``javascript:`` and other dangerous URI schemes from being
+    injected into ``href`` attributes via malicious RSS article URLs.
+
+    Args:
+        url: Candidate URL string from an RSS article.
+
+    Returns:
+        The original URL when the scheme is ``http`` or ``https``, else ``"#"``.
+    """
+    scheme = urlparse(url).scheme.lower()
+    return url if scheme in ("http", "https") else "#"
+
+
 def _build_more_links(articles: list[Article]) -> str:
     """Build a compact "More to read" link list for articles without full summaries.
+
+    Article titles and URLs come from untrusted RSS feed data and are HTML-escaped
+    before embedding to prevent XSS via malicious feed content.
 
     Args:
         articles: Articles to list. Returns an empty string when the list is empty.
@@ -82,7 +103,11 @@ def _build_more_links(articles: list[Article]) -> str:
     """
     if not articles:
         return ""
-    items = "".join(f'<li><a href="{a.url}">{a.title}</a></li>' for a in articles)
+    items = "".join(
+        f'<li><a href="{html_lib.escape(_safe_url(a.url))}">'
+        f"{html_lib.escape(a.title)}</a></li>"
+        for a in articles
+    )
     return f'<div class="more-links"><h3>More to read</h3><ul>{items}</ul></div>'
 
 

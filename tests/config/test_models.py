@@ -10,7 +10,7 @@ def test_miniflux_config_accepts_valid_values() -> None:
 
     # assert
     assert config.url == "https://rss.example.com"
-    assert config.api_key == "key123"
+    assert config.api_key.get_secret_value() == "key123"
 
 
 def test_email_config_accepts_valid_values() -> None:
@@ -30,7 +30,7 @@ def test_email_config_accepts_valid_values() -> None:
     assert config.from_addr == "from@example.com"
     assert config.to_addr == "to@example.com"
     assert config.username == "user"
-    assert config.password == "pass"
+    assert config.password.get_secret_value() == "pass"
 
 
 def test_ai_config_defaults() -> None:

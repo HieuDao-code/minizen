@@ -125,3 +125,60 @@ def test_render_email_with_no_extra_articles_hides_link_list() -> None:
 
     # assert
     assert "More to read" not in html
+
+
+def test_render_email_escapes_article_title_in_more_links() -> None:
+    # arrange
+    extra = Article(
+        id=1,
+        title="<script>alert('xss')</script>",
+        url="https://example.com/article",
+        content="content",
+        feed_name="Feed",
+        published_at=datetime(2026, 5, 4, tzinfo=UTC),
+    )
+
+    # act
+    html, _ = render_email(markdown="## Hello", extra_articles=[extra])
+
+    # assert
+    assert "<script>" not in html
+    assert "&lt;script&gt;" in html
+
+
+def test_render_email_escapes_article_url_in_more_links() -> None:
+    # arrange
+    extra = Article(
+        id=2,
+        title="Safe Title",
+        url='https://example.com/a"onmouseover="alert(1)',
+        content="content",
+        feed_name="Feed",
+        published_at=datetime(2026, 5, 4, tzinfo=UTC),
+    )
+
+    # act
+    html, _ = render_email(markdown="## Hello", extra_articles=[extra])
+
+    # assert
+    assert 'onmouseover="alert(1)' not in html
+    assert "&quot;" in html
+
+
+def test_render_email_blocks_javascript_url_in_more_links() -> None:
+    # arrange
+    extra = Article(
+        id=3,
+        title="Malicious Link",
+        url="javascript:alert('xss')",
+        content="content",
+        feed_name="Feed",
+        published_at=datetime(2026, 5, 4, tzinfo=UTC),
+    )
+
+    # act
+    html, _ = render_email(markdown="## Hello", extra_articles=[extra])
+
+    # assert
+    assert 'href="javascript:' not in html
+    assert 'href="#"' in html
