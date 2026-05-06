@@ -1,6 +1,9 @@
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
+import pytest
+from pydantic_ai.exceptions import AgentRunError, ModelHTTPError, UnexpectedModelBehavior
+
 from minizen.ai.agent import _SYSTEM_PROMPT, DigestAgent, DigestResult, _truncate_words
 from minizen.providers.rss.miniflux import Article
 
@@ -117,6 +120,50 @@ def test_run_omits_comments_url_in_prompt_when_none(mocker: MockerFixture) -> No
     user_prompt: str = call_args[0][0]
     assert "Comments URL: None" not in user_prompt
     assert "ycombinator" not in user_prompt
+
+
+# --- error handling ---
+
+
+def test_run_raises_on_model_http_error(mocker: MockerFixture) -> None:
+    # arrange
+    mock_agent_cls = mocker.patch("minizen.ai.agent.Agent")
+    mock_agent_cls.return_value.run_sync.side_effect = ModelHTTPError(
+        status_code=429, model_name="anthropic:claude-haiku-4-5"
+    )
+    agent = DigestAgent(model="anthropic:claude-haiku-4-5", top_n=3)
+    articles = [_make_article(article_id=1)]
+
+    # act / assert
+    with pytest.raises(ModelHTTPError) as exc_info:
+        agent.run(articles=articles)
+    assert exc_info.value.status_code == 429
+
+
+def test_run_raises_on_unexpected_model_behavior(mocker: MockerFixture) -> None:
+    # arrange
+    mock_agent_cls = mocker.patch("minizen.ai.agent.Agent")
+    mock_agent_cls.return_value.run_sync.side_effect = UnexpectedModelBehavior(
+        "Model returned empty response"
+    )
+    agent = DigestAgent(model="anthropic:claude-haiku-4-5", top_n=3)
+    articles = [_make_article(article_id=1)]
+
+    # act / assert
+    with pytest.raises(UnexpectedModelBehavior, match="Model returned empty response"):
+        agent.run(articles=articles)
+
+
+def test_run_raises_on_agent_run_error(mocker: MockerFixture) -> None:
+    # arrange
+    mock_agent_cls = mocker.patch("minizen.ai.agent.Agent")
+    mock_agent_cls.return_value.run_sync.side_effect = AgentRunError("Agent run failed")
+    agent = DigestAgent(model="anthropic:claude-haiku-4-5", top_n=3)
+    articles = [_make_article(article_id=1)]
+
+    # act / assert
+    with pytest.raises(AgentRunError, match="Agent run failed"):
+        agent.run(articles=articles)
 
 
 # --- _truncate_words ---

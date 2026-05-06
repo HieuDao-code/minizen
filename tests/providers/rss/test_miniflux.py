@@ -5,6 +5,8 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import miniflux
+import pytest
 from freezegun import freeze_time
 
 from minizen.config.models import MinifluxConfig
@@ -163,6 +165,88 @@ def test_fetch_recent_sets_comments_url_none_when_absent(mocker: MockerFixture) 
 
     # assert
     assert articles[0].comments_url is None
+
+
+def _make_miniflux_error_response(mocker: MockerFixture, status_code: int) -> object:
+    mock_response = mocker.MagicMock()
+    mock_response.status_code = status_code
+    mock_response.headers = {"Content-Type": "text/plain"}
+    return mock_response
+
+
+@freeze_time("2026-05-04T10:00:00Z")
+def test_fetch_recent_raises_on_unauthorized(mocker: MockerFixture) -> None:
+    # arrange
+    mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
+    response = _make_miniflux_error_response(mocker, status_code=401)
+    mock_client_cls.return_value.get_entries.side_effect = miniflux.AccessUnauthorized(
+        response
+    )
+    config = MinifluxConfig(url="https://rss.example.com", api_key="bad-key")
+    provider = MinifluxProvider(config=config)
+
+    # act / assert
+    with pytest.raises(miniflux.AccessUnauthorized):
+        provider.fetch_recent()
+
+
+@freeze_time("2026-05-04T10:00:00Z")
+def test_fetch_recent_raises_on_rate_limit(mocker: MockerFixture) -> None:
+    # arrange
+    mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
+    response = _make_miniflux_error_response(mocker, status_code=429)
+    mock_client_cls.return_value.get_entries.side_effect = miniflux.ClientError(response)
+    config = MinifluxConfig(url="https://rss.example.com", api_key="key")
+    provider = MinifluxProvider(config=config)
+
+    # act / assert
+    with pytest.raises(miniflux.ClientError) as exc_info:
+        provider.fetch_recent()
+    assert exc_info.value.status_code == 429
+
+
+@freeze_time("2026-05-04T10:00:00Z")
+def test_fetch_recent_raises_on_server_error(mocker: MockerFixture) -> None:
+    # arrange
+    mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
+    response = _make_miniflux_error_response(mocker, status_code=500)
+    mock_client_cls.return_value.get_entries.side_effect = miniflux.ServerError(response)
+    config = MinifluxConfig(url="https://rss.example.com", api_key="key")
+    provider = MinifluxProvider(config=config)
+
+    # act / assert
+    with pytest.raises(miniflux.ServerError):
+        provider.fetch_recent()
+
+
+@freeze_time("2026-05-04T10:00:00Z")
+def test_fetch_recent_raises_on_connection_error(mocker: MockerFixture) -> None:
+    # arrange
+    mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
+    mock_client_cls.return_value.get_entries.side_effect = OSError("Connection refused")
+    config = MinifluxConfig(url="https://rss.example.com", api_key="key")
+    provider = MinifluxProvider(config=config)
+
+    # act / assert
+    with pytest.raises(OSError, match="Connection refused"):
+        provider.fetch_recent()
+
+
+@freeze_time("2026-05-04T10:00:00Z")
+def test_fetch_recent_returns_empty_when_entries_key_missing(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
+    mock_client_cls.return_value.get_entries.return_value = {"total": 0}
+    config = MinifluxConfig(url="https://rss.example.com", api_key="key")
+    provider = MinifluxProvider(config=config)
+
+    # act
+    articles = provider.fetch_recent()
+
+    # assert
+    assert articles == []
 
 
 @freeze_time("2026-05-04T10:00:00Z")

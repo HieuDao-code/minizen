@@ -1,9 +1,12 @@
 """CLI command to run the full fetch-summarise-email pipeline."""
 
+import smtplib
 from pathlib import Path
 from typing import Annotated, cast
 
+import miniflux
 import typer
+from pydantic_ai.exceptions import AgentRunError, ModelHTTPError
 
 from minizen.config.defaults import (
     DEFAULT_CONFIG_PATH,
@@ -224,4 +227,39 @@ def run(
         raise typer.Exit(code=1)
     else:
         settings = apply_overrides(settings=settings, **_flag_kwargs)
-    run_pipeline(settings=settings, dry_run=dry_run)
+    try:
+        run_pipeline(settings=settings, dry_run=dry_run)
+    except miniflux.AccessUnauthorized:
+        typer.echo("Error: Miniflux authentication failed. Check your API key.")
+        raise typer.Exit(code=1)
+    except miniflux.ClientError as exc:
+        if exc.status_code == 429:  # noqa: PLR2004
+            typer.echo("Error: Miniflux API rate limit exceeded. Try again later.")
+        else:
+            typer.echo(f"Error: Miniflux API error (HTTP {exc.status_code}): {exc}")
+        raise typer.Exit(code=1)
+    except smtplib.SMTPAuthenticationError:
+        typer.echo(
+            "Error: Email authentication failed. Check your SMTP username and password."
+        )
+        raise typer.Exit(code=1)
+    except smtplib.SMTPRecipientsRefused:
+        typer.echo(
+            f"Error: Email recipient refused by SMTP server: {settings.email.to_addr}"
+        )
+        raise typer.Exit(code=1)
+    except smtplib.SMTPException as exc:
+        typer.echo(f"Error: Failed to send email: {exc}")
+        raise typer.Exit(code=1)
+    except ModelHTTPError as exc:
+        if exc.status_code == 429:  # noqa: PLR2004
+            typer.echo("Error: AI API rate limit exceeded. Try again later.")
+        else:
+            typer.echo(f"Error: AI API error (HTTP {exc.status_code}): {exc}")
+        raise typer.Exit(code=1)
+    except AgentRunError as exc:
+        typer.echo(f"Error: AI agent failed: {exc}")
+        raise typer.Exit(code=1)
+    except OSError as exc:
+        typer.echo(f"Error: Network error: {exc}")
+        raise typer.Exit(code=1)

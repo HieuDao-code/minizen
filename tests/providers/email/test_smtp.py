@@ -1,4 +1,7 @@
+import smtplib
 from typing import TYPE_CHECKING
+
+import pytest
 
 from minizen.config.models import EmailConfig
 from minizen.providers.email.smtp import EmailProvider
@@ -56,6 +59,66 @@ def test_send_attaches_plain_text_when_provided(mocker: MockerFixture) -> None:
     payloads = sent_msg.get_payload()
     assert any(p.get_content_type() == "text/plain" for p in payloads)
     assert any(p.get_content_type() == "text/html" for p in payloads)
+
+
+def _make_config() -> EmailConfig:
+    return EmailConfig(
+        smtp_host="smtp.example.com",
+        smtp_port=587,
+        from_addr="from@example.com",
+        to_addr="to@example.com",
+        username="user",
+        password="pass",
+    )
+
+
+def test_send_raises_on_auth_error(mocker: MockerFixture) -> None:
+    # arrange
+    mock_smtp_cls = mocker.patch("minizen.providers.email.smtp.smtplib.SMTP")
+    mock_smtp = mock_smtp_cls.return_value.__enter__.return_value
+    mock_smtp.login.side_effect = smtplib.SMTPAuthenticationError(535, b"Auth failed")
+    provider = EmailProvider(config=_make_config())
+
+    # act / assert
+    with pytest.raises(smtplib.SMTPAuthenticationError):
+        provider.send(subject="Test", html="<h1>Test</h1>")
+
+
+def test_send_raises_on_recipients_refused(mocker: MockerFixture) -> None:
+    # arrange
+    mock_smtp_cls = mocker.patch("minizen.providers.email.smtp.smtplib.SMTP")
+    mock_smtp = mock_smtp_cls.return_value.__enter__.return_value
+    mock_smtp.send_message.side_effect = smtplib.SMTPRecipientsRefused(
+        {"to@example.com": (550, b"User unknown")}
+    )
+    provider = EmailProvider(config=_make_config())
+
+    # act / assert
+    with pytest.raises(smtplib.SMTPRecipientsRefused):
+        provider.send(subject="Test", html="<h1>Test</h1>")
+
+
+def test_send_raises_on_smtp_exception(mocker: MockerFixture) -> None:
+    # arrange
+    mock_smtp_cls = mocker.patch("minizen.providers.email.smtp.smtplib.SMTP")
+    mock_smtp = mock_smtp_cls.return_value.__enter__.return_value
+    mock_smtp.starttls.side_effect = smtplib.SMTPNotSupportedError("STARTTLS not supported")
+    provider = EmailProvider(config=_make_config())
+
+    # act / assert
+    with pytest.raises(smtplib.SMTPException):
+        provider.send(subject="Test", html="<h1>Test</h1>")
+
+
+def test_send_raises_on_connection_error(mocker: MockerFixture) -> None:
+    # arrange
+    mock_smtp_cls = mocker.patch("minizen.providers.email.smtp.smtplib.SMTP")
+    mock_smtp_cls.side_effect = ConnectionRefusedError("Connection refused")
+    provider = EmailProvider(config=_make_config())
+
+    # act / assert
+    with pytest.raises(OSError, match="Connection refused"):
+        provider.send(subject="Test", html="<h1>Test</h1>")
 
 
 def test_send_message_has_correct_headers(mocker: MockerFixture) -> None:

@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, cast
 
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent, AgentRunResult
+from pydantic_ai.exceptions import AgentRunError, ModelHTTPError, UnexpectedModelBehavior
 
 if TYPE_CHECKING:
     from minizen.providers.rss.miniflux import Article
@@ -132,6 +133,13 @@ class DigestAgent:
         Returns:
             A ``DigestResult`` containing the Markdown text and the IDs of
             articles that were included.
+
+        Raises:
+            ModelHTTPError: If the AI API returns an HTTP error, including HTTP 429
+                rate-limit responses.
+            UnexpectedModelBehavior: If the model returns output that cannot be parsed
+                into a valid ``DigestResult``.
+            AgentRunError: If the agent run fails for any other reason.
         """
         logger.info("Running AI agent on %d article(s)", len(articles))
         articles_text = "\n\n---\n\n".join(
@@ -148,5 +156,25 @@ class DigestAgent:
             f"Please select the top {self._top_n} most important articles "  # noqa: S608
             f"from the following and write a digest:\n\n{articles_text}"
         )
-        result = self._agent.run_sync(user_prompt)
+        try:
+            result = self._agent.run_sync(user_prompt)
+        except ModelHTTPError as exc:
+            if exc.status_code == 429:  # noqa: PLR2004
+                logger.error(
+                    "AI API rate limit exceeded (HTTP 429) for model %s", exc.model_name
+                )
+            else:
+                logger.error(
+                    "AI API HTTP error (status %d) for model %s: %s",
+                    exc.status_code,
+                    exc.model_name,
+                    exc,
+                )
+            raise
+        except UnexpectedModelBehavior as exc:
+            logger.error("AI model returned unexpected output: %s", exc)
+            raise
+        except AgentRunError as exc:
+            logger.error("AI agent run failed: %s", exc)
+            raise
         return cast("AgentRunResult[DigestResult]", result).output

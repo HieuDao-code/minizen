@@ -49,11 +49,30 @@ class MinifluxProvider:
 
         Returns:
             A list of ``Article`` objects, one per entry in the lookback window.
+
+        Raises:
+            miniflux.AccessUnauthorized: If the API key is invalid or missing.
+            miniflux.ClientError: If the Miniflux API returns any other error response,
+                including HTTP 429 rate-limit responses.
+            OSError: If a network error occurs while contacting Miniflux.
         """
         cutoff = datetime.now(tz=UTC) - timedelta(hours=_LOOKBACK_HOURS)
         after_ts = int(cutoff.timestamp())
-        response = self._client.get_entries(published_after=after_ts)
-        entries = response["entries"]
+        try:
+            response = self._client.get_entries(published_after=after_ts)
+        except miniflux.AccessUnauthorized:
+            logger.error("Miniflux authentication failed: invalid API key")
+            raise
+        except miniflux.ClientError as exc:
+            if exc.status_code == 429:  # noqa: PLR2004
+                logger.error("Miniflux API rate limit exceeded (HTTP 429)")
+            else:
+                logger.error("Miniflux API error (HTTP %d): %s", exc.status_code, exc)
+            raise
+        except OSError as exc:
+            logger.error("Network error connecting to Miniflux: %s", exc)
+            raise
+        entries = response.get("entries") or []
         logger.debug(
             "Fetched %d entries from the last %dh", len(entries), _LOOKBACK_HOURS
         )

@@ -1,9 +1,12 @@
+import smtplib
 from pathlib import Path
 from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
+import miniflux
 import pytest
 import typer
+from pydantic_ai.exceptions import AgentRunError, ModelHTTPError
 from typer.testing import CliRunner
 
 from minizen.cli import app
@@ -284,3 +287,82 @@ def test_run_no_config_file_lists_missing_flags() -> None:
     # assert
     assert result.exit_code != 0
     assert "--miniflux-api-key" in result.output
+
+
+def _make_miniflux_error_response(status_code: int) -> object:
+    mock_response = MagicMock()
+    mock_response.status_code = status_code
+    mock_response.headers = {"Content-Type": "text/plain"}
+    return mock_response
+
+
+@pytest.mark.parametrize(
+    ("exc", "expected_output"),
+    [
+        (
+            miniflux.AccessUnauthorized(_make_miniflux_error_response(401)),
+            "Miniflux authentication failed",
+        ),
+        (
+            miniflux.ClientError(_make_miniflux_error_response(429)),
+            "Miniflux API rate limit exceeded",
+        ),
+        (
+            miniflux.ClientError(_make_miniflux_error_response(503)),
+            "Miniflux API error (HTTP 503)",
+        ),
+        (
+            smtplib.SMTPAuthenticationError(535, b"Auth failed"),
+            "Email authentication failed",
+        ),
+        (
+            smtplib.SMTPRecipientsRefused({"to@example.com": (550, b"User unknown")}),
+            "Email recipient refused",
+        ),
+        (
+            smtplib.SMTPException("Connection lost"),
+            "Failed to send email",
+        ),
+        (
+            ModelHTTPError(status_code=429, model_name="claude-haiku-4-5"),
+            "AI API rate limit exceeded",
+        ),
+        (
+            ModelHTTPError(status_code=500, model_name="claude-haiku-4-5"),
+            "AI API error (HTTP 500)",
+        ),
+        (
+            AgentRunError("Usage limit exceeded"),
+            "AI agent failed",
+        ),
+        (
+            OSError("Network unreachable"),
+            "Network error",
+        ),
+    ],
+)
+def test_run_exits_with_error_on_pipeline_failure(
+    mocker: MockerFixture,
+    tmp_path: Path,
+    exc: Exception,
+    expected_output: str,
+) -> None:
+    # arrange
+    mock_settings = MagicMock()
+    mock_settings.miniflux.model_copy.return_value = mock_settings.miniflux
+    mock_settings.email.model_copy.return_value = mock_settings.email
+    mock_settings.ai.model_copy.return_value = mock_settings.ai
+    mock_settings.model_copy.return_value = mock_settings
+    mock_settings.email.to_addr = "to@example.com"
+    mocker.patch("minizen.cli.commands.run.load_settings", return_value=mock_settings)
+    mocker.patch("minizen.cli.commands.run.run_pipeline", side_effect=exc)
+    config_path = tmp_path / "config.toml"
+    config_path.touch()
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(app, ["run", "--config", str(config_path)])
+
+    # assert
+    assert result.exit_code == 1
+    assert expected_output in result.output
