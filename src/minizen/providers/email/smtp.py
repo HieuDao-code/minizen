@@ -6,6 +6,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import TYPE_CHECKING
 
+from minizen.exceptions import EmailError
+
 if TYPE_CHECKING:
     from minizen.config.models import EmailConfig
 
@@ -30,6 +32,9 @@ class EmailProvider:
             subject: Email subject line.
             html: HTML body of the message.
             plain_text: Optional plain-text alternative; omitted if empty.
+
+        Raises:
+            EmailError: If the SMTP connection or send operation fails.
         """
         logger.debug(
             "Sending email: subject=%r, to=%s, smtp=%s:%d",
@@ -46,9 +51,13 @@ class EmailProvider:
             msg.attach(MIMEText(plain_text, "plain"))
         msg.attach(MIMEText(html, "html"))
 
-        with smtplib.SMTP(
-            host=self._config.smtp_host, port=self._config.smtp_port
-        ) as server:
-            server.starttls()
-            server.login(user=self._config.username, password=self._config.password)
-            server.send_message(msg)
+        try:
+            with smtplib.SMTP(
+                host=self._config.smtp_host, port=self._config.smtp_port
+            ) as server:
+                server.starttls()
+                server.login(user=self._config.username, password=self._config.password)
+                server.send_message(msg)
+        except (smtplib.SMTPException, OSError) as exc:
+            err_msg = f"Email delivery failed: {exc}"
+            raise EmailError(err_msg) from exc
