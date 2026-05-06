@@ -6,6 +6,9 @@ from typing import TYPE_CHECKING, cast
 
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent, AgentRunResult
+from pydantic_ai.exceptions import AgentRunError
+
+from minizen.exceptions import AIError
 
 if TYPE_CHECKING:
     from minizen.providers.rss.miniflux import Article
@@ -132,6 +135,9 @@ class DigestAgent:
         Returns:
             A ``DigestResult`` containing the Markdown text and the IDs of
             articles that were included.
+
+        Raises:
+            AIError: If the AI model call fails.
         """
         logger.info("Running AI agent on %d article(s)", len(articles))
         articles_text = "\n\n---\n\n".join(
@@ -148,5 +154,9 @@ class DigestAgent:
             f"Please select the top {self._top_n} most important articles "  # noqa: S608
             f"from the following and write a digest:\n\n{articles_text}"
         )
-        result = self._agent.run_sync(user_prompt)
+        try:
+            result = self._agent.run_sync(user_prompt)
+        except AgentRunError as exc:
+            msg = f"AI model error: {exc}"
+            raise AIError(msg) from exc
         return cast("AgentRunResult[DigestResult]", result).output
