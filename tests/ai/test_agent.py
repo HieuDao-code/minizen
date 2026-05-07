@@ -4,7 +4,13 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic_ai.exceptions import UnexpectedModelBehavior
 
-from minizen.ai.agent import _SYSTEM_PROMPT, DigestAgent, DigestResult, _truncate_words
+from minizen.ai.agent import (
+    _SYSTEM_PROMPT,
+    DigestAgent,
+    DigestResult,
+    _build_system_prompt,
+    _truncate_words,
+)
 from minizen.exceptions import AIError
 from minizen.providers.rss.miniflux import Article
 
@@ -250,3 +256,88 @@ def test_agent_uses_base_system_prompt_when_no_preferences(
     # assert
     call_kwargs = mock_agent_cls.call_args.kwargs
     assert call_kwargs["system_prompt"] == _SYSTEM_PROMPT
+
+
+def test_build_system_prompt_includes_preferred_categories_when_set() -> None:
+    # act
+    result = _build_system_prompt(
+        interests=[],
+        avoid=[],
+        preferred_categories=["Tech", "Science"],
+    )
+
+    # assert
+    assert (
+        "Prefer articles from these Miniflux categories"
+        " (in order of preference): Tech, Science"
+    ) in result
+
+
+def test_build_system_prompt_omits_preferred_categories_line_when_empty() -> None:
+    # act
+    result = _build_system_prompt(interests=[], avoid=[], preferred_categories=[])
+
+    # assert
+    assert result == _SYSTEM_PROMPT
+
+
+def test_run_includes_category_in_prompt_when_present(mocker: MockerFixture) -> None:
+    # arrange
+    mock_agent_cls = mocker.patch("minizen.ai.agent.Agent")
+    mock_run_result = mocker.MagicMock()
+    mock_run_result.output = DigestResult(markdown="# Digest", articles_used=[1])
+    mock_agent_cls.return_value.run_sync.return_value = mock_run_result
+    agent = DigestAgent(model="anthropic:claude-sonnet-4-6", top_n=3)
+    article = Article(
+        id=1,
+        title="Test Article",
+        url="https://example.com",
+        content="<p>Content</p>",
+        feed_name="Test Feed",
+        category="Tech",
+        published_at=datetime(2026, 4, 24, 8, 0, 0, tzinfo=UTC),
+    )
+
+    # act
+    agent.run(articles=[article])
+
+    # assert
+    user_prompt: str = mock_agent_cls.return_value.run_sync.call_args[0][0]
+    assert "Category: Tech" in user_prompt
+
+
+def test_run_omits_category_in_prompt_when_empty(mocker: MockerFixture) -> None:
+    # arrange
+    mock_agent_cls = mocker.patch("minizen.ai.agent.Agent")
+    mock_run_result = mocker.MagicMock()
+    mock_run_result.output = DigestResult(markdown="# Digest", articles_used=[1])
+    mock_agent_cls.return_value.run_sync.return_value = mock_run_result
+    agent = DigestAgent(model="anthropic:claude-sonnet-4-6", top_n=3)
+
+    # act
+    agent.run(articles=[_make_article(article_id=1)])
+
+    # assert
+    user_prompt: str = mock_agent_cls.return_value.run_sync.call_args[0][0]
+    assert "Category:" not in user_prompt
+
+
+def test_agent_initialized_with_preference_block_when_preferred_categories_set(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mock_agent_cls = mocker.patch("minizen.ai.agent.Agent")
+
+    # act
+    DigestAgent(
+        model="anthropic:claude-sonnet-4-6",
+        top_n=5,
+        preferred_categories=["Tech", "Science"],
+    )
+
+    # assert
+    call_kwargs = mock_agent_cls.call_args.kwargs
+    assert (
+        "Prefer articles from these Miniflux categories"
+        " (in order of preference): Tech, Science"
+    ) in call_kwargs["system_prompt"]

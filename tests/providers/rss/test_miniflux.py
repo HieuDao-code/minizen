@@ -307,3 +307,59 @@ def test_fetch_recent_raises_miniflux_error_after_exhausting_retries(
     with pytest.raises(MinifluxError, match="Miniflux API error"):
         provider.fetch_recent()
     assert mock_client_cls.return_value.get_entries.call_count == 3
+
+
+@freeze_time("2026-05-04T10:00:00Z")
+def test_fetch_recent_extracts_category_from_entry(mocker: MockerFixture) -> None:
+    # arrange
+    mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
+    mock_client_cls.return_value.get_entries.return_value = {
+        "total": 1,
+        "entries": [
+            {
+                "id": 1,
+                "title": "Test",
+                "url": "https://example.com",
+                "content": "<p>Body</p>",
+                "feed": {"title": "Hacker News", "category": {"title": "Tech"}},
+                "published_at": "2026-05-04T08:00:00Z",
+            }
+        ],
+    }
+    config = MinifluxConfig(url="https://rss.example.com", api_key="key")
+    provider = MinifluxProvider(config=config)
+
+    # act
+    articles = provider.fetch_recent()
+
+    # assert
+    assert articles[0].category == "Tech"
+
+
+@freeze_time("2026-05-04T10:00:00Z")
+def test_fetch_recent_defaults_category_to_empty_string_when_absent(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
+    mock_client_cls.return_value.get_entries.return_value = {
+        "total": 1,
+        "entries": [
+            {
+                "id": 1,
+                "title": "Test",
+                "url": "https://example.com",
+                "content": "<p>Body</p>",
+                "feed": {"title": "Hacker News"},
+                "published_at": "2026-05-04T08:00:00Z",
+            }
+        ],
+    }
+    config = MinifluxConfig(url="https://rss.example.com", api_key="key")
+    provider = MinifluxProvider(config=config)
+
+    # act
+    articles = provider.fetch_recent()
+
+    # assert
+    assert articles[0].category == ""

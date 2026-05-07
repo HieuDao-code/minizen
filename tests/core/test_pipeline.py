@@ -22,6 +22,7 @@ def _make_settings(
     *,
     interests: list[str] | None = None,
     avoid: list[str] | None = None,
+    preferred_categories: list[str] | None = None,
 ) -> Settings:
     return Settings(
         miniflux=MinifluxConfig(url="https://rss.example.com", api_key="key"),
@@ -38,6 +39,7 @@ def _make_settings(
             top_n=2,
             interests=interests or [],
             avoid=avoid or [],
+            preferred_categories=preferred_categories or [],
         ),
     )
 
@@ -95,6 +97,7 @@ def test_pipeline_runs_full_flow(mocker: MockerFixture) -> None:
         max_words_per_article=500,
         interests=[],
         avoid=[],
+        preferred_categories=[],
     )
 
 
@@ -252,4 +255,44 @@ def test_pipeline_passes_interests_and_avoid_to_agent(
         max_words_per_article=500,
         interests=["Rust", "AI"],
         avoid=["sports"],
+        preferred_categories=[],
+    )
+
+
+@freeze_time("2026-04-29")
+def test_pipeline_passes_preferred_categories_to_agent(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    articles = [_make_article(1)]
+    mock_rss = MagicMock()
+    mock_rss.fetch_recent.return_value = articles
+    mock_email = MagicMock()
+    mock_digest_result = MagicMock()
+    mock_digest_result.markdown = "## Digest"
+    mock_digest_result.articles_used = [1]
+    mock_agent = MagicMock()
+    mock_agent.run.return_value = mock_digest_result
+    mocker.patch("minizen.core.pipeline.MinifluxProvider", return_value=mock_rss)
+    mocker.patch("minizen.core.pipeline.EmailProvider", return_value=mock_email)
+    mock_agent_cls = mocker.patch(
+        "minizen.core.pipeline.DigestAgent", return_value=mock_agent
+    )
+    mocker.patch(
+        "minizen.core.pipeline.render_email",
+        return_value=("<h2>Digest</h2>", "## Digest"),
+    )
+    settings = _make_settings(preferred_categories=["Tech", "Science"])
+
+    # act
+    run_pipeline(settings=settings)
+
+    # assert
+    mock_agent_cls.assert_called_once_with(
+        model="anthropic:claude-sonnet-4-6",
+        top_n=2,
+        max_words_per_article=500,
+        interests=[],
+        avoid=[],
+        preferred_categories=["Tech", "Science"],
     )

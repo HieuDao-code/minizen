@@ -33,6 +33,7 @@ to_addr = "you@example.com"
 | `max_words_per_article` | integer        | `500`                          | Maximum words of article content sent to the LLM per article. Increase for longer summaries, decrease to reduce token usage. |
 | `interests`             | list of strings | `[]`                          | Topics for the AI to prioritise when selecting articles (e.g. `["Rust", "AI safety"]`). Omit or leave empty for no preference. |
 | `avoid`                 | list of strings | `[]`                          | Topics for the AI to skip when selecting articles (e.g. `["sports", "crypto"]`). Omit or leave empty for no preference. |
+| `preferred_categories`  | list of strings | `[]`                          | Miniflux category names for the AI to prefer when selecting articles (e.g. `["Tech", "Science"]`). Listed in order of preference. Omit or leave empty for no preference. |
 
 #### Interest profile
 
@@ -49,6 +50,22 @@ avoid = ["sports", "celebrity news", "crypto"]
 
 The AI will favour articles matching your `interests` and skip those matching `avoid` when choosing the top N.
 Both lists accept any freeform topic strings — the more specific, the better.
+
+#### Category preferences
+
+Use `preferred_categories` to steer the AI toward articles from specific Miniflux categories.
+Categories are matched by their exact name in Miniflux (case-sensitive).
+
+```toml
+[ai]
+model = "anthropic:claude-haiku-4-5"
+top_n = 5
+preferred_categories = ["Tech", "Science"]
+```
+
+The AI will favour articles from the listed categories when choosing the top N, treating earlier
+entries as higher priority. This works alongside `interests` and `avoid` — all three fields
+influence the same selection step. Unknown category names are silently ignored.
 
 **During setup** the wizard prompts for both fields interactively:
 
@@ -144,6 +161,7 @@ top_n = 5
 # max_words_per_article = 500                        # default: 500
 # interests = ["Rust", "AI safety", "climate tech"]  # optional
 # avoid = ["sports", "celebrity news", "crypto"]      # optional
+# preferred_categories = ["Tech", "Science"]          # optional
 ```
 
 Use `minizen config set` to update individual values later:

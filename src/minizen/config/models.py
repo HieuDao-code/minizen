@@ -53,6 +53,10 @@ class AIConfig(BaseModel):
         default_factory=list,
         description="Topics to avoid when selecting articles.",
     )
+    preferred_categories: list[str] = Field(
+        default_factory=list,
+        description="Miniflux category names to prioritise when selecting articles.",
+    )
 
 
 class Settings(BaseModel):
