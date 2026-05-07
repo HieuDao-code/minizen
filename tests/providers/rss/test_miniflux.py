@@ -11,7 +11,7 @@ from freezegun import freeze_time
 
 from minizen.config.models import MinifluxConfig
 from minizen.exceptions import MinifluxError
-from minizen.providers.rss.miniflux import MinifluxProvider
+from minizen.providers.rss.miniflux import MinifluxProvider, is_transient_miniflux
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
@@ -222,6 +222,7 @@ def test_fetch_recent_raises_miniflux_error_on_os_error(
     mocker: MockerFixture,
 ) -> None:
     # arrange
+    mocker.patch("tenacity.nap.sleep")
     mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
     mock_client_cls.return_value.get_entries.side_effect = OSError("Connection refused")
     config = MinifluxConfig(url="https://rss.example.com", api_key="key")
@@ -230,3 +231,79 @@ def test_fetch_recent_raises_miniflux_error_on_os_error(
     # act / assert
     with pytest.raises(MinifluxError, match="Miniflux API error"):
         provider.fetch_recent()
+
+
+def test_is_transient_miniflux_returns_true_for_os_error() -> None:
+    assert is_transient_miniflux(exc=OSError("timeout")) is True
+
+
+def test_is_transient_miniflux_returns_true_for_5xx_client_error(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mock_response = mocker.MagicMock()
+    mock_response.status_code = 503
+
+    # act / assert
+    assert is_transient_miniflux(exc=miniflux.ClientError(mock_response)) is True
+
+
+def test_is_transient_miniflux_returns_false_for_4xx_client_error(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mock_response = mocker.MagicMock()
+    mock_response.status_code = 403
+
+    # act / assert
+    assert is_transient_miniflux(exc=miniflux.ClientError(mock_response)) is False
+
+
+def test_is_transient_miniflux_returns_false_for_other_exceptions() -> None:
+    assert is_transient_miniflux(exc=ValueError("unrelated")) is False
+
+
+@freeze_time("2026-05-04T10:00:00Z")
+def test_fetch_recent_retries_on_transient_error_then_succeeds(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mocker.patch("tenacity.nap.sleep")
+    call_count = 0
+
+    def flaky_get_entries(**_: object) -> dict:
+        nonlocal call_count
+        call_count += 1
+        if call_count < 2:
+            msg = "timeout"
+            raise OSError(msg)
+        return {"total": 0, "entries": []}
+
+    mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
+    mock_client_cls.return_value.get_entries.side_effect = flaky_get_entries
+    config = MinifluxConfig(url="https://rss.example.com", api_key="key")
+    provider = MinifluxProvider(config=config)
+
+    # act
+    articles = provider.fetch_recent()
+
+    # assert
+    assert articles == []
+    assert call_count == 2
+
+
+@freeze_time("2026-05-04T10:00:00Z")
+def test_fetch_recent_raises_miniflux_error_after_exhausting_retries(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mocker.patch("tenacity.nap.sleep")
+    mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
+    mock_client_cls.return_value.get_entries.side_effect = OSError("timeout")
+    config = MinifluxConfig(url="https://rss.example.com", api_key="key")
+    provider = MinifluxProvider(config=config)
+
+    # act / assert
+    with pytest.raises(MinifluxError, match="Miniflux API error"):
+        provider.fetch_recent()
+    assert mock_client_cls.return_value.get_entries.call_count == 3
