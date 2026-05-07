@@ -4,7 +4,13 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic_ai.exceptions import UnexpectedModelBehavior
 
-from minizen.ai.agent import _SYSTEM_PROMPT, DigestAgent, DigestResult, _truncate_words
+from minizen.ai.agent import (
+    _SYSTEM_PROMPT,
+    DigestAgent,
+    DigestResult,
+    _build_system_prompt,
+    _truncate_words,
+)
 from minizen.exceptions import AIError
 from minizen.providers.rss.miniflux import Article
 
@@ -250,3 +256,47 @@ def test_agent_uses_base_system_prompt_when_no_preferences(
     # assert
     call_kwargs = mock_agent_cls.call_args.kwargs
     assert call_kwargs["system_prompt"] == _SYSTEM_PROMPT
+
+
+def test_build_system_prompt_includes_preferred_categories_when_set() -> None:
+    # act
+    result = _build_system_prompt(
+        interests=[],
+        avoid=[],
+        preferred_categories=["Tech", "Science"],
+    )
+
+    # assert
+    assert (
+        "Prefer articles from these Miniflux categories"
+        " (in order of preference): Tech, Science"
+    ) in result
+
+
+def test_build_system_prompt_omits_preferred_categories_line_when_empty() -> None:
+    # act
+    result = _build_system_prompt(interests=[], avoid=[], preferred_categories=[])
+
+    # assert
+    assert result == _SYSTEM_PROMPT
+
+
+def test_agent_initialized_with_preference_block_when_preferred_categories_set(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mock_agent_cls = mocker.patch("minizen.ai.agent.Agent")
+
+    # act
+    DigestAgent(
+        model="anthropic:claude-sonnet-4-6",
+        top_n=5,
+        preferred_categories=["Tech", "Science"],
+    )
+
+    # assert
+    call_kwargs = mock_agent_cls.call_args.kwargs
+    assert (
+        "Prefer articles from these Miniflux categories"
+        " (in order of preference): Tech, Science"
+    ) in call_kwargs["system_prompt"]

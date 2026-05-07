@@ -106,6 +106,9 @@ convention = "google"
   "S105",    # hardcoded-password-string
   "S106",    # hardcoded-password-func-arg
 ]
+"src/minizen/ai/agent.py" = [
+  "PLR0913", # too-many-arguments
+]
 "src/minizen/cli/**" = [
   "FBT002",  # boolean-default-value-positional-argument
   "PLR0913", # too-many-arguments

@@ -43,24 +43,32 @@ Rules:
 """
 
 
-def _build_system_prompt(*, interests: list[str], avoid: list[str]) -> str:
+def _build_system_prompt(
+    *, interests: list[str], avoid: list[str], preferred_categories: list[str]
+) -> str:
     """Build the system prompt, appending a user-preference block when non-empty.
 
     Args:
         interests: Topics the user wants to prioritise.
         avoid: Topics the user wants to exclude.
+        preferred_categories: Miniflux category names to prefer when selecting articles.
 
     Returns:
-        The base system prompt unchanged when both lists are empty, or with a
+        The base system prompt unchanged when all lists are empty, or with a
         ``User preferences:`` block appended when at least one list is non-empty.
     """
-    if not interests and not avoid:
+    if not interests and not avoid and not preferred_categories:
         return _SYSTEM_PROMPT
     lines = ["User preferences:"]
     if interests:
         lines.append(f"- Prioritise articles about: {', '.join(interests)}")
     if avoid:
         lines.append(f"- Avoid articles about: {', '.join(avoid)}")
+    if preferred_categories:
+        lines.append(
+            f"- Prefer articles from these Miniflux categories"
+            f" (in order of preference): {', '.join(preferred_categories)}"
+        )
     return _SYSTEM_PROMPT + "\n" + "\n".join(lines) + "\n"
 
 
@@ -126,6 +134,7 @@ class DigestAgent:
         max_words_per_article: int = 500,
         interests: list[str] | None = None,
         avoid: list[str] | None = None,
+        preferred_categories: list[str] | None = None,
     ) -> None:
         """Initialise the agent with the given model and digest settings.
 
@@ -136,6 +145,8 @@ class DigestAgent:
                 LLM per article.
             interests: Topics to prioritise when selecting articles.
             avoid: Topics to exclude when selecting articles.
+            preferred_categories: Miniflux category names to prefer when selecting
+                articles.
         """
         logger.debug(
             "Initialising DigestAgent: model=%s, top_n=%d, max_words=%d",
@@ -148,6 +159,7 @@ class DigestAgent:
         system_prompt = _build_system_prompt(
             interests=interests or [],
             avoid=avoid or [],
+            preferred_categories=preferred_categories or [],
         )
         self._agent = Agent(
             model=model,

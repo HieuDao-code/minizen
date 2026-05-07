@@ -29,7 +29,7 @@ class Article(BaseModel):
     feed_name: str = Field(description="Name of the feed the article belongs to.")
     category: str = Field(
         default="",
-        description="Miniflux category the feed belongs to, or empty string if uncategorised.",  # noqa: E501
+        description="Miniflux category the feed belongs to; empty if uncategorised.",
     )
     published_at: datetime = Field(description="Publication timestamp (UTC-aware).")
     comments_url: str | None = Field(
