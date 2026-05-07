@@ -184,7 +184,8 @@ class DigestAgent:
         articles_text = "\n\n---\n\n".join(
             f"ID: {a.id}\n"
             f"Feed: {a.feed_name}\n"
-            f"Title: {a.title}\n"
+            + (f"Category: {a.category}\n" if a.category else "")
+            + f"Title: {a.title}\n"
             f"URL: {a.url}\n"
             f"Published: {a.published_at.isoformat()}\n"
             + (f"Comments URL: {a.comments_url}\n" if a.comments_url else "")

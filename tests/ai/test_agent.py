@@ -281,6 +281,47 @@ def test_build_system_prompt_omits_preferred_categories_line_when_empty() -> Non
     assert result == _SYSTEM_PROMPT
 
 
+def test_run_includes_category_in_prompt_when_present(mocker: MockerFixture) -> None:
+    # arrange
+    mock_agent_cls = mocker.patch("minizen.ai.agent.Agent")
+    mock_run_result = mocker.MagicMock()
+    mock_run_result.output = DigestResult(markdown="# Digest", articles_used=[1])
+    mock_agent_cls.return_value.run_sync.return_value = mock_run_result
+    agent = DigestAgent(model="anthropic:claude-sonnet-4-6", top_n=3)
+    article = Article(
+        id=1,
+        title="Test Article",
+        url="https://example.com",
+        content="<p>Content</p>",
+        feed_name="Test Feed",
+        category="Tech",
+        published_at=datetime(2026, 4, 24, 8, 0, 0, tzinfo=UTC),
+    )
+
+    # act
+    agent.run(articles=[article])
+
+    # assert
+    user_prompt: str = mock_agent_cls.return_value.run_sync.call_args[0][0]
+    assert "Category: Tech" in user_prompt
+
+
+def test_run_omits_category_in_prompt_when_empty(mocker: MockerFixture) -> None:
+    # arrange
+    mock_agent_cls = mocker.patch("minizen.ai.agent.Agent")
+    mock_run_result = mocker.MagicMock()
+    mock_run_result.output = DigestResult(markdown="# Digest", articles_used=[1])
+    mock_agent_cls.return_value.run_sync.return_value = mock_run_result
+    agent = DigestAgent(model="anthropic:claude-sonnet-4-6", top_n=3)
+
+    # act
+    agent.run(articles=[_make_article(article_id=1)])
+
+    # assert
+    user_prompt: str = mock_agent_cls.return_value.run_sync.call_args[0][0]
+    assert "Category:" not in user_prompt
+
+
 def test_agent_initialized_with_preference_block_when_preferred_categories_set(
     mocker: MockerFixture,
 ) -> None:
