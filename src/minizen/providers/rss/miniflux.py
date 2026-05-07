@@ -8,6 +8,7 @@ import miniflux
 from pydantic import BaseModel, Field
 
 from minizen.exceptions import MinifluxError
+from minizen.retry import retry_transient
 
 if TYPE_CHECKING:
     from minizen.config.models import MinifluxConfig
@@ -15,6 +16,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 _LOOKBACK_HOURS = 24
+_HTTP_5XX_MIN = 500
 
 
 class Article(BaseModel):
@@ -30,6 +32,23 @@ class Article(BaseModel):
         default=None,
         description="URL of the article's comments section, if available.",
     )
+
+
+def is_transient_miniflux(exc: BaseException) -> bool:
+    """Return True if exc is a transient Miniflux error that warrants a retry.
+
+    Args:
+        exc: The exception to classify.
+
+    Returns:
+        True for ``OSError`` and ``miniflux.ClientError`` with a 5xx status code;
+        False for 4xx client errors and all other exception types.
+    """
+    if isinstance(exc, OSError):
+        return True
+    if isinstance(exc, miniflux.ClientError) and isinstance(exc.status_code, int):
+        return exc.status_code >= _HTTP_5XX_MIN
+    return False
 
 
 class MinifluxProvider:
@@ -53,13 +72,12 @@ class MinifluxProvider:
             A list of ``Article`` objects, one per entry in the lookback window.
 
         Raises:
-            MinifluxError: If the Miniflux API call fails due to a client error or
-                network issue.
+            MinifluxError: If the Miniflux API call fails after all retries.
         """
         cutoff = datetime.now(tz=UTC) - timedelta(hours=_LOOKBACK_HOURS)
         after_ts = int(cutoff.timestamp())
         try:
-            response = self._client.get_entries(published_after=after_ts)
+            response = self._get_entries(after_ts=after_ts)
         except (miniflux.ClientError, OSError) as exc:
             msg = f"Miniflux API error: {exc}"
             raise MinifluxError(msg) from exc
@@ -79,3 +97,19 @@ class MinifluxProvider:
             )
             for entry in entries
         ]
+
+    @retry_transient(is_transient_miniflux)
+    def _get_entries(self, *, after_ts: int) -> dict:
+        """Fetch raw entries from Miniflux, retrying on transient errors.
+
+        Args:
+            after_ts: Unix timestamp; only entries published after this are returned.
+
+        Returns:
+            Raw Miniflux API response dict.
+
+        Raises:
+            miniflux.ClientError: On API errors (retried if 5xx, re-raised if 4xx).
+            OSError: On network-level failures (always retried).
+        """
+        return self._client.get_entries(published_after=after_ts)
