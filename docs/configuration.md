@@ -11,6 +11,8 @@ and secrets from environment variables.
 [ai]
 model = "anthropic:claude-haiku-4-5"
 top_n = 5
+interests = ["Rust", "AI safety", "climate tech"]  # optional
+avoid = ["sports", "celebrity news"]                # optional
 
 [miniflux]
 url = "https://reader.miniflux.app"
@@ -24,11 +26,46 @@ to_addr = "you@example.com"
 
 ### `[ai]` section
 
-| Key                     | Type    | Default                        | Description |
-| ----------------------- | ------- | ------------------------------ | ----------- |
-| `model`                 | string  | `"anthropic:claude-haiku-4-5"` | pydantic-ai model identifier |
-| `top_n`                 | integer | `5`                            | Number of articles selected for full AI summaries; remaining recent articles appear as a "More to read" link list |
-| `max_words_per_article` | integer | `500`                          | Maximum words of article content sent to the LLM per article. Increase for longer summaries, decrease to reduce token usage. |
+| Key                     | Type           | Default                        | Description |
+| ----------------------- | -------------- | ------------------------------ | ----------- |
+| `model`                 | string         | `"anthropic:claude-haiku-4-5"` | pydantic-ai model identifier |
+| `top_n`                 | integer        | `5`                            | Number of articles selected for full AI summaries; remaining recent articles appear as a "More to read" link list |
+| `max_words_per_article` | integer        | `500`                          | Maximum words of article content sent to the LLM per article. Increase for longer summaries, decrease to reduce token usage. |
+| `interests`             | list of strings | `[]`                          | Topics for the AI to prioritise when selecting articles (e.g. `["Rust", "AI safety"]`). Omit or leave empty for no preference. |
+| `avoid`                 | list of strings | `[]`                          | Topics for the AI to skip when selecting articles (e.g. `["sports", "crypto"]`). Omit or leave empty for no preference. |
+
+#### Interest profile
+
+Use `interests` and `avoid` to guide the AI's article selection without writing any prompts yourself.
+Both fields are optional — existing configs without them work unchanged.
+
+```toml
+[ai]
+model = "anthropic:claude-haiku-4-5"
+top_n = 5
+interests = ["Rust", "AI safety", "climate tech"]
+avoid = ["sports", "celebrity news", "crypto"]
+```
+
+The AI will favour articles matching your `interests` and skip those matching `avoid` when choosing the top N.
+Both lists accept any freeform topic strings — the more specific, the better.
+
+**During setup** the wizard prompts for both fields interactively:
+
+```
+Topics to prioritise (comma-separated, Enter to skip): Rust, AI safety, climate tech
+Topics to avoid (comma-separated, Enter to skip): sports, crypto
+```
+
+**Non-interactive setup** accepts `--interests` and `--avoid` flags:
+
+```bash
+minizen setup --no-interactive \
+  --interests "Rust,AI safety,climate tech" \
+  --avoid "sports,crypto" \
+  --from-addr you@example.com \
+  --to-addr you@example.com
+```
 
 #### Supported models
 
@@ -104,7 +141,9 @@ to_addr = "you@example.com"
 [ai]
 model = "anthropic:claude-haiku-4-5"
 top_n = 5
-# max_words_per_article = 500    # default: 500
+# max_words_per_article = 500                        # default: 500
+# interests = ["Rust", "AI safety", "climate tech"]  # optional
+# avoid = ["sports", "celebrity news", "crypto"]      # optional
 ```
 
 Use `minizen config set` to update individual values later:
