@@ -17,7 +17,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 _LOOKBACK_HOURS = 24
-_HTTP_5XX_MIN = 500
 
 
 class Article(BaseModel):
@@ -48,7 +47,7 @@ def is_transient_miniflux(exc: BaseException) -> bool:
     if isinstance(exc, OSError):
         return True
     if isinstance(exc, miniflux.ClientError) and isinstance(exc.status_code, int):
-        return exc.status_code >= _HTTP_5XX_MIN
+        return exc.status_code >= http.HTTPStatus.INTERNAL_SERVER_ERROR
     return False
 
 
