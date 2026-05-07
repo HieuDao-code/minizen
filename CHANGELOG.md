@@ -1,3 +1,16 @@
+## 0.4.0 (2026-05-07)
+
+### Feat
+
+- add preferred_categories to AI config for category-based article ranking (#23)
+- retry on transient failure with exponential backoff (#22)
+- add interest profile for AI article curation (#20)
+- structured error handling with MinizenError hierarchy (#18)
+
+### Fix
+
+- add some security checks (#19)
+
 ## 0.3.0 (2026-05-05)
 
 ### Feat
