@@ -114,3 +114,19 @@ def test_ai_config_accepts_interests_and_avoid() -> None:
     # assert
     assert config.interests == ["Rust", "AI safety"]
     assert config.avoid == ["sports", "crypto"]
+
+
+def test_ai_config_defaults_preferred_categories_to_empty_list() -> None:
+    # act
+    config = AIConfig()
+
+    # assert
+    assert config.preferred_categories == []
+
+
+def test_ai_config_accepts_preferred_categories() -> None:
+    # act
+    config = AIConfig(preferred_categories=["Tech", "Science"])
+
+    # assert
+    assert config.preferred_categories == ["Tech", "Science"]
