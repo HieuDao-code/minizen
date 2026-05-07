@@ -27,6 +27,10 @@ class Article(BaseModel):
     url: str = Field(description="Canonical URL of the article.")
     content: str = Field(description="Full HTML or text content of the article.")
     feed_name: str = Field(description="Name of the feed the article belongs to.")
+    category: str = Field(
+        default="",
+        description="Miniflux category the feed belongs to, or empty string if uncategorised.",  # noqa: E501
+    )
     published_at: datetime = Field(description="Publication timestamp (UTC-aware).")
     comments_url: str | None = Field(
         default=None,
@@ -92,6 +96,7 @@ class MinifluxProvider:
                 url=entry["url"],
                 content=entry["content"],
                 feed_name=entry["feed"]["title"],
+                category=entry["feed"].get("category", {}).get("title", ""),
                 published_at=datetime.fromisoformat(entry["published_at"]),
                 comments_url=entry.get("comments_url") or None,
             )
