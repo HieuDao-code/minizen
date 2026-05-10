@@ -1,5 +1,7 @@
 # Implementation TODOs
 
+- [ ] fix: structure remaining links like the all resource in this newsletter https://claudemarketplaces.com/digest/this-week-in-claude-claude-security-beta-adobe-mcp-and-50-code-fixes
+
 ### Short-term:
 
 - [ ] Check how to optimize tokens. Fetch original content?
