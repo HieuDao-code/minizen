@@ -20,7 +20,7 @@ check:
 # Start development environment
 [group('Project')]
 dev:
-    nix develop -c fish
+    nix develop --command fish
 
 # Show docs
 [group('Project')]

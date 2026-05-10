@@ -1,5 +1,5 @@
 {
-  description = "Python dev shell";
+  description = "🐍";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
@@ -23,7 +23,6 @@
           if ! uv tool list 2>/dev/null | grep -q '^tox '; then
             uv tool install tox --with tox-uv-bare
           fi
-          echo "🐍 $(python --version)"
         '';
       };
     };
