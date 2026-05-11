@@ -127,6 +127,44 @@ def test_render_email_with_no_extra_articles_hides_link_list() -> None:
     assert "More to read" not in html
 
 
+def test_render_email_shows_feed_name_in_more_links() -> None:
+    # arrange
+    extra = Article(
+        id=99,
+        title="Extra Article Title",
+        url="https://example.com/extra",
+        content="content",
+        feed_name="My Source Feed",
+        published_at=datetime(2026, 5, 4, tzinfo=UTC),
+    )
+
+    # act
+    html, _ = render_email(markdown="## Hello", extra_articles=[extra])
+
+    # assert
+    assert "My Source Feed" in html
+    assert 'class="feed-badge"' in html
+
+
+def test_render_email_escapes_feed_name_in_more_links() -> None:
+    # arrange
+    extra = Article(
+        id=4,
+        title="Normal Title",
+        url="https://example.com/article",
+        content="content",
+        feed_name='<script>alert("xss")</script>',
+        published_at=datetime(2026, 5, 6, tzinfo=UTC),
+    )
+
+    # act
+    html, _ = render_email(markdown="Hello", extra_articles=[extra])
+
+    # assert
+    assert "<script>" not in html
+    assert "&lt;script&gt;" in html
+
+
 def test_render_email_escapes_article_title_in_more_links() -> None:
     # arrange
     extra = Article(
