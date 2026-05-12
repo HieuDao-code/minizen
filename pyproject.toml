@@ -72,6 +72,7 @@ typing = ["ty==0.0.34"]
 
 [tool.uv]
 exclude-newer = "1 week"
+exclude-newer-package = { "urllib3" = false }
 
 [tool.commitizen]
 name = "cz_conventional_commits"
