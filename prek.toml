@@ -12,7 +12,7 @@ hooks = [{ id = "ruff-check", args = ["--fix"] }, { id = "ruff-format" }]
 # uv
 [[repos]]
 repo = "https://github.com/astral-sh/uv-pre-commit"
-rev = "659a7789596d520c849e9c96525119e9fbaa731f"    # frozen: 0.11.8
+rev = "ee239ac0733e2e7582dc1cea2c29a97b306410ca"    # frozen: 0.11.9
 hooks = [{ id = "uv-audit" }, { id = "uv-lock" }]
 
 # zizmor
