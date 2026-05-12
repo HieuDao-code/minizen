@@ -86,7 +86,7 @@ def _build_more_links(articles: list[Article]) -> str:
     if not articles:
         return ""
     items = "".join(
-        f'<li>'
+        f"<li>"
         f'<span class="feed-badge">{escape(a.feed_name)}</span>'
         f'<a href="{escape(a.url)}">{escape(a.title)}</a>'
         f"</li>"
