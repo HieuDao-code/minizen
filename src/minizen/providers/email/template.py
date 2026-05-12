@@ -74,17 +74,22 @@ def _build_article_cards(html: str) -> str:
 def _build_more_links(articles: list[Article]) -> str:
     """Build a compact "More to read" link list for articles without full summaries.
 
+    Each item shows a feed-name badge above the linked article title.
+
     Args:
         articles: Articles to list. Returns an empty string when the list is empty.
 
     Returns:
-        An HTML ``<div>`` containing a heading and ``<ul>`` of linked titles,
+        An HTML ``<div>`` containing a heading and ``<ul>`` of badge + linked titles,
         or an empty string if ``articles`` is empty.
     """
     if not articles:
         return ""
     items = "".join(
-        f'<li><a href="{escape(a.url)}">{escape(a.title)}</a></li>'
+        f'<li>'
+        f'<span class="feed-badge">{escape(a.feed_name)}</span>'
+        f'<a href="{escape(a.url)}">{escape(a.title)}</a>'
+        f"</li>"
         for a in articles
         if a.url.startswith(("https://", "http://"))
     )
@@ -258,8 +263,11 @@ def render_email(
       list-style: none;
     }}
     .more-links li {{
-      margin-bottom: 6px;
+      margin-bottom: 12px;
       font-size: 14px;
+    }}
+    .more-links .feed-badge {{
+      display: block;
     }}
     .more-links li a {{
       color: {_ACCENT_BLUE};

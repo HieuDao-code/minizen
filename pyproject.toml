@@ -59,7 +59,7 @@ dev = [
 ]
 docs = ["zensical==0.0.39"]
 lint = ["ruff==0.15.12"]
-miscellaneous = ["prek==0.3.11"]
+miscellaneous = ["prek==0.3.12"]
 release = ["commitizen==4.15.0"]
 security = ["zizmor==1.24.1"]
 test = [
@@ -72,7 +72,7 @@ typing = ["ty==0.0.34"]
 
 [tool.uv]
 exclude-newer = "1 week"
-exclude-newer-package = { mistune = false }
+exclude-newer-package = { "urllib3" = false }
 
 [tool.commitizen]
 name = "cz_conventional_commits"

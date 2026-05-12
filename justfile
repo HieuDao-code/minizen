@@ -35,8 +35,8 @@ fmt:
 # Update dependencies, workflows, pre-commit hooks and nix flake
 [group('Project')]
 update:
-    uv lock --upgrade --exclude-newer "1 week"
-    prek auto-update --freeze --cooldown-days 7
+    uv lock --upgrade
+    prek auto-update --freeze
     pinact run --update --min-age 7
     nix flake update
 
