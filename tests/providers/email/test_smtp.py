@@ -109,7 +109,7 @@ def test_send_raises_email_error_on_smtp_exception(mocker: MockerFixture) -> Non
 
 def test_send_raises_email_error_on_os_error(mocker: MockerFixture) -> None:
     # arrange
-    mocker.patch("tenacity.nap.sleep")
+    mocker.patch("time.sleep")
     mock_smtp_cls = mocker.patch("minizen.providers.email.smtp.smtplib.SMTP")
     mock_smtp_cls.side_effect = OSError("Network unreachable")
     config = EmailConfig(
@@ -159,7 +159,7 @@ def test_is_transient_smtp_returns_false_for_base_smtp_exception() -> None:
 
 def test_send_retries_on_transient_error_then_succeeds(mocker: MockerFixture) -> None:
     # arrange
-    mocker.patch("tenacity.nap.sleep")
+    mocker.patch("time.sleep")
     mock_smtp_cls = mocker.patch("minizen.providers.email.smtp.smtplib.SMTP")
     mock_smtp_cls.side_effect = [
         OSError("Connection refused"),
@@ -190,7 +190,7 @@ def test_send_raises_email_error_after_exhausting_retries(
     mocker: MockerFixture,
 ) -> None:
     # arrange
-    mocker.patch("tenacity.nap.sleep")
+    mocker.patch("time.sleep")
     mock_smtp_cls = mocker.patch("minizen.providers.email.smtp.smtplib.SMTP")
     mock_smtp_cls.side_effect = OSError("Network unreachable")
     config = EmailConfig(

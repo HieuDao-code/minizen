@@ -222,7 +222,7 @@ def test_fetch_recent_raises_miniflux_error_on_os_error(
     mocker: MockerFixture,
 ) -> None:
     # arrange
-    mocker.patch("tenacity.nap.sleep")
+    mocker.patch("time.sleep")
     mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
     mock_client_cls.return_value.get_entries.side_effect = OSError("Connection refused")
     config = MinifluxConfig(url="https://rss.example.com", api_key="key")
@@ -268,7 +268,7 @@ def test_fetch_recent_retries_on_transient_error_then_succeeds(
     mocker: MockerFixture,
 ) -> None:
     # arrange
-    mocker.patch("tenacity.nap.sleep")
+    mocker.patch("time.sleep")
     call_count = 0
 
     def flaky_get_entries(**_: object) -> dict:
@@ -297,7 +297,7 @@ def test_fetch_recent_raises_miniflux_error_after_exhausting_retries(
     mocker: MockerFixture,
 ) -> None:
     # arrange
-    mocker.patch("tenacity.nap.sleep")
+    mocker.patch("time.sleep")
     mock_client_cls = mocker.patch("minizen.providers.rss.miniflux.miniflux.Client")
     mock_client_cls.return_value.get_entries.side_effect = OSError("timeout")
     config = MinifluxConfig(url="https://rss.example.com", api_key="key")

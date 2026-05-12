@@ -20,7 +20,7 @@ def test_retry_transient_returns_value_on_first_success() -> None:
 
 def test_retry_transient_retries_on_transient_error(mocker: MockerFixture) -> None:
     # arrange
-    mocker.patch("tenacity.nap.sleep")
+    mocker.patch("time.sleep")
     call_count = 0
 
     @retry_transient(lambda exc: isinstance(exc, ValueError))
@@ -42,7 +42,7 @@ def test_retry_transient_retries_on_transient_error(mocker: MockerFixture) -> No
 
 def test_retry_transient_does_not_retry_permanent_error(mocker: MockerFixture) -> None:
     # arrange
-    mocker.patch("tenacity.nap.sleep")
+    mocker.patch("time.sleep")
     call_count = 0
 
     @retry_transient(lambda exc: isinstance(exc, ValueError))
@@ -60,7 +60,7 @@ def test_retry_transient_does_not_retry_permanent_error(mocker: MockerFixture) -
 
 def test_retry_transient_reraises_after_exhaustion(mocker: MockerFixture) -> None:
     # arrange
-    mocker.patch("tenacity.nap.sleep")
+    mocker.patch("time.sleep")
     call_count = 0
 
     @retry_transient(lambda exc: isinstance(exc, ValueError))
