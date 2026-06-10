@@ -57,18 +57,18 @@ dev = [
   { include-group = "test" },
   { include-group = "typing" },
 ]
-docs = ["zensical==0.0.39"]
-lint = ["ruff==0.15.12"]
-miscellaneous = ["prek==0.3.12"]
-release = ["commitizen==4.15.0"]
-security = ["zizmor==1.24.1"]
+docs = ["zensical==0.0.43"]
+lint = ["ruff==0.15.15"]
+miscellaneous = ["prek==0.4.3"]
+release = ["commitizen==4.16.3"]
+security = ["zizmor==1.25.2"]
 test = [
   "freezegun==1.5.5",
   "pytest==9.0.3",
   "pytest-cov==7.1.0",
   "pytest-mock==3.15.1",
 ]
-typing = ["ty==0.0.34"]
+typing = ["ty==0.0.42"]
 
 [tool.uv]
 exclude-newer = "1 week"
