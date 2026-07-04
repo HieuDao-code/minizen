@@ -36,7 +36,7 @@ fmt:
 [group('Project')]
 update:
     uv lock --upgrade
-    prek auto-update --freeze
+    prek update --freeze
     pinact run --update --min-age 7
     nix flake update
 
