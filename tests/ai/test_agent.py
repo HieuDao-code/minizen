@@ -129,6 +129,23 @@ def test_run_omits_comments_url_in_prompt_when_none(mocker: MockerFixture) -> No
     assert "ycombinator" not in user_prompt
 
 
+def test_run_prompts_for_top_n_stories(mocker: MockerFixture) -> None:
+    # arrange
+    mock_agent_cls = mocker.patch("minizen.ai.agent.Agent")
+    mock_run_result = mocker.MagicMock()
+    mock_run_result.output = DigestResult(markdown="# Digest", articles_used=[1])
+    mock_agent_cls.return_value.run_sync.return_value = mock_run_result
+    agent = DigestAgent(model="anthropic:claude-sonnet-5", top_n=4)
+    articles = [_make_article(article_id=1)]
+
+    # act
+    agent.run(articles=articles)
+
+    # assert
+    user_prompt: str = mock_agent_cls.return_value.run_sync.call_args[0][0]
+    assert "top 4 most important stories" in user_prompt
+
+
 # --- _truncate_words ---
 
 

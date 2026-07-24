@@ -185,14 +185,14 @@ class DigestAgent:
         )
 
     def run(self, *, articles: list[Article]) -> DigestResult:
-        """Select the top N articles and return a structured Markdown digest.
+        """Select the top N stories and return a structured Markdown digest.
 
         Args:
             articles: Full list of articles to choose from.
 
         Returns:
             A ``DigestResult`` containing the Markdown text and the IDs of
-            articles that were included.
+            articles that were referenced across the selected stories.
 
         Raises:
             AIError: If the AI model call fails.
@@ -210,7 +210,7 @@ class DigestAgent:
             for a in articles
         )
         user_prompt = (
-            f"Please select the top {self._top_n} most important articles "  # noqa: S608
+            f"Please select the top {self._top_n} most important stories "  # noqa: S608
             f"from the following and write a digest:\n\n{articles_text}"
         )
         try:
