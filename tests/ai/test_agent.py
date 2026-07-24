@@ -39,7 +39,7 @@ def test_run_returns_digest_result(mocker: MockerFixture) -> None:
         articles_used=[1],
     )
     mock_agent_cls.return_value.run_sync.return_value = mock_run_result
-    agent = DigestAgent(model="anthropic:claude-sonnet-4-6", top_n=5)
+    agent = DigestAgent(model="anthropic:claude-sonnet-5", top_n=5)
     articles = [_make_article(article_id=1)]
 
     # act
@@ -57,7 +57,7 @@ def test_run_passes_article_data_to_agent(mocker: MockerFixture) -> None:
     mock_run_result = mocker.MagicMock()
     mock_run_result.output = DigestResult(markdown="# Digest", articles_used=[42])
     mock_agent_cls.return_value.run_sync.return_value = mock_run_result
-    agent = DigestAgent(model="anthropic:claude-sonnet-4-6", top_n=3)
+    agent = DigestAgent(model="anthropic:claude-sonnet-5", top_n=3)
     articles = [_make_article(article_id=42)]
 
     # act
@@ -94,7 +94,7 @@ def test_run_includes_comments_url_in_prompt_when_present(
     mock_run_result = mocker.MagicMock()
     mock_run_result.output = DigestResult(markdown="# Digest", articles_used=[1])
     mock_agent_cls.return_value.run_sync.return_value = mock_run_result
-    agent = DigestAgent(model="anthropic:claude-sonnet-4-6", top_n=3)
+    agent = DigestAgent(model="anthropic:claude-sonnet-5", top_n=3)
     articles = [
         _make_article(
             article_id=1, comments_url="https://news.ycombinator.com/item?id=99"
@@ -116,7 +116,7 @@ def test_run_omits_comments_url_in_prompt_when_none(mocker: MockerFixture) -> No
     mock_run_result = mocker.MagicMock()
     mock_run_result.output = DigestResult(markdown="# Digest", articles_used=[1])
     mock_agent_cls.return_value.run_sync.return_value = mock_run_result
-    agent = DigestAgent(model="anthropic:claude-sonnet-4-6", top_n=3)
+    agent = DigestAgent(model="anthropic:claude-sonnet-5", top_n=3)
     articles = [_make_article(article_id=1, comments_url=None)]
 
     # act
@@ -180,7 +180,7 @@ def test_run_truncates_content_at_max_words(mocker: MockerFixture) -> None:
         published_at=datetime(2026, 4, 24, 8, 0, 0, tzinfo=UTC),
     )
     agent = DigestAgent(
-        model="anthropic:claude-sonnet-4-6", top_n=3, max_words_per_article=50
+        model="anthropic:claude-sonnet-5", top_n=3, max_words_per_article=50
     )
 
     # act
@@ -198,7 +198,7 @@ def test_run_raises_ai_error_on_model_failure(mocker: MockerFixture) -> None:
     mock_agent_cls.return_value.run_sync.side_effect = UnexpectedModelBehavior(
         "Model returned empty response"
     )
-    agent = DigestAgent(model="anthropic:claude-sonnet-4-6", top_n=5)
+    agent = DigestAgent(model="anthropic:claude-sonnet-5", top_n=5)
     articles = [_make_article(article_id=1)]
 
     # act / assert
@@ -214,7 +214,7 @@ def test_agent_initialized_with_preference_block_when_interests_set(
 
     # act
     DigestAgent(
-        model="anthropic:claude-sonnet-4-6",
+        model="anthropic:claude-sonnet-5",
         top_n=5,
         interests=["Rust", "AI safety"],
         avoid=[],
@@ -233,7 +233,7 @@ def test_agent_initialized_with_preference_block_when_avoid_set(
 
     # act
     DigestAgent(
-        model="anthropic:claude-sonnet-4-6",
+        model="anthropic:claude-sonnet-5",
         top_n=5,
         interests=[],
         avoid=["sports", "crypto"],
@@ -251,7 +251,7 @@ def test_agent_uses_base_system_prompt_when_no_preferences(
     mock_agent_cls = mocker.patch("minizen.ai.agent.Agent")
 
     # act
-    DigestAgent(model="anthropic:claude-sonnet-4-6", top_n=5)
+    DigestAgent(model="anthropic:claude-sonnet-5", top_n=5)
 
     # assert
     call_kwargs = mock_agent_cls.call_args.kwargs
@@ -287,7 +287,7 @@ def test_run_includes_category_in_prompt_when_present(mocker: MockerFixture) -> 
     mock_run_result = mocker.MagicMock()
     mock_run_result.output = DigestResult(markdown="# Digest", articles_used=[1])
     mock_agent_cls.return_value.run_sync.return_value = mock_run_result
-    agent = DigestAgent(model="anthropic:claude-sonnet-4-6", top_n=3)
+    agent = DigestAgent(model="anthropic:claude-sonnet-5", top_n=3)
     article = Article(
         id=1,
         title="Test Article",
@@ -312,7 +312,7 @@ def test_run_omits_category_in_prompt_when_empty(mocker: MockerFixture) -> None:
     mock_run_result = mocker.MagicMock()
     mock_run_result.output = DigestResult(markdown="# Digest", articles_used=[1])
     mock_agent_cls.return_value.run_sync.return_value = mock_run_result
-    agent = DigestAgent(model="anthropic:claude-sonnet-4-6", top_n=3)
+    agent = DigestAgent(model="anthropic:claude-sonnet-5", top_n=3)
 
     # act
     agent.run(articles=[_make_article(article_id=1)])
@@ -330,7 +330,7 @@ def test_agent_initialized_with_preference_block_when_preferred_categories_set(
 
     # act
     DigestAgent(
-        model="anthropic:claude-sonnet-4-6",
+        model="anthropic:claude-sonnet-5",
         top_n=5,
         preferred_categories=["Tech", "Science"],
     )
