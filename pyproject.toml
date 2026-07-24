@@ -27,13 +27,13 @@ classifiers = [
 ]
 dependencies = [
   "miniflux>=1.1.6,<2.0.0",
-  "mistune>=3.3.2,<4.0.0",
+  "mistune>=3.3.3,<4.0.0",
   "pydantic>=2.13.4,<3.0.0",
-  "pydantic-ai-slim[anthropic,openai]>=2.0.0,<3.0.0",
+  "pydantic-ai-slim[anthropic,openai]>=2.12.0,<3.0.0",
   "python-dotenv>=1.2.2,<2.0.0",
   "tenacity>=9.1.4,<10.0.0",
   "tomli-w>=1.2.0,<2.0.0",
-  "typer>=0.26.8,<0.27.0",
+  "typer>=0.27.0,<0.28.0",
 ]
 
 [project.urls]
@@ -57,10 +57,10 @@ dev = [
   { include-group = "test" },
   { include-group = "typing" },
 ]
-docs = ["zensical==0.0.46"]
-lint = ["ruff==0.15.20"]
-miscellaneous = ["prek==0.4.8"]
-release = ["commitizen==4.16.4"]
+docs = ["zensical==0.0.51"]
+lint = ["ruff==0.15.22"]
+miscellaneous = ["prek==0.4.10"]
+release = ["commitizen==4.16.5"]
 security = ["zizmor==1.26.1"]
 test = [
   "freezegun==1.5.5",
@@ -68,12 +68,10 @@ test = [
   "pytest-cov==7.1.0",
   "pytest-mock==3.15.1",
 ]
-typing = ["ty==0.0.55"]
+typing = ["ty==0.0.60"]
 
 [tool.uv]
 exclude-newer = "1 week"
-# Allow prek itself to bypass the cooldown so we can track its newest release.
-exclude-newer-package = { prek = "2026-07-05" }
 
 [tool.commitizen]
 name = "cz_conventional_commits"
