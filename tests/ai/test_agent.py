@@ -161,6 +161,29 @@ def test_truncate_words_preserves_all_words_when_under_limit() -> None:
     assert result.split() == ["one", "two", "three"]
 
 
+# --- System prompt instructions ---
+
+
+def test_system_prompt_instructs_same_event_clustering() -> None:
+    # assert
+    assert "same specific real-world event" in _SYSTEM_PROMPT
+
+
+def test_system_prompt_defines_also_covered_by_template() -> None:
+    # assert
+    assert "Also covered by:" in _SYSTEM_PROMPT
+
+
+def test_system_prompt_selects_primary_source() -> None:
+    # assert
+    assert "primary source" in _SYSTEM_PROMPT
+
+
+def test_system_prompt_requires_every_referenced_id() -> None:
+    # assert
+    assert "every article you referenced" in _SYSTEM_PROMPT
+
+
 # --- max_words_per_article wiring ---
 
 
