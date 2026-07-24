@@ -136,7 +136,7 @@ class DigestResult(BaseModel):
 
     markdown: str = Field(description="Markdown digest text produced by the agent.")
     articles_used: list[int] = Field(
-        description="IDs of the articles selected for the digest."
+        description="IDs of every article referenced in the digest, including secondary sources."  # noqa: E501
     )
 
 
@@ -157,7 +157,8 @@ class DigestAgent:
 
         Args:
             model: pydantic-ai model identifier (e.g. ``anthropic:claude-haiku-4-5``).
-            top_n: Maximum number of articles to include in the digest.
+            top_n: Maximum number of stories (after deduplication) to include in
+                the digest.
             max_words_per_article: Maximum words of article content sent to the
                 LLM per article.
             interests: Topics to prioritise when selecting articles.
