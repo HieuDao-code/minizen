@@ -156,7 +156,7 @@ def test_run_prompts_for_top_n_stories(mocker: MockerFixture) -> None:
     mock_run_result = mocker.MagicMock()
     mock_run_result.output = DigestResult(markdown="# Digest", articles_used=[1])
     mock_agent_cls.return_value.run_sync.return_value = mock_run_result
-    agent = DigestAgent(model="anthropic:claude-sonnet-4-6", top_n=4)
+    agent = DigestAgent(model="anthropic:claude-sonnet-5", top_n=4)
     articles = [_make_article(article_id=1)]
 
     # act
