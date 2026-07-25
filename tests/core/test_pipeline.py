@@ -35,7 +35,7 @@ def _make_settings(
             password="pass",
         ),
         ai=AIConfig(
-            model="anthropic:claude-sonnet-4-6",
+            model="anthropic:claude-sonnet-5",
             top_n=2,
             interests=interests or [],
             avoid=avoid or [],
@@ -92,7 +92,7 @@ def test_pipeline_runs_full_flow(mocker: MockerFixture) -> None:
         plain_text="## Digest",
     )
     mock_agent_cls.assert_called_once_with(
-        model="anthropic:claude-sonnet-4-6",
+        model="anthropic:claude-sonnet-5",
         top_n=2,
         max_words_per_article=500,
         interests=[],
@@ -250,7 +250,7 @@ def test_pipeline_passes_interests_and_avoid_to_agent(
 
     # assert
     mock_agent_cls.assert_called_once_with(
-        model="anthropic:claude-sonnet-4-6",
+        model="anthropic:claude-sonnet-5",
         top_n=2,
         max_words_per_article=500,
         interests=["Rust", "AI"],
@@ -289,7 +289,7 @@ def test_pipeline_passes_preferred_categories_to_agent(
 
     # assert
     mock_agent_cls.assert_called_once_with(
-        model="anthropic:claude-sonnet-4-6",
+        model="anthropic:claude-sonnet-5",
         top_n=2,
         max_words_per_article=500,
         interests=[],

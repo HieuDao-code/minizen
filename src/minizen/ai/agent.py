@@ -17,29 +17,46 @@ logger = logging.getLogger(__name__)
 
 _SYSTEM_PROMPT = """\
 You are a personal news curator. You receive a list of unread articles and must:
-1. Select the top N most important and interesting articles.
-2. Write a cohesive Markdown digest following this exact structure.
-3. Return the digest and the IDs of the articles you selected.
+1. Group articles that cover the same specific real-world event into a single story.
+2. Select the top N most important and interesting stories.
+3. Write a cohesive Markdown digest following this exact structure.
+4. Return the digest and the IDs of every article you referenced.
+
+Grouping rules:
+- Merge articles only when they cover the same specific real-world event (for example,
+  the same announcement, launch, or incident). Keep distinct developments as separate
+  stories, even when they share a topic.
+- For each story, choose the most complete or authoritative source as the
+  primary source.
 
 Start the digest with a short narrative intro paragraph (2-4 sentences). Do not mention
 specific articles in the intro.
 
-Then write one section per selected article using this template exactly:
+Then write one section per selected story using this template exactly:
 
-**{feed_name}**
+**{primary_feed_name}**
 
-## [{Article Title}]({url})
+## [{Primary Article Title}]({primary_url})
 
-{2-3 sentence summary. Concise. No bullet points.}
+{2-3 sentence summary. Concise. No bullet points. When a story has multiple sources,
+synthesise across them and note where they diverge.}
+
+Also covered by: [{feed_name}]({url}) · [{feed_name}]({url})
 
 [Comments]({comments_url})
 
 Rules:
-- The feed name must be bold text on its own line above the heading.
-- The article title must be a Markdown link to the article URL.
-- Omit the [Comments] link entirely if no comments_url is provided for that article.
+- The primary feed name must be bold text on its own line above the heading.
+- The article title must be a Markdown link to the primary article URL.
+- Include the "Also covered by" line only when the story has more than one source. List
+  each secondary source as a Markdown link to its article, separated by " · ". Omit the
+  line entirely for single-source stories.
+- Omit the [Comments] link entirely if no comments_url is provided for the
+  primary article.
 - Summary: exactly 2-3 sentences, no lists, no sub-headings.
-- Be concise. Prioritise articles with broad significance over niche topics.
+- Be concise. Prioritise stories with broad significance over niche topics.
+- The returned article IDs must include every article you referenced in any story: the
+  primary source and every "Also covered by" source.
 """
 
 
@@ -119,7 +136,7 @@ class DigestResult(BaseModel):
 
     markdown: str = Field(description="Markdown digest text produced by the agent.")
     articles_used: list[int] = Field(
-        description="IDs of the articles selected for the digest."
+        description="IDs of every article referenced in the digest, including secondary sources."  # noqa: E501
     )
 
 
@@ -140,7 +157,8 @@ class DigestAgent:
 
         Args:
             model: pydantic-ai model identifier (e.g. ``anthropic:claude-haiku-4-5``).
-            top_n: Maximum number of articles to include in the digest.
+            top_n: Maximum number of stories (after deduplication) to include in
+                the digest.
             max_words_per_article: Maximum words of article content sent to the
                 LLM per article.
             interests: Topics to prioritise when selecting articles.
@@ -168,14 +186,14 @@ class DigestAgent:
         )
 
     def run(self, *, articles: list[Article]) -> DigestResult:
-        """Select the top N articles and return a structured Markdown digest.
+        """Select the top N stories and return a structured Markdown digest.
 
         Args:
             articles: Full list of articles to choose from.
 
         Returns:
             A ``DigestResult`` containing the Markdown text and the IDs of
-            articles that were included.
+            articles that were referenced across the selected stories.
 
         Raises:
             AIError: If the AI model call fails.
@@ -193,7 +211,7 @@ class DigestAgent:
             for a in articles
         )
         user_prompt = (
-            f"Please select the top {self._top_n} most important articles "  # noqa: S608
+            f"Please select the top {self._top_n} most important stories "  # noqa: S608
             f"from the following and write a digest:\n\n{articles_text}"
         )
         try:

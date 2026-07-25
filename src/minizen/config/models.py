@@ -39,7 +39,7 @@ class AIConfig(BaseModel):
     )
     top_n: int = Field(
         default=DEFAULT_TOP_N,
-        description="Maximum number of articles to include in the digest.",
+        description="Maximum number of stories (after deduplication) to include in the digest.",  # noqa: E501
     )
     max_words_per_article: int = Field(
         default=500,

@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 def _make_settings_mock() -> MagicMock:
     mock = MagicMock()
-    mock.ai.model = "anthropic:claude-sonnet-4-6"
+    mock.ai.model = "anthropic:claude-sonnet-5"
     mock.ai.top_n = 5
     mock.ai.max_words_per_article = 500
     return mock
@@ -96,7 +96,7 @@ def test_digest_preview_prints_markdown(mocker: MockerFixture) -> None:
     assert "## Today's Digest" in result.output
     mock_agent.run.assert_called_once_with(articles=mock_articles)
     mock_agent_cls.assert_called_once_with(
-        model="anthropic:claude-sonnet-4-6",
+        model="anthropic:claude-sonnet-5",
         top_n=5,
         max_words_per_article=500,
     )
@@ -166,7 +166,7 @@ def test_digest_send_test_sends_email(mocker: MockerFixture) -> None:
         plain_text="## Digest",
     )
     mock_agent_cls.assert_called_once_with(
-        model="anthropic:claude-sonnet-4-6",
+        model="anthropic:claude-sonnet-5",
         top_n=5,
         max_words_per_article=500,
     )
