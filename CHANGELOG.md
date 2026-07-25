@@ -1,3 +1,14 @@
+## 0.6.0 (2026-07-25)
+
+### Feat
+
+- **ai**: same-event story clustering in the digest (#29)
+- **deps**: update all deps
+
+### Fix
+
+- **setup**: secure env file
+
 ## 0.5.0 (2026-05-12)
 
 ### Feat

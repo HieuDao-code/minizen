@@ -13,7 +13,7 @@ from minizen.exceptions import AIError, EmailError, MinifluxError, MinizenError
 from minizen.providers.email import EmailProvider
 from minizen.providers.rss import Article, MinifluxProvider
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 
 __all__ = [
     "AIConfig",
