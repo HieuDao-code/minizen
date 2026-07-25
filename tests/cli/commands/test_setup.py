@@ -425,7 +425,7 @@ def test_setup_uses_default_config_path(mocker: MockerFixture) -> None:
     # arrange
     mock_write = mocker.patch("minizen.cli.commands.setup.Path.write_bytes")
     mocker.patch("minizen.cli.commands.setup.Path.mkdir")
-    mocker.patch("minizen.cli.commands.setup.Path.write_text")
+    mocker.patch("minizen.cli.commands.setup._write_secret_file")
     runner = CliRunner()
 
     # act

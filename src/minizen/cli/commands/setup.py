@@ -249,16 +249,35 @@ def _setup_interactive(
     )
 
     env_path = config.parent / ".env"
-    env_path.write_text(
+    _write_secret_file(
+        env_path,
         f"MINIFLUX_API_KEY={_quote_env_value(miniflux_api_key)}\n"
         f"{key_env_var}={_quote_env_value(ai_api_key)}\n"
         f"MINIZEN_EMAIL_USERNAME={_quote_env_value(email_username)}\n"
-        f"MINIZEN_EMAIL_PASSWORD={_quote_env_value(email_password)}\n"
+        f"MINIZEN_EMAIL_PASSWORD={_quote_env_value(email_password)}\n",
     )
-    env_path.chmod(0o600)
 
     typer.echo(f"\nConfig written to:      {config}")
     typer.echo(f"Credentials written to: {env_path}")
+
+
+def _write_secret_file(path: Path, content: str) -> None:
+    """Write ``content`` to ``path`` in a file that only the owner can read.
+
+    Creates the file atomically with ``0o600`` permissions so its contents are
+    never briefly world- or group-readable between creation and a later
+    ``chmod`` (the race the plain ``write_text`` + ``chmod`` sequence has). An
+    existing file is truncated and re-secured to ``0o600``.
+
+    Args:
+        path: Destination path for the secret file.
+        content: Text to write.
+    """
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w") as f:
+        f.write(content)
+    # Re-secure a pre-existing file, whose permissions O_CREAT leaves untouched.
+    os.chmod(path, 0o600)
 
 
 def _quote_env_value(value: str) -> str:
