@@ -95,17 +95,17 @@ Any provider it supports works:
 | OpenAI    | `openai:gpt-4o-mini`         | `OPENAI_API_KEY`    | no                    |
 | DeepSeek  | `deepseek:deepseek-chat`     | `DEEPSEEK_API_KEY`  | no                    |
 | Google    | `google:gemini-2.0-flash`    | `GOOGLE_API_KEY`    | yes                   |
-| Groq      | `groq:llama-3.3-70b`         | `GROQ_API_KEY`      | yes                   |
-| Mistral   | `mistral:mistral-large`      | `MISTRAL_API_KEY`   | yes                   |
+| Groq      | `groq:llama-3.3-70b-versatile` | `GROQ_API_KEY`     | yes                   |
+| Mistral   | `mistral:mistral-large-latest` | `MISTRAL_API_KEY`  | yes                   |
 
 DeepSeek needs no extra install because its API is OpenAI-compatible and reuses the
 OpenAI client minizen already ships.
 
 ##### Naming the API key
 
-For nearly every provider the environment variable is the provider name uppercased
-plus `_API_KEY` — `DEEPSEEK_API_KEY`, `GROQ_API_KEY`, `MISTRAL_API_KEY`. These are
-the exceptions:
+For nearly every provider the environment variable is the provider prefix
+uppercased, with any `-` turned into `_`, plus `_API_KEY` — `DEEPSEEK_API_KEY`,
+`GROQ_API_KEY`, `MISTRAL_API_KEY`. These are the exceptions:
 
 | Provider prefix    | Environment variable        |
 | ------------------ | ---------------------------- |
@@ -122,8 +122,19 @@ the exceptions:
 
 ##### Providers needing an extra package
 
-When a provider's SDK is missing, `minizen setup` reports the exact command, for
-example:
+When a provider's SDK is missing, `minizen setup` reports which package is
+missing and names the pydantic-ai optional group that provides it, for example:
+
+```
+Error: Provider 'groq' needs an extra package. Please install the `groq`
+package to use the Groq provider, you can use the `groq` optional group —
+`pip install "pydantic-ai-slim[groq]"`
+```
+
+That message quotes pydantic-ai's own `pip install` form, which installs into
+whatever environment runs the command. If you installed minizen with
+`uv tool install`, that is the wrong target — add the extra to minizen's own
+environment instead:
 
 ```bash
 uv tool install minizen --with 'pydantic-ai-slim[groq]'

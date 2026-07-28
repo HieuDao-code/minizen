@@ -8,7 +8,7 @@ minizen supports [Miniflux](https://miniflux.app) only — either the hosted ver
 ## Which AI providers and models work?
 
 minizen uses [pydantic-ai](https://ai.pydantic.dev/) under the hood,
-so any provider it supports will work. Tested providers:
+so any provider it supports will work:
 
 Working with a default install, no extra package needed:
 
@@ -17,7 +17,7 @@ Working with a default install, no extra package needed:
 - **DeepSeek** — set `model = "deepseek:deepseek-chat"` and provide `DEEPSEEK_API_KEY`
 
 Others — Google, Groq, Mistral, xAI, Cohere and the rest — work once their SDK is
-installed. `minizen setup` tells you the exact command if it is missing.
+installed. `minizen setup` names the missing package if it is not.
 
 See the [Configuration reference](configuration.md) for the full list of env vars.
 
