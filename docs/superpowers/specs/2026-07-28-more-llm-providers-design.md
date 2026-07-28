@@ -68,16 +68,26 @@ class ProviderKey(NamedTuple):
 | --- | --- |
 | `cohere` | `CO_API_KEY` |
 | `huggingface` | `HF_TOKEN` |
-| `google` | `GOOGLE_API_KEY` |
-| `google-gla` | `GOOGLE_API_KEY` |
 | `heroku` | `HEROKU_INFERENCE_KEY` |
 | `vercel` | `VERCEL_AI_GATEWAY_API_KEY` |
 | `voyageai` | `VOYAGE_API_KEY` |
+| `openai-chat` | `OPENAI_API_KEY` |
+| `openai-responses` | `OPENAI_API_KEY` |
+
+Verified against pydantic-ai 2.12.0. Two entries deserve note:
+
+- `google` is **not** in the table: the convention already yields `GOOGLE_API_KEY`,
+  which is correct. `google-gla` and `google-vertex` are **not valid prefixes** in
+  this version — they were pydantic-ai v0.x names and now raise
+  `Unknown provider`. Gemini is reached through `google:`.
+- `openai-chat` and `openai-responses` are real prefixes that would derive
+  `OPENAI_CHAT_API_KEY` / `OPENAI_RESPONSES_API_KEY` from the convention. Both read
+  `OPENAI_API_KEY`.
 
 #### Providers outside the wizard's scope
 
-`bedrock`, `azure`, `ollama`, `litellm`, and `google-cloud` need AWS credentials, an
-endpoint URL, or a base URL rather than a single API key. The wizard's "one
+`bedrock`, `azure`, `azure-responses`, `ollama`, `litellm`, and `google-cloud` need
+AWS credentials, an endpoint URL, or a base URL rather than a single API key. The wizard's "one
 provider, one secret" shape does not fit them, so `resolve_provider_key` raises
 `UnsupportedProviderError` naming the provider and directing the user to configure
 the environment manually.
@@ -204,9 +214,13 @@ pydantic-ai registry.
 
 ### Updated: `tests/cli/commands/test_setup.py`
 
-Lines 322 and 386 assert on the string `"Unknown model provider"` and must be
-updated to the new messages. A DeepSeek case is added, asserting
-`DEEPSEEK_API_KEY` is written to the generated `.env`.
+Lines 322 and 386 assert on the string `"Unknown model provider"`. The new error
+message deliberately preserves that wording (`Unknown model provider: 'unknown'.`),
+so both tests keep passing unchanged — the phrasing is a compatibility constraint,
+not an accident.
+
+A DeepSeek case is added, asserting `DEEPSEEK_API_KEY` is written to the generated
+`.env`.
 
 ### Updated: config command tests
 
