@@ -54,7 +54,6 @@ def test_model_name_may_contain_colons() -> None:
         ("huggingface:meta-llama/Llama-3-8B", "HF_TOKEN"),
         ("heroku:claude-3-5-sonnet", "HEROKU_INFERENCE_KEY"),
         ("vercel:anthropic/claude-sonnet-4", "VERCEL_AI_GATEWAY_API_KEY"),
-        ("voyageai:voyage-3", "VOYAGE_API_KEY"),
         ("openai-chat:gpt-4o", "OPENAI_API_KEY"),
         ("openai-responses:gpt-4o", "OPENAI_API_KEY"),
     ],
@@ -87,6 +86,18 @@ def test_unsupported_providers_raise_unsupported_provider_error(model: str) -> N
     # act / assert
     with pytest.raises(UnsupportedProviderError, match="cannot configure"):
         resolve_provider_key(model=model)
+
+
+def test_gateway_prefix_is_rejected() -> None:
+    # act / assert
+    with pytest.raises(UnsupportedProviderError, match="cannot configure"):
+        resolve_provider_key(model="gateway/openai:gpt-5")
+
+
+def test_gateway_prefix_error_names_the_real_env_var() -> None:
+    # act / assert
+    with pytest.raises(UnsupportedProviderError, match="PYDANTIC_AI_GATEWAY_API_KEY"):
+        resolve_provider_key(model="gateway/openai:gpt-5")
 
 
 def test_unsupported_provider_error_is_catchable_as_config_error() -> None:

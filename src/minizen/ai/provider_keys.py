@@ -13,7 +13,6 @@ _KEY_ENV_OVERRIDES: dict[str, str] = {
     "openai-chat": "OPENAI_API_KEY",
     "openai-responses": "OPENAI_API_KEY",
     "vercel": "VERCEL_AI_GATEWAY_API_KEY",
-    "voyageai": "VOYAGE_API_KEY",
 }
 
 _DISPLAY_NAMES: dict[str, str] = {
@@ -27,7 +26,6 @@ _DISPLAY_NAMES: dict[str, str] = {
     "openrouter": "OpenRouter",
     "ovhcloud": "OVHcloud",
     "sambanova": "SambaNova",
-    "voyageai": "Voyage AI",
     "xai": "xAI",
     "zai": "Z.ai",
 }
@@ -80,11 +78,20 @@ def resolve_provider_key(*, model: str) -> ProviderKey:
 
     prefix = model.split(":", maxsplit=1)[0]
 
+    if "/" in prefix:
+        msg = (
+            f"The setup wizard cannot configure the {prefix!r} provider. "
+            "Gateway-routed providers must be configured manually: set the "
+            "PYDANTIC_AI_GATEWAY_API_KEY environment variable yourself, then run "
+            "`minizen config set ai.model` to point at it."
+        )
+        raise UnsupportedProviderError(msg)
+
     if prefix in _UNSUPPORTED_PREFIXES:
         msg = (
             f"The setup wizard cannot configure the {prefix!r} provider, which "
             "needs more than a single API key. Set its environment variables "
-            "yourself and edit ai.model directly."
+            "yourself, then run `minizen config set ai.model` to point at it."
         )
         raise UnsupportedProviderError(msg)
 
