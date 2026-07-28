@@ -38,7 +38,7 @@ You will be prompted for:
 
 | Prompt                     | Where to find it                                                             |
 | -------------------------- | ---------------------------------------------------------------------------- |
-| **AI model**               | Model identifier, e.g. `anthropic:claude-haiku-4-5` or `openai:gpt-4o`       |
+| **AI model**               | Model identifier as `provider:model`, e.g. `anthropic:claude-haiku-4-5`, `openai:gpt-4o` or `deepseek:deepseek-chat` |
 | **Number of top articles** | How many articles to include in the digest (default: 5)                      |
 | **SMTP host**              | Your SMTP server hostname (e.g. `smtp.gmail.com`)                            |
 | **SMTP port**              | SMTP port — use `587` for STARTTLS (works with most providers)               |
@@ -47,7 +47,7 @@ You will be prompted for:
 | **Email username**         | Your SMTP login username (often your email address)                          |
 | **Email password**         | Your SMTP password or app password (see your provider's docs)                |
 | **Miniflux API key**       | Miniflux → Settings → API Keys → Create a new API key                        |
-| **AI provider API key**    | `ANTHROPIC_API_KEY` for Anthropic models; `OPENAI_API_KEY` for OpenAI models |
+| **AI provider API key**    | The wizard prompts for whichever provider your model names, and writes the matching variable — `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `DEEPSEEK_API_KEY`, and so on |
 
 ### Email provider setup
 

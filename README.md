@@ -20,8 +20,8 @@ uses AI to curate and summarise the most interesting ones, and emails you a clea
   narrative, not a bullet dump
   no server required
 - **Dry-run friendly** — preview the digest in your terminal before a single email is sent
-- **Pluggable AI** — works with Anthropic Claude or OpenAI models via
-  [pydantic-ai](https://ai.pydantic.dev/)
+- **Pluggable AI** — works with any [pydantic-ai](https://ai.pydantic.dev/) provider:
+  Anthropic, OpenAI, DeepSeek, Google, Groq, Mistral and more
 
 ## Quick start
 
