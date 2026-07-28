@@ -7,6 +7,7 @@ from typing import Annotated
 import tomli_w
 import typer
 
+from minizen.ai.provider_keys import ProviderKey, resolve_provider_key
 from minizen.config.defaults import (
     DEFAULT_CONFIG_PATH,
     DEFAULT_MINIFLUX_URL,
@@ -15,27 +16,27 @@ from minizen.config.defaults import (
     DEFAULT_SMTP_PORT,
     DEFAULT_TOP_N,
 )
+from minizen.exceptions import ConfigError
 
 
-def _provider_key_info(model: str) -> tuple[str, str]:
-    """Return the prompt label and env var name for the AI provider API key.
+def _provider_key(model: str) -> ProviderKey:
+    """Resolve the provider API key for *model*, exiting on any failure.
 
     Args:
-        model: pydantic-ai model identifier (e.g. ``anthropic:claude-haiku-4-5``).
+        model: pydantic-ai model identifier (e.g. ``deepseek:deepseek-chat``).
 
     Returns:
-        A tuple of (prompt_label, env_var_name).
+        The ``ProviderKey`` describing the required API key.
 
     Raises:
-        typer.Exit: If the model prefix is not a recognised provider.
+        typer.Exit: If the identifier is invalid, names an unknown provider,
+            needs an uninstalled package, or cannot be configured by the wizard.
     """
-    if model.startswith("anthropic:"):
-        return "Anthropic API key", "ANTHROPIC_API_KEY"
-    if model.startswith("openai:"):
-        return "OpenAI API key", "OPENAI_API_KEY"
-    prefix = model.split(":", maxsplit=1)[0] if ":" in model else model
-    typer.echo(f"Error: Unknown model provider: {prefix}")
-    raise typer.Exit(code=1)
+    try:
+        return resolve_provider_key(model=model)
+    except ConfigError as exc:
+        typer.echo(f"Error: {exc}")
+        raise typer.Exit(code=1) from exc
 
 
 def _parse_comma_list(value: str | None) -> list[str]:
@@ -155,7 +156,7 @@ def _setup_non_interactive(
         typer.echo("Error: --to-addr is required in non-interactive mode.")
         raise typer.Exit(code=1)
 
-    _, ai_key_var = _provider_key_info(model)
+    ai_key_var = _provider_key(model).env_var
 
     for var in (
         "MINIFLUX_API_KEY",
@@ -209,7 +210,9 @@ def _setup_interactive(
     typer.echo("minizen setup wizard")
     typer.echo("--------------------")
 
-    resolved_model = typer.prompt("AI model", default=model or DEFAULT_MODEL)
+    resolved_model = typer.prompt(
+        "AI model (provider:model)", default=model or DEFAULT_MODEL
+    )
     resolved_top_n = typer.prompt(
         "Number of top articles", default=top_n or DEFAULT_TOP_N
     )
@@ -233,8 +236,8 @@ def _setup_interactive(
     email_password = typer.prompt("Email password (App Password)", hide_input=True)
     miniflux_api_key = typer.prompt("Miniflux API key", hide_input=True)
 
-    key_label, key_env_var = _provider_key_info(resolved_model)
-    ai_api_key = typer.prompt(key_label, hide_input=True)
+    provider = _provider_key(resolved_model)
+    ai_api_key = typer.prompt(provider.label, hide_input=True)
 
     _write_config(
         config=config,
@@ -252,7 +255,7 @@ def _setup_interactive(
     _write_secret_file(
         env_path,
         f"MINIFLUX_API_KEY={_quote_env_value(miniflux_api_key)}\n"
-        f"{key_env_var}={_quote_env_value(ai_api_key)}\n"
+        f"{provider.env_var}={_quote_env_value(ai_api_key)}\n"
         f"MINIZEN_EMAIL_USERNAME={_quote_env_value(email_username)}\n"
         f"MINIZEN_EMAIL_PASSWORD={_quote_env_value(email_password)}\n",
     )

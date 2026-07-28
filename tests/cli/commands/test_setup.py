@@ -559,3 +559,102 @@ def test_setup_non_interactive_writes_interests_and_avoid(
         data = tomllib.load(f)
     assert data["ai"]["interests"] == ["Rust", "AI safety"]
     assert data["ai"]["avoid"] == ["sports", "crypto"]
+
+
+def test_setup_interactive_writes_deepseek_key_to_env(tmp_path: Path) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(
+        app,
+        ["setup", "--config", str(config_path)],
+        input=(
+            "deepseek:deepseek-chat\n"
+            "\n"  # top_n
+            "\n"  # interests
+            "\n"  # avoid
+            "\n"  # smtp host
+            "\n"  # smtp port
+            "from@example.com\n"
+            "to@example.com\n"
+            "email-user\n"
+            "email-password\n"
+            "miniflux-api-key\n"
+            "deepseek-api-key\n"
+        ),
+    )
+
+    # assert
+    assert result.exit_code == 0
+    assert "DeepSeek API key" in result.output
+    env_text = (config_path.parent / ".env").read_text()
+    assert 'DEEPSEEK_API_KEY="deepseek-api-key"' in env_text
+
+
+def test_setup_non_interactive_accepts_deepseek_model(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    monkeypatch.setenv("MINIFLUX_API_KEY", "mf-key")
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "ds-key")
+    monkeypatch.setenv("MINIZEN_EMAIL_USERNAME", "user")
+    monkeypatch.setenv("MINIZEN_EMAIL_PASSWORD", "pass")
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(
+        app,
+        [
+            "setup",
+            "--no-interactive",
+            "--config",
+            str(config_path),
+            "--from-addr",
+            "from@example.com",
+            "--to-addr",
+            "to@example.com",
+            "--model",
+            "deepseek:deepseek-chat",
+        ],
+    )
+
+    # assert
+    assert result.exit_code == 0
+    assert tomllib.loads(config_path.read_text())["ai"]["model"] == (
+        "deepseek:deepseek-chat"
+    )
+
+
+def test_setup_rejects_provider_needing_more_than_a_key(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    monkeypatch.setenv("MINIFLUX_API_KEY", "mf-key")
+    monkeypatch.setenv("MINIZEN_EMAIL_USERNAME", "user")
+    monkeypatch.setenv("MINIZEN_EMAIL_PASSWORD", "pass")
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(
+        app,
+        [
+            "setup",
+            "--no-interactive",
+            "--config",
+            str(config_path),
+            "--from-addr",
+            "from@example.com",
+            "--to-addr",
+            "to@example.com",
+            "--model",
+            "ollama:llama3",
+        ],
+    )
+
+    # assert
+    assert result.exit_code != 0
+    assert "cannot configure" in result.output
