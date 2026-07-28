@@ -9,7 +9,14 @@ from minizen.config import (
     load_settings,
 )
 from minizen.core import run_pipeline
-from minizen.exceptions import AIError, EmailError, MinifluxError, MinizenError
+from minizen.exceptions import (
+    AIError,
+    ConfigError,
+    EmailError,
+    MinifluxError,
+    MinizenError,
+    UnsupportedProviderError,
+)
 from minizen.providers.email import EmailProvider
 from minizen.providers.rss import Article, MinifluxProvider
 
@@ -19,6 +26,7 @@ __all__ = [
     "AIConfig",
     "AIError",
     "Article",
+    "ConfigError",
     "DigestAgent",
     "DigestResult",
     "EmailConfig",
@@ -29,6 +37,7 @@ __all__ = [
     "MinifluxProvider",
     "MinizenError",
     "Settings",
+    "UnsupportedProviderError",
     "load_settings",
     "run_pipeline",
 ]
