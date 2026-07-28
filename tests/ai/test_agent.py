@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 import pytest
-from pydantic_ai.exceptions import UnexpectedModelBehavior
+from pydantic_ai.exceptions import UnexpectedModelBehavior, UserError
 
 from minizen.ai.agent import (
     _SYSTEM_PROMPT,
@@ -244,6 +244,31 @@ def test_run_raises_ai_error_on_model_failure(mocker: MockerFixture) -> None:
     # act / assert
     with pytest.raises(AIError, match="AI model error"):
         agent.run(articles=articles)
+
+
+def test_init_raises_ai_error_on_unknown_provider(mocker: MockerFixture) -> None:
+    # arrange
+    mocker.patch(
+        "minizen.ai.agent.Agent", side_effect=ValueError("Unknown provider: bogus")
+    )
+
+    # act / assert
+    with pytest.raises(AIError, match="AI model error"):
+        DigestAgent(model="bogus:some-model", top_n=5)
+
+
+def test_init_raises_ai_error_on_missing_provider_config(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mocker.patch(
+        "minizen.ai.agent.Agent",
+        side_effect=UserError("Set the `OLLAMA_BASE_URL` environment variable"),
+    )
+
+    # act / assert
+    with pytest.raises(AIError, match="AI model error"):
+        DigestAgent(model="ollama:llama3", top_n=5)
 
 
 def test_agent_initialized_with_preference_block_when_interests_set(

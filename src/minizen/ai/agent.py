@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, cast
 
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent, AgentRunResult
-from pydantic_ai.exceptions import AgentRunError
+from pydantic_ai.exceptions import AgentRunError, UserError
 
 from minizen.exceptions import AIError
 
@@ -165,6 +165,10 @@ class DigestAgent:
             avoid: Topics to exclude when selecting articles.
             preferred_categories: Miniflux category names to prefer when selecting
                 articles.
+
+        Raises:
+            AIError: If *model* names an unknown provider, or the provider is
+                missing a required API key or base URL.
         """
         logger.debug(
             "Initialising DigestAgent: model=%s, top_n=%d, max_words=%d",
@@ -179,11 +183,15 @@ class DigestAgent:
             avoid=avoid or [],
             preferred_categories=preferred_categories or [],
         )
-        self._agent = Agent(
-            model=model,
-            output_type=DigestResult,
-            system_prompt=system_prompt,
-        )
+        try:
+            self._agent = Agent(
+                model=model,
+                output_type=DigestResult,
+                system_prompt=system_prompt,
+            )
+        except (ValueError, UserError) as exc:
+            msg = f"AI model error: {exc}"
+            raise AIError(msg) from exc
 
     def run(self, *, articles: list[Article]) -> DigestResult:
         """Select the top N stories and return a structured Markdown digest.
