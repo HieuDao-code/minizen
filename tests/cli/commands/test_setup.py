@@ -322,6 +322,26 @@ def test_setup_interactive_exits_on_unknown_model_provider(tmp_path: Path) -> No
     assert "Unknown model provider" in result.output
 
 
+def test_setup_interactive_validates_model_before_later_prompts(
+    tmp_path: Path,
+) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(
+        app,
+        ["setup", "--config", str(config_path)],
+        input="unknown:some-model\n",
+    )
+
+    # assert
+    assert result.exit_code != 0
+    assert "Unknown model provider" in result.output
+    assert "SMTP host" not in result.output
+
+
 def test_setup_non_interactive_accepts_openai_model(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -656,5 +676,5 @@ def test_setup_rejects_provider_needing_more_than_a_key(
     )
 
     # assert
-    assert result.exit_code != 0
+    assert result.exit_code == 1
     assert "cannot configure" in result.output

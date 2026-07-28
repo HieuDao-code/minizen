@@ -213,6 +213,7 @@ def _setup_interactive(
     resolved_model = typer.prompt(
         "AI model (provider:model)", default=model or DEFAULT_MODEL
     )
+    provider = _provider_key(resolved_model)
     resolved_top_n = typer.prompt(
         "Number of top articles", default=top_n or DEFAULT_TOP_N
     )
@@ -236,7 +237,6 @@ def _setup_interactive(
     email_password = typer.prompt("Email password (App Password)", hide_input=True)
     miniflux_api_key = typer.prompt("Miniflux API key", hide_input=True)
 
-    provider = _provider_key(resolved_model)
     ai_api_key = typer.prompt(provider.label, hide_input=True)
 
     _write_config(
