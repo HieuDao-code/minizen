@@ -280,7 +280,7 @@ def _write_secret_file(path: Path, content: str) -> None:
     with os.fdopen(fd, "w") as f:
         f.write(content)
     # Re-secure a pre-existing file, whose permissions O_CREAT leaves untouched.
-    os.chmod(path, 0o600)
+    path.chmod(0o600)
 
 
 def _quote_env_value(value: str) -> str:

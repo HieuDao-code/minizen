@@ -113,7 +113,6 @@ uppercased, with any `-` turned into `_`, plus `_API_KEY` — `DEEPSEEK_API_KEY`
 | `huggingface`      | `HF_TOKEN`                  |
 | `heroku`           | `HEROKU_INFERENCE_KEY`      |
 | `vercel`           | `VERCEL_AI_GATEWAY_API_KEY` |
-| `voyageai`         | `VOYAGE_API_KEY`            |
 | `openai-chat`      | `OPENAI_API_KEY`            |
 | `openai-responses` | `OPENAI_API_KEY`            |
 
@@ -122,8 +121,9 @@ uppercased, with any `-` turned into `_`, plus `_API_KEY` — `DEEPSEEK_API_KEY`
 
 ##### Providers needing an extra package
 
-When a provider's SDK is missing, `minizen setup` reports which package is
-missing and names the pydantic-ai optional group that provides it, for example:
+When a provider's SDK is missing, `minizen setup`, `minizen config set ai.model`
+and `minizen config validate` all report which package is missing and name the
+pydantic-ai optional group that provides it, for example:
 
 ```
 Error: Provider 'groq' needs an extra package. Please install the `groq`
@@ -131,13 +131,16 @@ package to use the Groq provider, you can use the `groq` optional group —
 `pip install "pydantic-ai-slim[groq]"`
 ```
 
-That message quotes pydantic-ai's own `pip install` form, which installs into
-whatever environment runs the command. If you installed minizen with
-`uv tool install`, that is the wrong target — add the extra to minizen's own
-environment instead:
+That message quotes pydantic-ai's own `pip install` form. Add the extra to the
+same environment minizen is installed in — which form you need depends on how
+you installed minizen:
 
 ```bash
+# If you installed minizen with `uv tool install`:
 uv tool install minizen --with 'pydantic-ai-slim[groq]'
+
+# If you installed minizen with `pip install`:
+pip install 'pydantic-ai-slim[groq]'
 ```
 
 ##### Providers the wizard cannot configure
