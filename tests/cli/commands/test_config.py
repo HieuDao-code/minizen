@@ -74,6 +74,7 @@ def test_config_validate_succeeds_with_valid_config(
     monkeypatch.setenv("MINIFLUX_API_KEY", "mf-key")
     monkeypatch.setenv("MINIZEN_EMAIL_USERNAME", "email-user")
     monkeypatch.setenv("MINIZEN_EMAIL_PASSWORD", "email-pass")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "ai-key")
     runner = CliRunner()
 
     # act
@@ -251,3 +252,145 @@ def test_config_show_displays_ai_defaults_when_section_absent(
     assert result.exit_code == 0
     assert "anthropic:claude-haiku-4-5" in result.output
     assert "5" in result.output
+
+
+def test_config_validate_fails_when_ai_key_missing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    _minimal_config(config_path)
+    monkeypatch.setenv("MINIFLUX_API_KEY", "mf-key")
+    monkeypatch.setenv("MINIZEN_EMAIL_USERNAME", "user")
+    monkeypatch.setenv("MINIZEN_EMAIL_PASSWORD", "pass")
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(app, ["config", "validate", "--config", str(config_path)])
+
+    # assert
+    assert result.exit_code == 1
+    assert "ANTHROPIC_API_KEY" in result.output
+
+
+def test_config_validate_skips_key_check_for_manual_provider(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    _write_config(
+        config_path,
+        {
+            "miniflux": {"url": "https://rss.example.com"},
+            "email": {
+                "smtp_host": "smtp.example.com",
+                "smtp_port": 587,
+                "from_addr": "from@example.com",
+                "to_addr": "to@example.com",
+            },
+            "ai": {"model": "ollama:llama3"},
+        },
+    )
+    monkeypatch.setenv("MINIFLUX_API_KEY", "mf-key")
+    monkeypatch.setenv("MINIZEN_EMAIL_USERNAME", "user")
+    monkeypatch.setenv("MINIZEN_EMAIL_PASSWORD", "pass")
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(app, ["config", "validate", "--config", str(config_path)])
+
+    # assert
+    assert result.exit_code == 0
+    assert "configured manually" in result.output
+
+
+def test_config_validate_fails_on_unknown_provider(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    _write_config(
+        config_path,
+        {
+            "miniflux": {"url": "https://rss.example.com"},
+            "email": {
+                "smtp_host": "smtp.example.com",
+                "smtp_port": 587,
+                "from_addr": "from@example.com",
+                "to_addr": "to@example.com",
+            },
+            "ai": {"model": "notaprovider:some-model"},
+        },
+    )
+    monkeypatch.setenv("MINIFLUX_API_KEY", "mf-key")
+    monkeypatch.setenv("MINIZEN_EMAIL_USERNAME", "user")
+    monkeypatch.setenv("MINIZEN_EMAIL_PASSWORD", "pass")
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(app, ["config", "validate", "--config", str(config_path)])
+
+    # assert
+    assert result.exit_code == 1
+    assert "Unknown model provider" in result.output
+
+
+def test_config_set_rejects_invalid_model(tmp_path: Path) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    _minimal_config(config_path)
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(
+        app,
+        ["config", "set", "ai.model", "notaprovider:x", "--config", str(config_path)],
+    )
+
+    # assert
+    assert result.exit_code == 1
+    assert "Unknown model provider" in result.output
+
+
+def test_config_set_accepts_deepseek_model(tmp_path: Path) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    _minimal_config(config_path)
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(
+        app,
+        [
+            "config",
+            "set",
+            "ai.model",
+            "deepseek:deepseek-chat",
+            "--config",
+            str(config_path),
+        ],
+    )
+
+    # assert
+    assert result.exit_code == 0
+    assert tomllib.loads(config_path.read_text())["ai"]["model"] == (
+        "deepseek:deepseek-chat"
+    )
+
+
+def test_config_set_accepts_manual_provider_model(tmp_path: Path) -> None:
+    # arrange
+    config_path = tmp_path / "config.toml"
+    _minimal_config(config_path)
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(
+        app,
+        ["config", "set", "ai.model", "ollama:llama3", "--config", str(config_path)],
+    )
+
+    # assert
+    assert result.exit_code == 0
+    assert tomllib.loads(config_path.read_text())["ai"]["model"] == "ollama:llama3"
