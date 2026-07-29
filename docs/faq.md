@@ -15,8 +15,9 @@ Working with a default install, no extra package needed:
 - **Anthropic** — set `model = "anthropic:claude-haiku-4-5"` and provide `ANTHROPIC_API_KEY`
 - **OpenAI** — set `model = "openai:gpt-4o-mini"` and provide `OPENAI_API_KEY`
 - **DeepSeek** — set `model = "deepseek:deepseek-chat"` and provide `DEEPSEEK_API_KEY`
+- **Google** — set `model = "google:gemini-2.0-flash"` and provide `GOOGLE_API_KEY`
 
-Others — Google, Groq, Mistral, xAI, Cohere and the rest — work once their SDK is
+Others — Groq, Mistral, xAI, Cohere and the rest — work once their SDK is
 installed. `minizen setup` names the missing package if it is not.
 
 See the [Configuration reference](configuration.md) for the full list of env vars.

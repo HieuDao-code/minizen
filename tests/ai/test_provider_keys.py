@@ -29,6 +29,16 @@ def test_resolves_deepseek_without_extra_dependency() -> None:
     assert result.label == "DeepSeek API key"
 
 
+def test_resolves_google_with_bundled_sdk() -> None:
+    # act
+    result = resolve_provider_key(model="google:gemini-2.0-flash")
+
+    # assert
+    assert result.prefix == "google"
+    assert result.env_var == "GOOGLE_API_KEY"
+    assert result.label == "Google API key"
+
+
 def test_resolves_openai_with_display_name_override() -> None:
     # act
     result = resolve_provider_key(model="openai:gpt-4o")

@@ -94,12 +94,13 @@ Any provider it supports works:
 | Anthropic | `anthropic:claude-haiku-4-5` | `ANTHROPIC_API_KEY` | no                    |
 | OpenAI    | `openai:gpt-4o-mini`         | `OPENAI_API_KEY`    | no                    |
 | DeepSeek  | `deepseek:deepseek-chat`     | `DEEPSEEK_API_KEY`  | no                    |
-| Google    | `google:gemini-2.0-flash`    | `GOOGLE_API_KEY`    | yes                   |
+| Google    | `google:gemini-2.0-flash`    | `GOOGLE_API_KEY`    | no                    |
 | Groq      | `groq:llama-3.3-70b-versatile` | `GROQ_API_KEY`     | yes                   |
 | Mistral   | `mistral:mistral-large-latest` | `MISTRAL_API_KEY`  | yes                   |
 
-DeepSeek needs no extra install because its API is OpenAI-compatible and reuses the
-OpenAI client minizen already ships.
+Anthropic, OpenAI and Google need no extra install because minizen ships their SDKs.
+DeepSeek needs none either, for a different reason: its API is OpenAI-compatible and
+reuses the OpenAI client minizen already ships.
 
 ##### Naming the API key
 
