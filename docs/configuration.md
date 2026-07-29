@@ -89,10 +89,74 @@ minizen setup --no-interactive \
 minizen uses [pydantic-ai](https://ai.pydantic.dev/) for LLM integration.
 Any provider it supports works:
 
-| Provider  | Example `model` value        | Required env var    |
-| --------- | ---------------------------- | ------------------- |
-| Anthropic | `anthropic:claude-haiku-4-5` | `ANTHROPIC_API_KEY` |
-| OpenAI    | `openai:gpt-4o-mini`         | `OPENAI_API_KEY`    |
+| Provider  | Example `model` value        | Required env var    | Extra install needed |
+| --------- | ----------------------------- | -------------------- | --------------------- |
+| Anthropic | `anthropic:claude-haiku-4-5` | `ANTHROPIC_API_KEY` | no                    |
+| OpenAI    | `openai:gpt-4o-mini`         | `OPENAI_API_KEY`    | no                    |
+| DeepSeek  | `deepseek:deepseek-chat`     | `DEEPSEEK_API_KEY`  | no                    |
+| Google    | `google:gemini-2.0-flash`    | `GOOGLE_API_KEY`    | no                    |
+| Groq      | `groq:llama-3.3-70b-versatile` | `GROQ_API_KEY`     | yes                   |
+| Mistral   | `mistral:mistral-large-latest` | `MISTRAL_API_KEY`  | yes                   |
+
+Anthropic, OpenAI and Google need no extra install because minizen ships their SDKs.
+DeepSeek needs none either, for a different reason: its API is OpenAI-compatible and
+reuses the OpenAI client minizen already ships.
+
+##### Naming the API key
+
+For nearly every provider the environment variable is the provider prefix
+uppercased, with any `-` turned into `_`, plus `_API_KEY` — `DEEPSEEK_API_KEY`,
+`GROQ_API_KEY`, `MISTRAL_API_KEY`. These are the exceptions:
+
+| Provider prefix    | Environment variable        |
+| ------------------ | ---------------------------- |
+| `cohere`           | `CO_API_KEY`                |
+| `huggingface`      | `HF_TOKEN`                  |
+| `heroku`           | `HEROKU_INFERENCE_KEY`      |
+| `vercel`           | `VERCEL_AI_GATEWAY_API_KEY` |
+| `openai-chat`      | `OPENAI_API_KEY`            |
+| `openai-responses` | `OPENAI_API_KEY`            |
+
+`minizen setup` prompts for the right variable automatically, and
+`minizen config validate` checks that it is set.
+
+##### Providers needing an extra package
+
+When a provider's SDK is missing, `minizen setup`, `minizen config set ai.model`
+and `minizen config validate` all report which package is missing and name the
+pydantic-ai optional group that provides it, for example:
+
+```
+Error: Provider 'groq' needs an extra package. Please install the `groq`
+package to use the Groq provider, you can use the `groq` optional group —
+`pip install "pydantic-ai-slim[groq]"`
+```
+
+That message quotes pydantic-ai's own `pip install` form. Add the extra to the
+same environment minizen is installed in — which form you need depends on how
+you installed minizen:
+
+```bash
+# If you installed minizen with `uv tool install`:
+uv tool install minizen --with 'pydantic-ai-slim[groq]'
+
+# If you installed minizen with `pip install`:
+pip install 'pydantic-ai-slim[groq]'
+```
+
+##### Providers the wizard cannot configure
+
+`bedrock`, `azure`, `azure-responses`, `ollama`, `litellm` and `google-cloud` need
+AWS credentials, an endpoint or a base URL rather than a single API key, so
+`minizen setup` cannot prompt for them. They still work: set their environment
+variables yourself, then point minizen at the model.
+
+```bash
+minizen config set ai.model "ollama:llama3"
+```
+
+`minizen config validate` reports these as configured manually and skips the key
+check.
 
 ### `[miniflux]` section
 
@@ -119,8 +183,7 @@ Secrets are never stored in the config file. Set them in your shell or in
 | Variable                 | Purpose                                         |
 | ------------------------ | ----------------------------------------------- |
 | `MINIFLUX_API_KEY`       | Miniflux API key for authentication             |
-| `ANTHROPIC_API_KEY`      | Anthropic API key (if using an Anthropic model) |
-| `OPENAI_API_KEY`         | OpenAI API key (if using an OpenAI model)       |
+| `<PROVIDER>_API_KEY`     | API key for the provider named in `ai.model`, e.g. `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `DEEPSEEK_API_KEY` (see [Naming the API key](#naming-the-api-key)) |
 | `MINIZEN_EMAIL_USERNAME` | SMTP login username                             |
 | `MINIZEN_EMAIL_PASSWORD` | SMTP login password or app password             |
 
@@ -177,7 +240,7 @@ Create `~/.config/minizen/.env` (same directory as `config.toml`):
 
 ```dotenv
 MINIFLUX_API_KEY=your-miniflux-api-key
-ANTHROPIC_API_KEY=your-anthropic-key   # or OPENAI_API_KEY
+ANTHROPIC_API_KEY=your-anthropic-key   # match the provider in ai.model
 MINIZEN_EMAIL_USERNAME=your-smtp-username
 MINIZEN_EMAIL_PASSWORD=your-smtp-app-password
 ```
@@ -195,7 +258,7 @@ As an alternative to `.env`, export the variables in your shell profile
 
 ```bash
 export MINIFLUX_API_KEY="your-miniflux-api-key"
-export ANTHROPIC_API_KEY="your-anthropic-key"   # or OPENAI_API_KEY
+export ANTHROPIC_API_KEY="your-anthropic-key"   # match the provider in ai.model
 export MINIZEN_EMAIL_USERNAME="your-smtp-username"
 export MINIZEN_EMAIL_PASSWORD="your-smtp-app-password"
 ```

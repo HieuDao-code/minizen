@@ -1,6 +1,7 @@
 """CLI commands to inspect and update the minizen configuration."""
 
 import contextlib
+import os
 import tomllib
 from pathlib import Path
 from typing import Annotated
@@ -8,8 +9,10 @@ from typing import Annotated
 import tomli_w
 import typer
 
+from minizen.ai.provider_keys import resolve_provider_key
 from minizen.config.defaults import DEFAULT_CONFIG_PATH, DEFAULT_MODEL, DEFAULT_TOP_N
 from minizen.config.loader import load_settings
+from minizen.exceptions import ConfigError, UnsupportedProviderError
 
 _CONFIG_OPTION = Annotated[
     Path,
@@ -17,6 +20,28 @@ _CONFIG_OPTION = Annotated[
 ]
 
 app = typer.Typer(help="Inspect and update configuration.")
+
+
+def _check_model(model: str) -> None:
+    """Exit with an error when *model* is not a usable model identifier.
+
+    A provider the wizard cannot configure is accepted: the identifier is
+    valid and works once the user sets up its environment.
+
+    Args:
+        model: pydantic-ai model identifier from the config file.
+
+    Raises:
+        typer.Exit: If the identifier is malformed, names an unknown provider,
+            or needs an uninstalled package.
+    """
+    try:
+        resolve_provider_key(model=model)
+    except UnsupportedProviderError:
+        return
+    except ConfigError as exc:
+        typer.echo(f"Error: {exc}")
+        raise typer.Exit(code=1) from exc
 
 
 @app.command("show")
@@ -48,7 +73,7 @@ def show(config: _CONFIG_OPTION = DEFAULT_CONFIG_PATH) -> None:
 def validate(config: _CONFIG_OPTION = DEFAULT_CONFIG_PATH) -> None:
     """Validate the configuration file and environment variables."""
     try:
-        load_settings(config_path=config)
+        settings = load_settings(config_path=config)
     except FileNotFoundError:
         typer.echo(f"Config file not found: {config}")
         typer.echo("Run `minizen setup` to create one.")
@@ -56,6 +81,19 @@ def validate(config: _CONFIG_OPTION = DEFAULT_CONFIG_PATH) -> None:
     except KeyError as e:
         typer.echo(f"Error: missing environment variable {e.args[0]}")
         raise typer.Exit(code=1)
+
+    try:
+        provider = resolve_provider_key(model=settings.ai.model)
+    except UnsupportedProviderError:
+        typer.echo(f"AI provider configured manually: {settings.ai.model}")
+    except ConfigError as exc:
+        typer.echo(f"Error: {exc}")
+        raise typer.Exit(code=1) from exc
+    else:
+        if not os.environ.get(provider.env_var):
+            typer.echo(f"Error: missing environment variable {provider.env_var}")
+            raise typer.Exit(code=1)
+
     typer.echo("Configuration is valid.")
 
 
@@ -83,6 +121,9 @@ def set_value(
         allowed = ", ".join(sorted(_ALLOWED_KEYS))
         typer.echo(f"Error: unknown config key '{key}'. Allowed: {allowed}")
         raise typer.Exit(code=1)
+
+    if key == "ai.model":
+        _check_model(value)
 
     try:
         with config.open("rb") as f:

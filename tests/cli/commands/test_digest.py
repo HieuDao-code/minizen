@@ -549,6 +549,56 @@ def test_digest_send_test_exits_on_agent_error(
     assert "Error: AI model error: rate limit" in result.output
 
 
+def test_digest_preview_exits_on_agent_construction_error(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mock_settings = _make_settings_mock()
+    mocker.patch(
+        "minizen.cli.commands.digest.load_settings", return_value=mock_settings
+    )
+    mock_rss = mocker.MagicMock()
+    mock_rss.fetch_recent.return_value = [mocker.MagicMock()]
+    mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
+    mocker.patch(
+        "minizen.cli.commands.digest.DigestAgent",
+        side_effect=AIError("AI model error: OLLAMA_BASE_URL is not set"),
+    )
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(app, ["digest", "preview"])
+
+    # assert
+    assert result.exit_code == 1
+    assert "Error: AI model error: OLLAMA_BASE_URL is not set" in result.output
+
+
+def test_digest_send_test_exits_on_agent_construction_error(
+    mocker: MockerFixture,
+) -> None:
+    # arrange
+    mock_settings = _make_settings_mock()
+    mocker.patch(
+        "minizen.cli.commands.digest.load_settings", return_value=mock_settings
+    )
+    mock_rss = mocker.MagicMock()
+    mock_rss.fetch_recent.return_value = [mocker.MagicMock()]
+    mocker.patch("minizen.cli.commands.digest.MinifluxProvider", return_value=mock_rss)
+    mocker.patch(
+        "minizen.cli.commands.digest.DigestAgent",
+        side_effect=AIError("AI model error: OLLAMA_BASE_URL is not set"),
+    )
+    runner = CliRunner()
+
+    # act
+    result = runner.invoke(app, ["digest", "send-test"])
+
+    # assert
+    assert result.exit_code == 1
+    assert "Error: AI model error: OLLAMA_BASE_URL is not set" in result.output
+
+
 def test_digest_send_test_exits_on_email_error(
     mocker: MockerFixture,
 ) -> None:

@@ -5,6 +5,7 @@ from minizen import (
     AIConfig,
     AIError,
     Article,
+    ConfigError,
     DigestAgent,
     DigestResult,
     EmailConfig,
@@ -15,6 +16,7 @@ from minizen import (
     MinifluxProvider,
     MinizenError,
     Settings,
+    UnsupportedProviderError,
     load_settings,
     run_pipeline,
 )
@@ -32,9 +34,11 @@ from minizen.config import (
 from minizen.core import run_pipeline as _run_pipeline
 from minizen.exceptions import (
     AIError as _AIError,
+    ConfigError as _ConfigError,
     EmailError as _EmailError,
     MinifluxError as _MinifluxError,
     MinizenError as _MinizenError,
+    UnsupportedProviderError as _UnsupportedProviderError,
 )
 from minizen.providers.email import EmailProvider as _EmailProvider
 from minizen.providers.rss import (
@@ -49,6 +53,7 @@ def test_top_level_all() -> None:
         "AIConfig",
         "AIError",
         "Article",
+        "ConfigError",
         "DigestAgent",
         "DigestResult",
         "EmailConfig",
@@ -59,6 +64,7 @@ def test_top_level_all() -> None:
         "MinifluxProvider",
         "MinizenError",
         "Settings",
+        "UnsupportedProviderError",
         "load_settings",
         "run_pipeline",
     }
@@ -88,3 +94,5 @@ def test_exception_imports_are_same_objects() -> None:
     assert MinifluxError is _MinifluxError
     assert AIError is _AIError
     assert EmailError is _EmailError
+    assert ConfigError is _ConfigError
+    assert UnsupportedProviderError is _UnsupportedProviderError
