@@ -205,3 +205,9 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Claude Code
+#  Linked worktrees are created here. Their contents belong to the branch checked
+#  out in them, not to this checkout, so they must never be staged from here.
+#  .claude/settings.json stays tracked.
+.claude/worktrees/
