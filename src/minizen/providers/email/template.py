@@ -173,12 +173,6 @@ def render_email(
     .content {{
       padding: 32px 32px 24px;
     }}
-    .content > p {{
-      font-size: 16px;
-      line-height: 1.8;
-      color: {_TEXT};
-      margin: 0 0 24px;
-    }}
     .article-card {{
       background: {_CARD_BG};
       border: 1px solid {_BORDER};

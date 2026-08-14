@@ -51,7 +51,7 @@ def test_render_email_with_fixture_digest() -> None:
     assert "Apple" in html
     assert "Platforms" in html
     assert "Webb" in html
-    assert "~3 min read" in html
+    assert "~1 min read" in html
     assert plain_text == content
 
 
@@ -233,3 +233,17 @@ def test_render_email_escapes_feed_name_in_article_cards() -> None:
     # assert
     assert 'class="feed-badge"><b>evil</b>' not in html
     assert "&lt;b&gt;evil&lt;/b&gt;" in html
+
+
+def test_render_email_has_no_intro_paragraph_before_first_card() -> None:
+    # arrange
+    fixture_path = Path(__file__).parents[2] / "fixtures" / "digest_result.md"
+    content = fixture_path.read_text()
+
+    # act
+    html, _ = render_email(markdown=content)
+
+    # assert
+    content_start = html.index('<div class="content">')
+    first_card = html.index('<div class="article-card">')
+    assert "<p" not in html[content_start:first_card]
