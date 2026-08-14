@@ -201,6 +201,21 @@ def test_system_prompt_requires_every_referenced_id() -> None:
     assert "every article you referenced" in _SYSTEM_PROMPT
 
 
+def test_system_prompt_requires_one_sentence_summary() -> None:
+    # assert
+    assert "exactly one sentence" in _SYSTEM_PROMPT
+
+
+def test_system_prompt_forbids_introduction() -> None:
+    # assert
+    assert "Do not write an introduction" in _SYSTEM_PROMPT
+
+
+def test_system_prompt_omits_source_divergence_instruction() -> None:
+    # assert
+    assert "diverge" not in _SYSTEM_PROMPT
+
+
 # --- max_words_per_article wiring ---
 
 
