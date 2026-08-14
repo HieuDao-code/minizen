@@ -72,7 +72,7 @@ def _build_article_cards(html: str) -> str:
 
 
 def _build_more_links(articles: list[Article]) -> str:
-    """Build a compact "More to read" link list for articles without full summaries.
+    """Build a compact "More to read" link list for articles without a summary.
 
     Each item shows a feed-name badge above the linked article title.
 
@@ -105,7 +105,7 @@ def render_email(
 
     Args:
         markdown: Raw Markdown digest produced by the AI agent.
-        extra_articles: Articles not selected for full summaries, shown as a compact
+        extra_articles: Articles not selected for a summary, shown as a compact
             link list at the bottom of the email. Defaults to no link list.
 
     Returns:
