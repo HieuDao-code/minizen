@@ -8,7 +8,7 @@
 ### Long-term:
 
 - Implement more LLM models provider
-- Add additional filtering options, such as keywords, add more articles but as additional entries which only contain the title and link without the summary (or a one sentence summary) at the end.
+- Add additional filtering options, such as keywords, add more articles but as additional entries which only contain the title and link without the summary at the end.
 - Some type of critera and rules for articles to be set to read if they got not picked in the digest, so next time they will excluded
 
 ### Out of scope for now but maybe in the future:

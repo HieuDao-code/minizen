@@ -52,6 +52,7 @@ def test_render_email_with_fixture_digest() -> None:
     assert "Platforms" in html
     assert "Webb" in html
     assert "~1 min read" in html
+    assert "Also covered by" in html
     assert plain_text == content
 
 

@@ -206,6 +206,11 @@ def test_system_prompt_requires_one_sentence_summary() -> None:
     assert "exactly one sentence" in _SYSTEM_PROMPT
 
 
+def test_system_prompt_template_placeholder_caps_summary_at_one_sentence() -> None:
+    # assert
+    assert "One sentence stating what happened" in _SYSTEM_PROMPT
+
+
 def test_system_prompt_forbids_introduction() -> None:
     # assert
     assert "Do not write an introduction" in _SYSTEM_PROMPT

@@ -16,9 +16,8 @@ uses AI to curate and summarise the most interesting ones, and emails you a clea
 
 ### Features
 
-- **Curated, not firehosed** — the AI picks your top N articles and writes a cohesive
-  narrative, not a bullet dump
-  no server required
+- **Curated, not firehosed** — the AI picks your top N articles and gives each a
+  single-sentence summary you can scan, then click through
 - **Dry-run friendly** — preview the digest in your terminal before a single email is sent
 - **Pluggable AI** — works with Anthropic Claude or OpenAI models via
   [pydantic-ai](https://ai.pydantic.dev/)
