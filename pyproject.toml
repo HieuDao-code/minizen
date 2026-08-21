@@ -29,7 +29,7 @@ dependencies = [
   "miniflux>=1.1.6,<2.0.0",
   "mistune>=3.3.3,<4.0.0",
   "pydantic>=2.13.4,<3.0.0",
-  "pydantic-ai-slim[anthropic,openai]>=2.12.0,<3.0.0",
+  "pydantic-ai-slim[anthropic,openai]>=2.33.0,<3.0.0",
   "python-dotenv>=1.2.2,<2.0.0",
   "tenacity>=9.1.4,<10.0.0",
   "tomli-w>=1.2.0,<2.0.0",
@@ -72,6 +72,9 @@ typing = ["ty==0.0.60"]
 
 [tool.uv]
 exclude-newer = "1 week"
+# Opt these out of the freshness quarantine: pydantic-ai 2.33.0 requires
+# anthropic>=1.0.0, and both were published inside the 1-week window.
+exclude-newer-package = { anthropic = "2026-08-22", openai = "2026-08-22", pydantic-ai-slim = "2026-08-22", pydantic-graph = "2026-08-22" }
 
 [tool.commitizen]
 name = "cz_conventional_commits"
