@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "minizen"
-version = "0.6.1"
+version = "0.6.2"
 description = "A quieter way to stay informed"
 readme = "README.md"
 license = "MIT"

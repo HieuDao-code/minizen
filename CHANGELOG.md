@@ -1,3 +1,9 @@
+## 0.6.2 (2026-08-21)
+
+### Fix
+
+- **deps**: upgrade pydantic-ai to 2.33.0 for anthropic 1.0 (#32)
+
 ## 0.6.1 (2026-08-14)
 
 ### Fix
