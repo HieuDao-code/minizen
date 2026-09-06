@@ -1,5 +1,5 @@
 [build-system]
-requires = ["uv_build>=0.11.7,<0.12"]
+requires = ["uv_build>=0.12.7,<0.13"]
 build-backend = "uv_build"
 
 [project]
@@ -57,18 +57,18 @@ dev = [
   { include-group = "test" },
   { include-group = "typing" },
 ]
-docs = ["zensical==0.0.51"]
-lint = ["ruff==0.15.22"]
-miscellaneous = ["prek==0.4.10"]
-release = ["commitizen==4.16.5"]
-security = ["zizmor==1.26.1"]
+docs = ["zensical==0.0.57"]
+lint = ["ruff==0.16.5"]
+miscellaneous = ["prek==0.5.0"]
+release = ["commitizen==4.18.0"]
+security = ["zizmor==1.30.0"]
 test = [
   "freezegun==1.5.5",
   "pytest==9.1.1",
   "pytest-cov==7.1.0",
   "pytest-mock==3.15.1",
 ]
-typing = ["ty==0.0.60"]
+typing = ["ty==0.0.75"]
 
 [tool.uv]
 exclude-newer = "1 week"
