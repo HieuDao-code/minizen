@@ -1,3 +1,5 @@
+# Copyright (c) 2026 HieuDao-code
+# SPDX-License-Identifier: MIT
 """Miniflux RSS provider for fetching articles published in the last 24 hours."""
 
 import http

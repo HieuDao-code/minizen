@@ -1,3 +1,5 @@
+# Copyright (c) 2026 HieuDao-code
+# SPDX-License-Identifier: MIT
 """Tests for the digest CLI subcommands."""
 
 from typing import TYPE_CHECKING

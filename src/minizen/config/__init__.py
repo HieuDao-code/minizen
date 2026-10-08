@@ -1,3 +1,5 @@
+# Copyright (c) 2026 HieuDao-code
+# SPDX-License-Identifier: MIT
 """Public configuration API for minizen."""
 
 from minizen.config.loader import load_settings

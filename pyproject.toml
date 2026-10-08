@@ -91,7 +91,6 @@ select = ["ALL"]
 ignore = [
   "B904",   # raise-without-from-inside-except
   "COM812", # missing-trailing-comma
-  "CPY001", # missing-copyright-notice
 ]
 
 [tool.ruff.lint.pydocstyle]
@@ -112,7 +111,6 @@ convention = "google"
 "src/minizen/cli/**" = [
   "FBT002",  # boolean-default-value-positional-argument
   "PLR0913", # too-many-arguments
-  "PLR0917", # too-many-positional-arguments
   "TC003",   # typing-only-standard-library-import
 ]
 "src/minizen/providers/email/template.py" = [

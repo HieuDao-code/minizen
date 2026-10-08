@@ -1,3 +1,5 @@
+# Copyright (c) 2026 HieuDao-code
+# SPDX-License-Identifier: MIT
 """CLI commands to preview or test the digest without sending."""
 
 from datetime import UTC, datetime

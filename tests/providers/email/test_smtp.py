@@ -1,3 +1,5 @@
+# Copyright (c) 2026 HieuDao-code
+# SPDX-License-Identifier: MIT
 import smtplib
 from typing import TYPE_CHECKING
 

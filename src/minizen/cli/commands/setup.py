@@ -1,3 +1,5 @@
+# Copyright (c) 2026 HieuDao-code
+# SPDX-License-Identifier: MIT
 """Interactive and non-interactive setup wizard for minizen."""
 
 import os
@@ -53,6 +55,7 @@ def _parse_comma_list(value: str | None) -> list[str]:
 
 
 def setup(
+    *,
     config: Annotated[
         Path,
         typer.Option(help="Path to write the TOML configuration file."),

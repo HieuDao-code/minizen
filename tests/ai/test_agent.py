@@ -1,3 +1,5 @@
+# Copyright (c) 2026 HieuDao-code
+# SPDX-License-Identifier: MIT
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 

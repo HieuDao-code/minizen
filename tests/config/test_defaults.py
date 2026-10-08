@@ -1,3 +1,5 @@
+# Copyright (c) 2026 HieuDao-code
+# SPDX-License-Identifier: MIT
 """Tests for minizen.config.defaults default constants."""
 
 from pathlib import Path

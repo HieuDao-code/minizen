@@ -1,3 +1,5 @@
+# Copyright (c) 2026 HieuDao-code
+# SPDX-License-Identifier: MIT
 """Settings loader — reads TOML config and overlays secrets from environment."""
 
 import os

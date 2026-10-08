@@ -1,3 +1,5 @@
+# Copyright (c) 2026 HieuDao-code
+# SPDX-License-Identifier: MIT
 """CLI commands to inspect and update the minizen configuration."""
 
 import contextlib

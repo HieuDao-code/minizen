@@ -1,3 +1,5 @@
+# Copyright (c) 2026 HieuDao-code
+# SPDX-License-Identifier: MIT
 """CLI command to run the full fetch-summarise-email pipeline."""
 
 from pathlib import Path
@@ -157,6 +159,7 @@ def _build_settings_from_flags(
 
 
 def run(
+    *,
     config: Annotated[
         Path,
         typer.Option(help="Path to the TOML configuration file.", show_default=True),

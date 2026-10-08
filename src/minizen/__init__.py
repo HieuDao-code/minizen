@@ -1,3 +1,5 @@
+# Copyright (c) 2026 HieuDao-code
+# SPDX-License-Identifier: MIT
 """minizen — A quieter way to stay informed."""
 
 from minizen.ai import DigestAgent, DigestResult

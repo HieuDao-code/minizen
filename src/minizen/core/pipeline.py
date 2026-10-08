@@ -1,3 +1,5 @@
+# Copyright (c) 2026 HieuDao-code
+# SPDX-License-Identifier: MIT
 """End-to-end digest pipeline: fetch recent articles, summarise, and email."""
 
 import logging

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 HieuDao-code
+# SPDX-License-Identifier: MIT
 """Email template renderer -- converts Markdown digest to styled HTML and plain text."""
 
 import math
