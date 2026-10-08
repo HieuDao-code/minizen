@@ -105,7 +105,7 @@ def _build_settings_from_flags(
     Args:
         miniflux_url: Miniflux base URL (defaults to hosted instance if None).
         miniflux_api_key: Miniflux API key; required.
-        model: AI model identifier (defaults to claude-haiku-4-5 if None).
+        model: AI model identifier (defaults to claude-haiku-5-5 if None).
         top_n: Max articles in digest (defaults to 5 if None).
         from_addr: Sender email address; required.
         to_addr: Recipient email address; required.

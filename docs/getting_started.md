@@ -38,7 +38,7 @@ You will be prompted for:
 
 | Prompt                     | Where to find it                                                             |
 | -------------------------- | ---------------------------------------------------------------------------- |
-| **AI model**               | Model identifier, e.g. `anthropic:claude-haiku-4-5` or `openai:gpt-4o`       |
+| **AI model**               | Model identifier, e.g. `anthropic:claude-haiku-5-5` or `openai:gpt-4o`       |
 | **Number of top articles** | How many articles to include in the digest (default: 5)                      |
 | **SMTP host**              | Your SMTP server hostname (e.g. `smtp.gmail.com`)                            |
 | **SMTP port**              | SMTP port — use `587` for STARTTLS (works with most providers)               |

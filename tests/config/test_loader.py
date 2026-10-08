@@ -74,7 +74,7 @@ def test_load_settings_uses_ai_defaults_when_section_absent(
     settings = load_settings(config_path=config_file)
 
     # assert
-    assert settings.ai.model == "anthropic:claude-haiku-4-5"
+    assert settings.ai.model == "anthropic:claude-haiku-5-5"
     assert settings.ai.top_n == 10
 
 

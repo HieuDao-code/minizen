@@ -35,7 +35,7 @@ class AIConfig(BaseModel):
 
     model: str = Field(
         default=DEFAULT_MODEL,
-        description="pydantic-ai model identifier (e.g. ``anthropic:claude-haiku-4-5``).",  # noqa: E501
+        description="pydantic-ai model identifier (e.g. ``anthropic:claude-haiku-5-5``).",  # noqa: E501
     )
     top_n: int = Field(
         default=DEFAULT_TOP_N,
