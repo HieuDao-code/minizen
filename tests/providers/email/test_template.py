@@ -1,5 +1,3 @@
-# Copyright (c) 2026 HieuDao-code
-# SPDX-License-Identifier: MIT
 """Tests for minizen.providers.email.template email rendering."""
 
 from datetime import UTC, datetime

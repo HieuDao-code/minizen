@@ -1,5 +1,3 @@
-# Copyright (c) 2026 HieuDao-code
-# SPDX-License-Identifier: MIT
 """Tests for the Miniflux RSS provider."""
 
 import json

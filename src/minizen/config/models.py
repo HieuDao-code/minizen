@@ -1,5 +1,3 @@
-# Copyright (c) 2026 HieuDao-code
-# SPDX-License-Identifier: MIT
 """Pydantic settings models for the minizen configuration."""
 
 from pydantic import BaseModel, Field

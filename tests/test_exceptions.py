@@ -1,5 +1,3 @@
-# Copyright (c) 2026 HieuDao-code
-# SPDX-License-Identifier: MIT
 from minizen.exceptions import AIError, EmailError, MinifluxError, MinizenError
 
 

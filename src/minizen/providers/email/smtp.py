@@ -1,5 +1,3 @@
-# Copyright (c) 2026 HieuDao-code
-# SPDX-License-Identifier: MIT
 """SMTP email sender for delivering multipart HTML/plain-text digest emails."""
 
 import logging

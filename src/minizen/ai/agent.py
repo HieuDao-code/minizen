@@ -1,5 +1,3 @@
-# Copyright (c) 2026 HieuDao-code
-# SPDX-License-Identifier: MIT
 """AI agent for curating and summarising RSS articles into a Markdown digest."""
 
 import logging

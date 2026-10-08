@@ -1,5 +1,3 @@
-# Copyright (c) 2026 HieuDao-code
-# SPDX-License-Identifier: MIT
 """Tests for the retry_transient decorator factory."""
 
 from typing import TYPE_CHECKING

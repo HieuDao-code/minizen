@@ -1,5 +1,3 @@
-# Copyright (c) 2026 HieuDao-code
-# SPDX-License-Identifier: MIT
 """CLI application root — registers all sub-commands."""
 
 from typing import Annotated

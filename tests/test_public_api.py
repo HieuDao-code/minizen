@@ -1,5 +1,3 @@
-# Copyright (c) 2026 HieuDao-code
-# SPDX-License-Identifier: MIT
 """Tests that all public symbols are importable from their declared locations."""
 
 import minizen

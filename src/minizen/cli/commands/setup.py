@@ -1,5 +1,3 @@
-# Copyright (c) 2026 HieuDao-code
-# SPDX-License-Identifier: MIT
 """Interactive and non-interactive setup wizard for minizen."""
 
 import os

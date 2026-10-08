@@ -1,5 +1,3 @@
-# Copyright (c) 2026 HieuDao-code
-# SPDX-License-Identifier: MIT
 """CLI command to run the full fetch-summarise-email pipeline."""
 
 from pathlib import Path
