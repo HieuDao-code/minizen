@@ -9,7 +9,7 @@ and secrets from environment variables.
 
 ```toml
 [ai]
-model = "anthropic:claude-haiku-4-5"
+model = "anthropic:claude-haiku-5-5"
 top_n = 5
 interests = ["Rust", "AI safety", "climate tech"]  # optional
 avoid = ["sports", "celebrity news"]                # optional
@@ -28,7 +28,7 @@ to_addr = "you@example.com"
 
 | Key                     | Type           | Default                        | Description |
 | ----------------------- | -------------- | ------------------------------ | ----------- |
-| `model`                 | string         | `"anthropic:claude-haiku-4-5"` | pydantic-ai model identifier |
+| `model`                 | string         | `"anthropic:claude-haiku-5-5"` | pydantic-ai model identifier |
 | `top_n`                 | integer        | `5`                            | Number of articles selected for full AI summaries; remaining recent articles appear as a "More to read" link list |
 | `max_words_per_article` | integer        | `500`                          | Maximum words of article content sent to the LLM per article. Increase for longer summaries, decrease to reduce token usage. |
 | `interests`             | list of strings | `[]`                          | Topics for the AI to prioritise when selecting articles (e.g. `["Rust", "AI safety"]`). Omit or leave empty for no preference. |
@@ -42,7 +42,7 @@ Both fields are optional — existing configs without them work unchanged.
 
 ```toml
 [ai]
-model = "anthropic:claude-haiku-4-5"
+model = "anthropic:claude-haiku-5-5"
 top_n = 5
 interests = ["Rust", "AI safety", "climate tech"]
 avoid = ["sports", "celebrity news", "crypto"]
@@ -58,7 +58,7 @@ Categories are matched by their exact name in Miniflux (case-sensitive).
 
 ```toml
 [ai]
-model = "anthropic:claude-haiku-4-5"
+model = "anthropic:claude-haiku-5-5"
 top_n = 5
 preferred_categories = ["Tech", "Science"]
 ```
@@ -91,7 +91,7 @@ Any provider it supports works:
 
 | Provider  | Example `model` value        | Required env var    |
 | --------- | ---------------------------- | ------------------- |
-| Anthropic | `anthropic:claude-haiku-4-5` | `ANTHROPIC_API_KEY` |
+| Anthropic | `anthropic:claude-haiku-5-5` | `ANTHROPIC_API_KEY` |
 | OpenAI    | `openai:gpt-4o-mini`         | `OPENAI_API_KEY`    |
 
 ### `[miniflux]` section
@@ -156,7 +156,7 @@ from_addr = "you@example.com"
 to_addr = "you@example.com"
 
 [ai]
-model = "anthropic:claude-haiku-4-5"
+model = "anthropic:claude-haiku-5-5"
 top_n = 5
 # max_words_per_article = 500                        # default: 500
 # interests = ["Rust", "AI safety", "climate tech"]  # optional

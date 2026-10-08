@@ -249,5 +249,5 @@ def test_config_show_displays_ai_defaults_when_section_absent(
 
     # assert
     assert result.exit_code == 0
-    assert "anthropic:claude-haiku-4-5" in result.output
+    assert "anthropic:claude-haiku-5-5" in result.output
     assert "5" in result.output

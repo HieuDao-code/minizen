@@ -21,7 +21,7 @@ def _provider_key_info(model: str) -> tuple[str, str]:
     """Return the prompt label and env var name for the AI provider API key.
 
     Args:
-        model: pydantic-ai model identifier (e.g. ``anthropic:claude-haiku-4-5``).
+        model: pydantic-ai model identifier (e.g. ``anthropic:claude-haiku-5-5``).
 
     Returns:
         A tuple of (prompt_label, env_var_name).
@@ -53,6 +53,7 @@ def _parse_comma_list(value: str | None) -> list[str]:
 
 
 def setup(
+    *,
     config: Annotated[
         Path,
         typer.Option(help="Path to write the TOML configuration file."),

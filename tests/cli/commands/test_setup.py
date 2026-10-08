@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
 _INTERACTIVE_INPUT = (
-    "\n"  # model (default: anthropic:claude-haiku-4-5)
+    "\n"  # model (default: anthropic:claude-haiku-5-5)
     "\n"  # top_n (default: 10)
     "\n"  # interests (skip)
     "\n"  # avoid (skip)
@@ -63,7 +63,7 @@ def test_setup_writes_correct_toml(tmp_path: Path) -> None:
     assert data["email"]["smtp_port"] == 587
     assert data["email"]["from_addr"] == "from@example.com"
     assert data["email"]["to_addr"] == "to@example.com"
-    assert data["ai"]["model"] == "anthropic:claude-haiku-4-5"
+    assert data["ai"]["model"] == "anthropic:claude-haiku-5-5"
     assert data["ai"]["top_n"] == 10
 
 
@@ -171,7 +171,7 @@ def test_setup_non_interactive_writes_config(
     assert data["email"]["from_addr"] == "from@example.com"
     assert data["email"]["to_addr"] == "to@example.com"
     assert data["email"]["smtp_host"] == "smtp.gmail.com"
-    assert data["ai"]["model"] == "anthropic:claude-haiku-4-5"
+    assert data["ai"]["model"] == "anthropic:claude-haiku-5-5"
 
 
 def test_setup_non_interactive_fails_without_from_addr(

@@ -88,7 +88,7 @@ def test_build_settings_from_flags_succeeds_with_all_required() -> None:
     # assert
     assert result.miniflux.api_key == "mf-key"
     assert result.miniflux.url == "https://reader.miniflux.app"
-    assert result.ai.model == "anthropic:claude-haiku-4-5"
+    assert result.ai.model == "anthropic:claude-haiku-5-5"
     assert result.email.smtp_host == "smtp.example.com"
 
 

@@ -24,7 +24,7 @@ def test_default_miniflux_url() -> None:
 
 def test_default_model() -> None:
     # act / assert
-    assert DEFAULT_MODEL == "anthropic:claude-haiku-4-5"
+    assert DEFAULT_MODEL == "anthropic:claude-haiku-5-5"
 
 
 def test_default_top_n() -> None:

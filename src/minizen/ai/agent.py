@@ -2,10 +2,10 @@
 
 import logging
 from html.parser import HTMLParser
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, Field
-from pydantic_ai import Agent, AgentRunResult
+from pydantic_ai import Agent
 from pydantic_ai.exceptions import AgentRunError
 
 from minizen.exceptions import AIError
@@ -155,7 +155,7 @@ class DigestAgent:
         """Initialise the agent with the given model and digest settings.
 
         Args:
-            model: pydantic-ai model identifier (e.g. ``anthropic:claude-haiku-4-5``).
+            model: pydantic-ai model identifier (e.g. ``anthropic:claude-haiku-5-5``).
             top_n: Maximum number of stories (after deduplication) to include in
                 the digest.
             max_words_per_article: Maximum words of article content sent to the
@@ -218,4 +218,4 @@ class DigestAgent:
         except AgentRunError as exc:
             msg = f"AI model error: {exc}"
             raise AIError(msg) from exc
-        return cast("AgentRunResult[DigestResult]", result).output
+        return result.output

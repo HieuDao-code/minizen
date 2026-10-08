@@ -10,7 +10,7 @@ minizen supports [Miniflux](https://miniflux.app) only — either the hosted ver
 minizen uses [pydantic-ai](https://ai.pydantic.dev/) under the hood,
 so any provider it supports will work. Tested providers:
 
-- **Anthropic** — set `model = "anthropic:claude-haiku-4-5"` and provide `ANTHROPIC_API_KEY`
+- **Anthropic** — set `model = "anthropic:claude-haiku-5-5"` and provide `ANTHROPIC_API_KEY`
 - **OpenAI** — set `model = "openai:gpt-4o-mini"` and provide `OPENAI_API_KEY`
 
 See the [Configuration reference](configuration.md) for the full list of env vars.
