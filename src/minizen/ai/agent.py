@@ -2,10 +2,10 @@
 
 import logging
 from html.parser import HTMLParser
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, Field
-from pydantic_ai import Agent, AgentRunResult
+from pydantic_ai import Agent
 from pydantic_ai.exceptions import AgentRunError
 
 from minizen.exceptions import AIError
@@ -218,4 +218,4 @@ class DigestAgent:
         except AgentRunError as exc:
             msg = f"AI model error: {exc}"
             raise AIError(msg) from exc
-        return cast("AgentRunResult[DigestResult]", result).output
+        return result.output
