@@ -137,3 +137,58 @@ def test_load_settings_uses_default_miniflux_url_when_section_absent(
     # assert
     assert settings.miniflux.url == "https://reader.miniflux.app"
     assert settings.miniflux.api_key == "mf-key"
+
+
+def test_load_settings_reads_quotes_section(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # arrange
+    config_file = tmp_path / "config.toml"
+    _write_config(
+        config_file,
+        {
+            "email": {
+                "smtp_host": "smtp.example.com",
+                "smtp_port": 587,
+                "from_addr": "from@example.com",
+                "to_addr": "to@example.com",
+            },
+            "quotes": {"dir": str(tmp_path / "quotes")},
+        },
+    )
+    monkeypatch.setenv("MINIFLUX_API_KEY", "mf-key")
+    monkeypatch.setenv("MINIZEN_EMAIL_USERNAME", "email-user")
+    monkeypatch.setenv("MINIZEN_EMAIL_PASSWORD", "email-pass")
+
+    # act
+    settings = load_settings(config_path=config_file)
+
+    # assert
+    assert settings.quotes.dir == tmp_path / "quotes"
+
+
+def test_load_settings_disables_quotes_when_section_absent(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # arrange
+    config_file = tmp_path / "config.toml"
+    _write_config(
+        config_file,
+        {
+            "email": {
+                "smtp_host": "smtp.example.com",
+                "smtp_port": 587,
+                "from_addr": "from@example.com",
+                "to_addr": "to@example.com",
+            },
+        },
+    )
+    monkeypatch.setenv("MINIFLUX_API_KEY", "mf-key")
+    monkeypatch.setenv("MINIZEN_EMAIL_USERNAME", "email-user")
+    monkeypatch.setenv("MINIZEN_EMAIL_PASSWORD", "email-pass")
+
+    # act
+    settings = load_settings(config_path=config_file)
+
+    # assert
+    assert settings.quotes.dir is None

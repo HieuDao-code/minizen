@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from minizen.ai.agent import DigestAgent
 from minizen.providers.email.smtp import EmailProvider
 from minizen.providers.email.template import render_email
+from minizen.providers.quotes import load_daily_quote
 from minizen.providers.rss.miniflux import MinifluxProvider
 
 if TYPE_CHECKING:
@@ -51,7 +52,10 @@ def run_pipeline(*, settings: Settings, dry_run: bool = False) -> None:
     result = agent.run(articles=articles)
     selected_ids = set(result.articles_used)
     extra_articles = [a for a in articles if a.id not in selected_ids]
-    html, plain_text = render_email(result.markdown, extra_articles=extra_articles)
+    quote = load_daily_quote(config=settings.quotes)
+    html, plain_text = render_email(
+        result.markdown, extra_articles=extra_articles, quote=quote
+    )
     today = datetime.now(tz=UTC).date().strftime("%B %-d, %Y")
     logger.info("Sending digest email to %s", settings.email.to_addr)
     email.send(subject=f"Your Daily Zen — {today}", html=html, plain_text=plain_text)

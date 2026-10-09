@@ -109,6 +109,36 @@ Any provider it supports works:
 | `from_addr` | string  | —       | Sender email address                     |
 | `to_addr`   | string  | —       | Recipient email address                  |
 
+### `[quotes]` section
+
+Optional. When set, each digest ends with one of your favourite quotes.
+
+| Key   | Type   | Default | Description                                                |
+| ----- | ------ | ------- | ---------------------------------------------------------- |
+| `dir` | string | unset   | Folder of quote notes (`~` allowed). Unset disables quotes |
+
+```toml
+[quotes]
+dir = "~/Documents/obsidian/personal/quotes/sources"
+```
+
+Each `*.md` file in the folder (not subfolders) holds one quote:
+
+```markdown
+---
+Author: Frank Herbert
+Source: Dune
+---
+
+> I must not fear.
+> Fear is the mind-killer.
+```
+
+- `Author` and `Source` frontmatter keys are required; other keys are ignored.
+- The quote is every line starting with `>`; headings and other text are ignored.
+- Invalid files are skipped with a warning. Quotes rotate daily and every quote
+  is shown once before any repeats.
+
 ---
 
 ## Environment variables

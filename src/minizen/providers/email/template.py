@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, cast
 import mistune
 
 if TYPE_CHECKING:
+    from minizen.providers.quotes import Quote
     from minizen.providers.rss.miniflux import Article
 
 # Colour palette
@@ -98,8 +99,49 @@ def _build_more_links(articles: list[Article]) -> str:
     return f'<div class="more-links"><h3>More to read</h3><ul>{items}</ul></div>'
 
 
+def _build_quote_card(quote: Quote | None) -> str:
+    """Build the closing quote card shown above the footer.
+
+    Args:
+        quote: The day's quote. Returns an empty string when ``None``.
+
+    Returns:
+        An HTML ``<div>`` with the escaped quote (line breaks as ``<br>``) and
+        its attribution, or an empty string.
+    """
+    if quote is None:
+        return ""
+    text = "<br>".join(escape(line) for line in quote.text.split("\n"))
+    return (
+        f'<div class="quote-card">'
+        f"<blockquote>{text}</blockquote>"
+        f'<p class="quote-attribution">&mdash; {escape(quote.author)}, '
+        f"<em>{escape(quote.source)}</em></p>"
+        f"</div>"
+    )
+
+
+def _quote_plain_text(quote: Quote | None) -> str:
+    """Build the plain-text quote footer appended to the Markdown digest.
+
+    Args:
+        quote: The day's quote. Returns an empty string when ``None``.
+
+    Returns:
+        A ``---`` separator, the quote as ``> `` lines and its attribution, or
+        an empty string.
+    """
+    if quote is None:
+        return ""
+    lines = "\n".join(f"> {line}" for line in quote.text.split("\n"))
+    return f"\n\n---\n\n{lines}\n\n— {quote.author}, *{quote.source}*"
+
+
 def render_email(
-    markdown: str, *, extra_articles: list[Article] | None = None
+    markdown: str,
+    *,
+    extra_articles: list[Article] | None = None,
+    quote: Quote | None = None,
 ) -> tuple[str, str]:
     """Render a Markdown digest into a styled HTML email and a plain-text fallback.
 
@@ -107,10 +149,13 @@ def render_email(
         markdown: Raw Markdown digest produced by the AI agent.
         extra_articles: Articles not selected for a summary, shown as a compact
             link list at the bottom of the email. Defaults to no link list.
+        quote: Favourite quote shown as a closing card above the footer.
+            Defaults to no quote.
 
     Returns:
         A ``(html, plain_text)`` tuple where ``html`` is a fully styled email
-        document and ``plain_text`` is the original Markdown unchanged.
+        document and ``plain_text`` is the original Markdown, followed by the
+        quote when one is given.
     """
     today = datetime.now(tz=UTC).date().strftime("%B %-d, %Y")
     read_time = _reading_time(markdown)
@@ -118,6 +163,7 @@ def render_email(
     raw_html = cast("str", mistune.html(markdown))
     content_html = _build_article_cards(raw_html)
     more_html = _build_more_links(extra_articles or [])
+    quote_html = _build_quote_card(quote)
     preheader = f"~{read_time} min read \u00b7 Your curated articles for {today}"
 
     html = f"""<!DOCTYPE html>
@@ -269,6 +315,27 @@ def render_email(
     }}
     .more-links li a:hover {{ text-decoration: underline; }}
 
+    .quote-card {{
+      margin-top: 28px;
+      padding: 20px 24px;
+      background: {_CARD_BG};
+      border: 1px solid {_BORDER};
+      border-left: 4px solid {_ACCENT_ORANGE};
+      border-radius: 12px;
+    }}
+    .quote-card blockquote {{
+      margin: 0 0 12px;
+      font-size: 15px;
+      font-style: italic;
+      line-height: 1.75;
+      color: {_TEXT};
+    }}
+    .quote-attribution {{
+      margin: 0;
+      font-size: 13px;
+      color: {_MUTED};
+    }}
+
     @media (max-width: 640px) {{
       .wrapper {{ margin: 0; border-radius: 0; box-shadow: none; }}
       .header {{ padding: 28px 20px 22px; }}
@@ -277,6 +344,7 @@ def render_email(
       .article-card {{ padding: 18px; }}
       .article-card h2 {{ font-size: 17px; }}
       .footer {{ padding: 16px 20px; }}
+      .quote-card {{ padding: 18px; }}
     }}
   </style>
 </head>
@@ -291,6 +359,7 @@ def render_email(
     <div class="content">
       {content_html}
       {more_html}
+      {quote_html}
     </div>
     <div class="footer">
       Curated by <a href="https://hieudao-code.github.io/minizen/">minizen</a> &middot; {today}
@@ -300,4 +369,4 @@ def render_email(
 </body>
 </html>"""
 
-    return html, markdown
+    return html, markdown + _quote_plain_text(quote)

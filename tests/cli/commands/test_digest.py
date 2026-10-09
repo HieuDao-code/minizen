@@ -10,6 +10,7 @@ from typer.testing import CliRunner
 
 from minizen.cli import app
 from minizen.exceptions import AIError, EmailError, MinifluxError
+from minizen.providers.quotes import Quote
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -22,6 +23,7 @@ def _make_settings_mock() -> MagicMock:
     mock.ai.model = "anthropic:claude-sonnet-5"
     mock.ai.top_n = 5
     mock.ai.max_words_per_article = 500
+    mock.quotes.dir = None
     return mock
 
 
@@ -149,9 +151,13 @@ def test_digest_send_test_sends_email(mocker: MockerFixture) -> None:
     )
     mock_email = MagicMock()
     mocker.patch("minizen.cli.commands.digest.EmailProvider", return_value=mock_email)
-    mocker.patch(
+    mock_render = mocker.patch(
         "minizen.cli.commands.digest.render_email",
         return_value=("<h2>Digest</h2>", "## Digest"),
+    )
+    quote = Quote(text="I must not fear.", author="Frank Herbert", source="Dune")
+    mock_load_quote = mocker.patch(
+        "minizen.cli.commands.digest.load_daily_quote", return_value=quote
     )
     runner = CliRunner()
 
@@ -170,6 +176,10 @@ def test_digest_send_test_sends_email(mocker: MockerFixture) -> None:
         top_n=5,
         max_words_per_article=500,
     )
+    mock_render.assert_called_once_with(
+        "## Digest", extra_articles=[unselected], quote=quote
+    )
+    mock_load_quote.assert_called_once_with(config=mock_settings.quotes)
 
 
 def test_digest_send_test_exits_early_when_no_articles(

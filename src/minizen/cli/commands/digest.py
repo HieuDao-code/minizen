@@ -13,6 +13,7 @@ from minizen.config.loader import load_settings
 from minizen.exceptions import MinizenError
 from minizen.providers.email.smtp import EmailProvider
 from minizen.providers.email.template import render_email
+from minizen.providers.quotes import load_daily_quote
 from minizen.providers.rss.miniflux import MinifluxProvider
 
 if TYPE_CHECKING:
@@ -154,7 +155,10 @@ def send_test(
         raise typer.Exit(code=1)
     selected_ids = set(result.articles_used)
     extra_articles = [a for a in articles if a.id not in selected_ids]
-    html, plain_text = render_email(result.markdown, extra_articles=extra_articles)
+    quote = load_daily_quote(config=settings.quotes)
+    html, plain_text = render_email(
+        result.markdown, extra_articles=extra_articles, quote=quote
+    )
     if dry_run:
         typer.echo("Dry run — email not sent:\n")
         typer.echo(plain_text)
