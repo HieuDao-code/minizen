@@ -35,7 +35,11 @@ def load_daily_quote(
     if not config.dir.is_dir():
         logger.warning("Quotes path %s is not a directory, skipping quote", config.dir)
         return None
-    quotes = ObsidianQuoteProvider(config=config).load()
+    try:
+        quotes = ObsidianQuoteProvider(config=config).load()
+    except Exception as e:  # the quote must never break the digest
+        logger.warning("Failed to load quotes, skipping quote: %s", e, exc_info=True)
+        return None
     if not quotes:
         logger.warning("No valid quotes found in %s, skipping quote", config.dir)
         return None

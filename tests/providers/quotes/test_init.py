@@ -11,6 +11,25 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     import pytest
+    from pytest_mock import MockerFixture
+
+
+def test_load_daily_quote_never_raises_on_provider_error(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture, mocker: MockerFixture
+) -> None:
+    # arrange
+    mocker.patch(
+        "minizen.providers.quotes.ObsidianQuoteProvider",
+        side_effect=RuntimeError("boom"),
+    )
+    caplog.set_level(logging.WARNING)
+
+    # act
+    quote = load_daily_quote(config=QuotesConfig(dir=tmp_path))
+
+    # assert
+    assert quote is None
+    assert "boom" in caplog.text
 
 
 def test_load_daily_quote_returns_quote_from_folder(tmp_path: Path) -> None:

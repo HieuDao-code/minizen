@@ -145,6 +145,7 @@ def test_parse_quote_file_stringifies_non_string_values(tmp_path: Path) -> None:
         ("Author: Frank Herbert\nSource: Dune", "\n>   \n"),
         ("Author: [unclosed\nSource: Dune", "\n> text\n"),
         ("- just\n- a list", "\n> text\n"),
+        ("Author: A\nSource: S\nCreated: 2024-02-30", "\n> text\n"),
     ],
     ids=[
         "missing-author",
@@ -154,6 +155,7 @@ def test_parse_quote_file_stringifies_non_string_values(tmp_path: Path) -> None:
         "blank-blockquote",
         "invalid-yaml",
         "non-mapping-frontmatter",
+        "invalid-date",
     ],
 )
 def test_parse_quote_file_skips_invalid_note_with_warning(

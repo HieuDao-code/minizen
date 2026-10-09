@@ -83,7 +83,7 @@ def parse_quote_file(*, path: Path) -> Quote | None:
     """
     try:
         parsed = _split_frontmatter(path.read_text(encoding="utf-8-sig"))
-    except (OSError, UnicodeDecodeError, yaml.YAMLError) as e:
+    except (OSError, ValueError, yaml.YAMLError) as e:
         logger.warning("Skipping quote file %s: %s", path, e)
         return None
     if parsed is None:
