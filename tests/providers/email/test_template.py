@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from minizen.providers.email.template import render_email
+from minizen.providers.quotes import Quote
 from minizen.providers.rss.miniflux import Article
 
 
@@ -248,3 +249,87 @@ def test_render_email_has_no_intro_paragraph_before_first_card() -> None:
     content_start = html.index('<div class="content">')
     first_card = html.index('<div class="article-card">')
     assert "<p" not in html[content_start:first_card]
+
+
+def test_render_email_adds_quote_card_to_html() -> None:
+    # arrange
+    quote = Quote(
+        text="I must not fear.\nFear is the mind-killer.",
+        author="Frank Herbert",
+        source="Dune",
+    )
+
+    # act
+    html, _ = render_email(markdown="## Digest", quote=quote)
+
+    # assert
+    assert 'class="quote-card"' in html
+    assert "I must not fear.<br>Fear is the mind-killer." in html
+    assert "&mdash; Frank Herbert, <em>Dune</em>" in html
+
+
+def test_render_email_places_quote_card_after_more_links_before_footer() -> None:
+    # arrange
+    article = Article(
+        id=1,
+        title="Extra",
+        url="https://example.com/1",
+        content="Content",
+        feed_name="Feed",
+        published_at=datetime(2026, 4, 25, tzinfo=UTC),
+    )
+    quote = Quote(
+        text="Honor is dead.", author="Brandon Sanderson", source="Words of Radiance"
+    )
+
+    # act
+    html, _ = render_email(markdown="## Digest", extra_articles=[article], quote=quote)
+
+    # assert
+    assert (
+        html.index('class="more-links"')
+        < html.index('class="quote-card"')
+        < html.index('class="footer"')
+    )
+
+
+def test_render_email_escapes_quote_html() -> None:
+    # arrange
+    quote = Quote(text="<script>alert(1)</script> & co", author="A <b>", source="S & T")
+
+    # act
+    html, plain_text = render_email(markdown="## Digest", quote=quote)
+
+    # assert
+    assert "<script>" not in html
+    assert "&lt;script&gt;alert(1)&lt;/script&gt; &amp; co" in html
+    assert "&mdash; A &lt;b&gt;, <em>S &amp; T</em>" in html
+    assert "<script>alert(1)</script> & co" in plain_text
+
+
+def test_render_email_appends_quote_to_plain_text() -> None:
+    # arrange
+    quote = Quote(
+        text="I must not fear.\nFear is the mind-killer.",
+        author="Frank Herbert",
+        source="Dune",
+    )
+
+    # act
+    _, plain_text = render_email(markdown="## Digest", quote=quote)
+
+    # assert
+    assert plain_text == (
+        "## Digest\n\n---\n\n"
+        "> I must not fear.\n> Fear is the mind-killer.\n\n"
+        "— Frank Herbert, *Dune*"
+    )
+
+
+def test_render_email_without_quote_has_no_quote_card() -> None:
+    # act
+    html, plain_text = render_email(markdown="## Digest")
+
+    # assert
+    assert 'class="quote-card"' not in html
+    assert plain_text == "## Digest"
