@@ -1,3 +1,9 @@
+## 0.8.0 (2026-10-09)
+
+### Feat
+
+- **quotes**: append a daily favourite quote to the digest (#34)
+
 ## 0.7.0 (2026-10-09)
 
 ### Feat
