@@ -12,6 +12,7 @@ from freezegun import freeze_time
 from minizen.config.models import AIConfig, EmailConfig, MinifluxConfig, Settings
 from minizen.core.pipeline import run_pipeline
 from minizen.providers.email import template as email_template
+from minizen.providers.quotes import Quote
 from minizen.providers.rss.miniflux import Article
 
 if TYPE_CHECKING:
@@ -71,6 +72,10 @@ def test_pipeline_runs_full_flow(mocker: MockerFixture) -> None:
         "minizen.core.pipeline.render_email",
         return_value=("<h2>Digest</h2>", "## Digest"),
     )
+    quote = Quote(text="I must not fear.", author="Frank Herbert", source="Dune")
+    mock_load_quote = mocker.patch(
+        "minizen.core.pipeline.load_daily_quote", return_value=quote
+    )
     mocker.patch("minizen.core.pipeline.MinifluxProvider", return_value=mock_rss)
     mocker.patch("minizen.core.pipeline.EmailProvider", return_value=mock_email)
     mock_agent_cls = mocker.patch(
@@ -85,7 +90,8 @@ def test_pipeline_runs_full_flow(mocker: MockerFixture) -> None:
     mock_rss.fetch_recent.assert_called_once_with()
     mock_agent.run.assert_called_once_with(articles=articles)
     extra = [a for a in articles if a.id not in {1, 2}]
-    mock_render.assert_called_once_with("## Digest", extra_articles=extra)
+    mock_render.assert_called_once_with("## Digest", extra_articles=extra, quote=quote)
+    mock_load_quote.assert_called_once_with(config=settings.quotes)
     mock_email.send.assert_called_once_with(
         subject="Your Daily Zen — April 29, 2026",
         html="<h2>Digest</h2>",
@@ -131,6 +137,7 @@ def test_pipeline_dry_run_skips_llm_and_email(mocker: MockerFixture) -> None:
     mocker.patch("minizen.core.pipeline.MinifluxProvider", return_value=mock_rss)
     mocker.patch("minizen.core.pipeline.EmailProvider", return_value=mock_email)
     mocker.patch("minizen.core.pipeline.DigestAgent", return_value=mock_agent)
+    mock_load_quote = mocker.patch("minizen.core.pipeline.load_daily_quote")
     settings = _make_settings()
 
     # act
@@ -140,6 +147,7 @@ def test_pipeline_dry_run_skips_llm_and_email(mocker: MockerFixture) -> None:
     mock_rss.fetch_recent.assert_called_once_with()
     mock_agent.run.assert_not_called()
     mock_email.send.assert_not_called()
+    mock_load_quote.assert_not_called()
 
 
 @freeze_time("2026-04-29")

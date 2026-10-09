@@ -14,7 +14,6 @@
 ### Out of scope for now but maybe in the future:
 
 - more ai assistant features like:
-  - quote of the day, favourite quote
   - weather forecast
   - personal goals and reminders
 
