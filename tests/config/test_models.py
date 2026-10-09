@@ -1,7 +1,15 @@
+from pathlib import Path
+
 import pytest
 from pydantic import ValidationError
 
-from minizen.config.models import AIConfig, EmailConfig, MinifluxConfig, Settings
+from minizen.config.models import (
+    AIConfig,
+    EmailConfig,
+    MinifluxConfig,
+    QuotesConfig,
+    Settings,
+)
 
 
 def test_miniflux_config_accepts_valid_values() -> None:
@@ -130,3 +138,38 @@ def test_ai_config_accepts_preferred_categories() -> None:
 
     # assert
     assert config.preferred_categories == ["Tech", "Science"]
+
+
+def test_quotes_config_defaults_to_disabled() -> None:
+    # act
+    config = QuotesConfig()
+
+    # assert
+    assert config.dir is None
+
+
+def test_quotes_config_expands_user_home() -> None:
+    # act
+    config = QuotesConfig(dir="~/quotes")
+
+    # assert
+    assert config.dir == Path.home() / "quotes"
+
+
+def test_settings_quotes_defaults_to_disabled() -> None:
+    # act
+    settings = Settings(
+        miniflux=MinifluxConfig(url="https://rss.example.com", api_key="key"),
+        email=EmailConfig(
+            smtp_host="smtp.example.com",
+            smtp_port=587,
+            from_addr="from@example.com",
+            to_addr="to@example.com",
+            username="user",
+            password="pass",
+        ),
+        ai=AIConfig(),
+    )
+
+    # assert
+    assert settings.quotes.dir is None
