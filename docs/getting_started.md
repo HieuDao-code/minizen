@@ -24,6 +24,15 @@ Or with `uv`:
 uv tool install minizen
 ```
 
+To install with the exact dependency versions minizen was tested against,
+pass the release's constraints file. This keeps a new release of a dependency
+(e.g. the Anthropic SDK) from breaking an unattended setup:
+
+```bash
+uv tool install minizen \
+  -c https://github.com/hieudao-code/minizen/releases/latest/download/constraints.txt
+```
+
 ---
 
 ## Setup
