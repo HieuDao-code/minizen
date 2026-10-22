@@ -142,6 +142,7 @@ testpaths = ["tests"]
 env_list = ["py314", "commit-msg", "lint", "security", "typing"]
 
 [tool.tox.env_run_base]
+runner = "uv-venv-lock-runner"
 description = "Run tests"
 dependency_groups = ["dev"]
 commands = [["pytest"]]
