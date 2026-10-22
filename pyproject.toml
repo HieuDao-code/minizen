@@ -58,21 +58,23 @@ dev = [
   { include-group = "test" },
   { include-group = "typing" },
 ]
-docs = ["zensical==0.0.67"]
-lint = ["ruff==0.16.10"]
-miscellaneous = ["prek==0.5.4"]
-release = ["commitizen==4.19.0"]
-security = ["zizmor==1.30.1"]
+docs = ["zensical==0.0.70"]
+lint = ["ruff==0.17.1"]
+miscellaneous = ["prek==0.5.5"]
+release = ["commitizen==4.19.2"]
+security = ["zizmor==1.31.0"]
 test = [
   "freezegun==1.5.5",
   "pytest==9.1.1",
   "pytest-cov==7.1.0",
   "pytest-mock==3.16.0",
 ]
-typing = ["ty==0.0.84", "types-pyyaml==6.0.12.20260906"]
+typing = ["ty==0.0.88", "types-pyyaml==6.0.12.20260906"]
 
 [tool.uv]
 exclude-newer = "1 week"
+# CA bundle fixes are security updates; take them without the cooldown.
+exclude-newer-package = { certifi = false }
 
 [tool.commitizen]
 name = "cz_conventional_commits"
