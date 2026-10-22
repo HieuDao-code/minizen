@@ -48,9 +48,6 @@ jobs:
           enable-cache: false
           version: 0.11.25
 
-      # Hashed pins of every runtime dependency, straight from uv.lock. Installs
-      # pass this as a constraints file so they get the exact versions CI tested:
-      #   uv tool run -c <release asset url> minizen ...
       - name: Export runtime constraints
         run: |
           uv export --locked --no-dev --no-emit-project --no-header \
