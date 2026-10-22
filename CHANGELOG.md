@@ -1,3 +1,9 @@
+## 0.9.0 (2026-10-22)
+
+### Feat
+
+- **release**: attach constraints.txt to releases; upgrade deps (#36)
+
 ## 0.8.0 (2026-10-09)
 
 ### Feat
