@@ -27,9 +27,6 @@
           if ! uv tool list 2>/dev/null | grep -q '^tox '; then
             uv tool install tox --with tox-uv-bare
           fi
-
-          uv sync --quiet
-          source .venv/bin/activate
         '';
       };
     };
