@@ -32,12 +32,12 @@ docs:
 fmt:
     ruff format
 
-# Update dependencies, workflows, pre-commit hooks and nix flake
+# Update dependencies, hooks, actions lockfile and nix flake
 [group('Project')]
 update:
     uv lock --upgrade
     prek update --freeze
-    pinact run --update --min-age 7
+    gh actions-lock
     nix flake update
 
 # Run tests
