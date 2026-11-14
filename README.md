@@ -35,7 +35,7 @@ minizen run              # fetch → summarise → send
 
 ```bash
 nix develop              # dev shell with uv, just, gh and gh-actions-lock (or `just dev`)
-prek install             # git hooks
+uv run prek install      # git hooks
 just test                # tox: tests, lint, typing, security
 just update              # upgrade deps, hooks, actions lockfile and nixpkgs (7-day cooldown)
 ```
