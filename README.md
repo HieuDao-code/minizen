@@ -30,3 +30,17 @@ minizen setup            # interactive wizard — configure Miniflux, AI, and em
 minizen digest preview   # preview today's digest in your terminal
 minizen run              # fetch → summarise → send
 ```
+
+## Development
+
+```bash
+nix develop              # dev shell with uv, just, gh and gh-actions-lock (or `just dev`)
+prek install             # git hooks
+just test                # tox: tests, lint, typing, security
+just update              # upgrade deps, hooks, actions lockfile and nixpkgs (7-day cooldown)
+```
+
+GitHub Actions are locked in `.github/workflows/actions.lock`. After changing a
+workflow `uses:` reference, run `gh actions-lock` (install it with
+`gh extension install github/gh-actions-lock --pin v0.4.1` outside the dev shell)
+and commit the updated lockfile. CI fails on PRs with a stale lockfile.

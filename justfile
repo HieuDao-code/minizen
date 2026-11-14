@@ -32,13 +32,17 @@ docs:
 fmt:
     ruff format
 
-# Update dependencies, workflows, pre-commit hooks and nix flake
+# Update dependencies, hooks, actions lockfile and nix flake (7-day cooldown)
 [group('Project')]
 update:
+    #!/usr/bin/env bash
+    set -euo pipefail
     uv lock --upgrade
     prek update --freeze
-    pinact run --update --min-age 7
-    nix flake update
+    gh actions-lock
+    until=$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)
+    sha=$(gh api "repos/NixOS/nixpkgs/commits?sha=nixpkgs-unstable&until=${until}&per_page=1" --jq '.[0].sha')
+    nix flake lock --override-input nixpkgs "github:NixOS/nixpkgs/${sha}"
 
 # Run tests
 [group('Project')]
