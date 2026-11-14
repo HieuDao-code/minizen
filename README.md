@@ -37,7 +37,7 @@ minizen run              # fetch → summarise → send
 nix develop              # dev shell with uv, just, gh and gh-actions-lock (or `just dev`)
 uv run prek install      # git hooks
 just test                # tox: tests, lint, typing, security
-just update              # upgrade deps, hooks, actions lockfile and nixpkgs (7-day cooldown)
+just update              # upgrade deps, hooks, actions lockfile and nix flake
 ```
 
 GitHub Actions are locked in `.github/workflows/actions.lock`. After changing a
