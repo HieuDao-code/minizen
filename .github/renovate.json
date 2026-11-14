@@ -2,8 +2,41 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   // https://docs.renovatebot.com/presets-config/#configbest-practices
   "extends": ["config:best-practices", "config:semverAllWeekly"],
+  // Actions are locked by .github/workflows/actions.lock, so keep tag refs.
+  "ignorePresets": ["helpers:pinGitHubActionDigests"],
   "minimumReleaseAge": "7 days",
+  "automerge": false,
+  // Version of gh-actions-lock Renovate uses to regenerate actions.lock; keep in sync with the other pins.
+  "constraints": {
+    "ghActionsLock": "v0.4.1"
+  },
+  // flake.lock is updated by `just update`, which picks a nixpkgs commit at least 7 days old.
   "nix": {
-    "enabled": true
-  }
+    "enabled": false
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    // Lock refreshes have no release timestamp, so Renovate's age check never passes.
+    // uv's `exclude-newer = "1 week"` enforces the cooldown on uv.lock instead.
+    "minimumReleaseAge": null,
+    "schedule": ["* 0-3 * * 1"]
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Keep every gh-actions-lock pin on the same version",
+      "managerFilePatterns": [
+        "/^\\.github/workflows/lockfile\\.yml$/",
+        "/^\\.github/renovate\\.json$/",
+        "/^flake\\.nix$/",
+        "/^README\\.md$/"
+      ],
+      "matchStrings": [
+        "gh-actions-lock(\\.\\*)?\\s*(--pin\\s+)?(?<currentValue>v\\d+\\.\\d+\\.\\d+)",
+        "\"ghActionsLock\":\\s*\"(?<currentValue>v\\d+\\.\\d+\\.\\d+)\""
+      ],
+      "depNameTemplate": "github/gh-actions-lock",
+      "datasourceTemplate": "github-releases"
+    }
+  ]
 }
