@@ -36,7 +36,7 @@ fmt:
 [group('Project')]
 update:
     uv lock --upgrade
-    uv run prek update --freeze
+    prek update --freeze
     gh actions-lock
     nix flake update
 
